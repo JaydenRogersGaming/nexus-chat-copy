@@ -18,7 +18,7 @@ import MatrixRain from './components/MatrixRain';
 import * as DB from './lib/storage';
 
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, loginWithRedirect } = useAuth();
+  const { user, isLoading } = useAuth();
   const [settings, setSettings] = useState(DB.getAppSettings());
   const [showSettings, setShowSettings] = useState(false);
   const [localColor, setLocalColor] = useState(settings.matrixColor);
@@ -27,7 +27,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   // Redirect unauthenticated users to login
   useEffect(() => {
     if (!isLoading && !user) {
-      loginWithRedirect({ redirectUrl: window.location.href });
+      loginWithRedirect();
     }
   }, [isLoading, user]);
 
