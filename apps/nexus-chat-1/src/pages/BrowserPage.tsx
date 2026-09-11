@@ -133,7 +133,9 @@ export default function BrowserPage() {
           ref={iframeRef}
           src={url}
           className="w-full h-full border-0"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads allow-modals allow-presentation"
+          referrerPolicy="no-referrer-when-downgrade"
+          allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; clipboard-write"
           onLoad={() => setIsLoading(false)}
           title="Browser"
         />
