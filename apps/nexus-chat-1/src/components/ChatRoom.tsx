@@ -216,6 +216,11 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   async function send() {
     if (!input.trim() || !profile) return;
 
+    const text = input.trim();
+
+    // Process commands first — they bypass cooldown and mute
+    if (text.startsWith('/') && handleCommand(text)) { setInput(''); setShowSuggestions(false); return; }
+
     // Cooldown check (3 seconds between messages, owner bypasses)
     if (!isOwner && cooldown > 0) {
       toast.error(`⏳ Wait ${cooldown}s before sending again`);
@@ -231,10 +236,6 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         return;
       }
     }
-
-    const text = input.trim();
-
-    if (text.startsWith('/') && handleCommand(text)) { setInput(''); return; }
 
     const { censored, hadProfanity } = censorMessage(text);
 
