@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Gem } from 'lucide-react';
 import TitleBadge from '../components/TitleBadge';
+import UserProfileModal from '../components/UserProfileModal';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { OWNER_EMAIL } from '../lib/gameData';
@@ -9,6 +10,7 @@ import { cn } from '@project/components/lib/utils';
 export default function LeaderboardPage() {
   const { profile } = useApp();
   const [users, setUsers] = useState<DB.UserProfile[]>([]);
+  const [viewProfileEmail, setViewProfileEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const load = () => {
@@ -57,7 +59,7 @@ export default function LeaderboardPage() {
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/40">
                   {u.profilePic ? <img src={u.profilePic} alt="" className="w-full h-full object-cover" /> : <span className="font-bold text-primary text-sm">{u.name[0]?.toUpperCase()}</span>}
                 </div>
-                <p className="text-xs font-semibold text-center max-w-16 truncate" style={{ color: u.nameColor }}>{u.name}</p>
+                <p className="text-xs font-semibold text-center max-w-16 truncate cursor-pointer hover:underline" style={{ color: u.nameColor }} onClick={() => setViewProfileEmail(u.email)}>{u.name}</p>
                 <div className={cn('w-16 rounded-t-lg flex flex-col items-center justify-end pb-2', heights[i])} style={{ background: ['#c0c0c020','#ffd70020','#cd7f3220'][i], border: `1px solid ${['#c0c0c040','#ffd70040','#cd7f3240'][i]}` }}>
                   <span className="text-xs font-bold flex items-center gap-0.5"><Gem className="w-3 h-3 text-purple-400" />{u.gems >= 999999999 ? '∞' : u.gems >= 1000 ? `${(u.gems/1000).toFixed(1)}k` : u.gems}</span>
                 </div>
@@ -81,7 +83,7 @@ export default function LeaderboardPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-sm font-semibold truncate" style={{ color: u.nameColor }}>{u.name}</span>
+                  <span className="text-sm font-semibold truncate cursor-pointer hover:underline" style={{ color: u.nameColor }} onClick={() => setViewProfileEmail(u.email)}>{u.name}</span>
                   {isOwner(u) && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">👑 Owner</span>}
                   {!isOwner(u) && roleLabel && <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded', roleLabel === 'Co-Owner' ? 'bg-orange-500/20 text-orange-400' : roleLabel === 'Admin' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400')}>{roleLabel}</span>}
                   {u.activeTitle && <TitleBadge title={u.activeTitle} effect={u.activeTitleEffect} color={u.activeTitleColor} />}
@@ -97,6 +99,7 @@ export default function LeaderboardPage() {
         })}
         {users.length === 0 && <p className="text-center text-muted-foreground py-8">No users yet. Be the first!</p>}
       </div>
+      <UserProfileModal email={viewProfileEmail} onClose={() => setViewProfileEmail(null)} />
     </div>
   );
 }

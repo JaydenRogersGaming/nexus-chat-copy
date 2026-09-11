@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
 import TitleBadge from './TitleBadge';
+import UserProfileModal from './UserProfileModal';
 import { cn } from '@project/components/lib/utils';
 import { presence } from 'zitejs/api';
 
@@ -23,10 +24,11 @@ type OnlineUser = {
   role: string;
 };
 
-type Props = { currentUserEmail?: string };
+type Props = { currentUserEmail?: string; onStartDM?: (email: string) => void };
 
-export default function OnlinePanel({ currentUserEmail }: Props) {
+export default function OnlinePanel({ currentUserEmail, onStartDM }: Props) {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [viewProfileEmail, setViewProfileEmail] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -53,7 +55,7 @@ export default function OnlinePanel({ currentUserEmail }: Props) {
 
       <div className="flex-1 p-2 space-y-0.5">
         {onlineUsers.map(u => (
-          <div key={u.email} className={cn('flex items-center gap-2 px-2 py-1.5 rounded-lg', u.email === currentUserEmail && 'bg-primary/10')}>
+          <button key={u.email} onClick={() => setViewProfileEmail(u.email)} className={cn('w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left hover:bg-secondary/50 transition-colors cursor-pointer', u.email === currentUserEmail && 'bg-primary/10')}>
             <div className="relative flex-shrink-0">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
                 {u.profilePic
@@ -74,12 +76,13 @@ export default function OnlinePanel({ currentUserEmail }: Props) {
                 </span>
               )}
             </div>
-          </div>
+          </button>
         ))}
         {onlineUsers.length === 0 && (
           <p className="text-[10px] text-muted-foreground text-center py-4">No one online</p>
         )}
       </div>
+      <UserProfileModal email={viewProfileEmail} onClose={() => setViewProfileEmail(null)} onStartDM={onStartDM} />
     </div>
   );
 }
