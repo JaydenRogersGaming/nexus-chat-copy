@@ -1,0 +1,10 @@
+{
+  "integrations": {
+    "openai": {
+      "type": "openai",
+      "connectionId": "svc_456915"
+    }
+  },
+  "accessMode": "external",
+  "id": "g7mqodwqsm"
+}
