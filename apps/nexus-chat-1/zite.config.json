@@ -1,0 +1,26 @@
+{
+  "accessMode": "external",
+  "authentication": {
+    "signup": "open",
+    "authenticationMethods": {
+      "magicLink": true,
+      "googleSignIn": true,
+      "sso": false
+    }
+  },
+  "envVars": {
+    "ZITE_GIPHY_API_KEY": {
+      "description": "Giphy API key for the GIF search feature in chat"
+    },
+    "ZITE_TENOR_API_KEY": {
+      "description": "Google Tenor API key for GIF search (powered by Google)"
+    }
+  },
+  "integrations": {
+    "openai": {
+      "type": "openai",
+      "connectionId": "svc_456915"
+    }
+  },
+  "id": "1vc4gaurvx"
+}
