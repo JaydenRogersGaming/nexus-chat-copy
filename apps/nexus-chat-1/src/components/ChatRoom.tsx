@@ -67,7 +67,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const query = val.slice(7).toLowerCase().trim();
       const users = DB.getBans().filter(b => !query || b.email.toLowerCase().includes(query)).map(b => DB.getUser(b.email)).filter(Boolean) as DB.UserProfile[];
       setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
-    } else if ((val.startsWith('/mute ') || val.startsWith('/unmute ') || val.startsWith('/give ') || val.startsWith('/infgems ')) && isStaff) {
+    } else if ((val.startsWith('/mute ') || val.startsWith('/unmute ') || val.startsWith('/give ') || val.startsWith('/infgems ') || val.startsWith('/setstreak ') || val.startsWith('/setquest ')) && isStaff) {
       const parts = val.split(' ');
       const query = (parts[1] || '').toLowerCase();
       const users = DB.getAllUsers().filter(u => !query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
@@ -167,6 +167,35 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       toast.info(`🟢 ${online.length} online: ${online.map(u => u.name).join(', ')}`); return true;
     }
 
+    // /setstreak email amount
+    if (text.startsWith('/setstreak ') && isOwner) {
+      const parts = text.slice(11).trim().split(' ');
+      const target = parts[0];
+      const amount = parseInt(parts[1]);
+      if (!target || isNaN(amount)) { toast.error('Usage: /setstreak email amount'); return true; }
+      const targetUser = DB.getUser(target);
+      if (!targetUser) { toast.error('User not found'); return true; }
+      DB.saveUser({ ...targetUser, streak: Math.max(0, amount), lastStreakDate: new Date().toISOString().slice(0, 10) });
+      toast.success(`🔥 Set ${targetUser.name}'s streak to ${amount}`); return true;
+    }
+
+    // /setquest email questId amount
+    if (text.startsWith('/setquest ') && isOwner) {
+      const parts = text.slice(10).trim().split(' ');
+      const target = parts[0];
+      const questId = parts[1];
+      const amount = parseInt(parts[2]);
+      if (!target || !questId || isNaN(amount)) { toast.error('Usage: /setquest email questId amount'); return true; }
+      const targetUser = DB.getUser(target);
+      if (!targetUser) { toast.error('User not found'); return true; }
+      const validQuests = DB.DAILY_QUESTS.map(q => q.id);
+      if (!validQuests.includes(questId)) { toast.error(`Invalid quest. Valid: ${validQuests.join(', ')}`); return true; }
+      const qp = DB.getDailyQuestProgress(target);
+      qp.progress[questId] = Math.max(0, amount);
+      DB.saveDailyQuestProgress(target, qp);
+      toast.success(`📋 Set ${targetUser.name}'s ${questId} progress to ${amount}`); return true;
+    }
+
     return false;
   }
 
@@ -257,6 +286,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     { cmd: '/give', desc: 'Give gems [email] [amount]', level: 'owner' },
     { cmd: '/infgems', desc: 'Give ∞ gems [email]', level: 'owner' },
     { cmd: '/setrole', desc: 'Set role [email] [role]', level: 'owner' },
+    { cmd: '/setstreak', desc: 'Set streak [email] [amount]', level: 'owner' },
+    { cmd: '/setquest', desc: 'Set quest progress [email] [questId] [amount]', level: 'owner' },
     { cmd: '/online', desc: 'Show online users', level: 'all' },
   ];
 

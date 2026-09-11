@@ -460,6 +460,10 @@ export function incrementQuestProgress(email: string, questId: string, amount = 
   s(`dailyQuests:${email}`, qp);
 }
 
+export function saveDailyQuestProgress(email: string, qp: DailyQuestProgress) {
+  s(`dailyQuests:${email}`, qp);
+}
+
 export function claimQuestReward(email: string, questId: string): number {
   const qp = getDailyQuestProgress(email);
   if (qp.claimed.includes(questId)) return 0;
