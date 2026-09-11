@@ -28,6 +28,9 @@ export type UserProfile = {
   voiceJoined: boolean;
   proxyUsed: boolean;
   lastSeen: number;
+  streak: number;
+  lastStreakDate: string;
+  lastMessageTime: number;
 };
 
 export type Message = {
@@ -144,6 +147,7 @@ export function getOrCreateUser(email: string): UserProfile {
     messageCount: 0, gambleCount: 0, gambleWins: 0, gambleLoseStreak: 0,
     reactionCount: 0, dmCount: 0, groupCount: 0, bugCount: 0, suggestionCount: 0,
     voiceJoined: false, proxyUsed: false, lastSeen: Date.now(),
+    streak: 0, lastStreakDate: '', lastMessageTime: 0,
   };
   saveUser(p); return p;
 }
@@ -395,6 +399,80 @@ export function togglePinAnnouncement(id: string) {
 
 // ── Clear Chat ────────────────────────────────────────────────
 export function clearChat(roomId: string) { s(`messages:${roomId}`, []); }
+
+// ── Streaks ───────────────────────────────────────────────────
+function todayStr(): string { return new Date().toISOString().slice(0, 10); }
+function yesterdayStr(): string { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); }
+
+export function checkAndUpdateStreak(email: string): { streak: number; isNewDay: boolean; gemsAwarded: number } {
+  const u = getUser(email);
+  if (!u) return { streak: 0, isNewDay: false, gemsAwarded: 0 };
+  const today = todayStr();
+  if (u.lastStreakDate === today) return { streak: u.streak, isNewDay: false, gemsAwarded: 0 };
+  const yesterday = yesterdayStr();
+  let newStreak: number;
+  if (u.lastStreakDate === yesterday) { newStreak = (u.streak || 0) + 1; }
+  else { newStreak = 1; }
+  // Streak gems: 10 base + 5 per day (capped at 100)
+  const gemsAwarded = Math.min(100, 10 + (newStreak - 1) * 5);
+  saveUser({ ...u, streak: newStreak, lastStreakDate: today, gems: u.gems + gemsAwarded });
+  return { streak: newStreak, isNewDay: true, gemsAwarded };
+}
+
+// ── Daily Quests ──────────────────────────────────────────────
+export type DailyQuest = {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  target: number;
+  reward: number;
+};
+
+export const DAILY_QUESTS: DailyQuest[] = [
+  { id: 'send_5',     title: 'Chatterbox',      description: 'Send 5 messages',       icon: '💬', target: 5,  reward: 20 },
+  { id: 'send_20',    title: 'Motor Mouth',      description: 'Send 20 messages',      icon: '🗣️', target: 20, reward: 50 },
+  { id: 'react_3',    title: 'Emoji Fan',        description: 'React to 3 messages',   icon: '😄', target: 3,  reward: 15 },
+  { id: 'gamble_3',   title: 'High Roller',      description: 'Gamble 3 times',        icon: '🎰', target: 3,  reward: 25 },
+  { id: 'send_50',    title: 'Unstoppable',      description: 'Send 50 messages',      icon: '🔥', target: 50, reward: 100 },
+];
+
+export type DailyQuestProgress = {
+  date: string;
+  progress: Record<string, number>;
+  claimed: string[];
+};
+
+export function getDailyQuestProgress(email: string): DailyQuestProgress {
+  const key = `dailyQuests:${email}`;
+  const existing = g<DailyQuestProgress>(key);
+  const today = todayStr();
+  if (existing && existing.date === today) return existing;
+  // Reset for new day
+  const fresh: DailyQuestProgress = { date: today, progress: {}, claimed: [] };
+  s(key, fresh);
+  return fresh;
+}
+
+export function incrementQuestProgress(email: string, questId: string, amount = 1) {
+  const qp = getDailyQuestProgress(email);
+  qp.progress[questId] = (qp.progress[questId] || 0) + amount;
+  s(`dailyQuests:${email}`, qp);
+}
+
+export function claimQuestReward(email: string, questId: string): number {
+  const qp = getDailyQuestProgress(email);
+  if (qp.claimed.includes(questId)) return 0;
+  const quest = DAILY_QUESTS.find(q => q.id === questId);
+  if (!quest) return 0;
+  const current = qp.progress[questId] || 0;
+  if (current < quest.target) return 0;
+  qp.claimed.push(questId);
+  s(`dailyQuests:${email}`, qp);
+  const u = getUser(email);
+  if (u) saveUser({ ...u, gems: u.gems + quest.reward });
+  return quest.reward;
+}
 
 // ── BroadcastChannel ─────────────────────────────────────────
 type Listener = (type: string, data: unknown) => void;

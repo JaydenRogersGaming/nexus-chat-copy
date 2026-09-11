@@ -25,6 +25,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const isTypingRef = useRef(false);
   const [muteInfo, setMuteInfo] = useState<DB.MuteRecord | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isOwner = profile?.email === OWNER_EMAIL || profile?.role === 'owner';
   const isStaff = profile && ['owner', 'co-owner', 'admin', 'mod'].includes(profile.role);
@@ -171,6 +173,12 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   async function send() {
     if (!input.trim() || !profile) return;
 
+    // Cooldown check (3 seconds between messages, owner bypasses)
+    if (!isOwner && cooldown > 0) {
+      toast.error(`⏳ Wait ${cooldown}s before sending again`);
+      return;
+    }
+
     // Check mute (owner can bypass)
     if (!isOwner) {
       const muteCheck = DB.isUserMuted(profile.email);
@@ -222,6 +230,21 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     setInput('');
     setReplyingTo(null);
     setShowSuggestions(false);
+
+    // Start 3s cooldown
+    if (!isOwner) {
+      setCooldown(3);
+      if (cooldownTimer.current) clearInterval(cooldownTimer.current);
+      cooldownTimer.current = setInterval(() => {
+        setCooldown(prev => { if (prev <= 1) { clearInterval(cooldownTimer.current!); cooldownTimer.current = null; return 0; } return prev - 1; });
+      }, 1000);
+    }
+
+    // Track daily quest progress
+    DB.incrementQuestProgress(profile.email, 'send_5');
+    DB.incrementQuestProgress(profile.email, 'send_20');
+    DB.incrementQuestProgress(profile.email, 'send_50');
+
     setTimeout(() => { checkAchievements(); checkBadges(profile.email); load(); }, 100);
   }
 
@@ -334,8 +357,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
         <div className="flex gap-2">
           <Input value={input} onChange={e => handleInputChange(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={replyingTo ? `Reply to ${replyingTo.senderName}…` : `Message ${room.name}…`} className="flex-1 bg-secondary border-border" />
-          <Button onClick={send} size="icon" disabled={!input.trim()}>
-            <Send className="w-4 h-4" />
+          <Button onClick={send} size="icon" disabled={!input.trim() || (!isOwner && cooldown > 0)}>
+            {cooldown > 0 && !isOwner ? <span className="text-xs font-bold">{cooldown}</span> : <Send className="w-4 h-4" />}
           </Button>
         </div>
       </div>

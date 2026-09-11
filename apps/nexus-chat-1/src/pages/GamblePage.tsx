@@ -87,6 +87,7 @@ export default function GamblePage() {
         DB.saveUser(up); updateProfile(up);
         setSlotResult({ win: didWin, amount: payout, message: msg });
         addHistory({ type: 'Slots', bet: betNum, result: payout - betNum, win: didWin, timestamp: Date.now() });
+        DB.incrementQuestProgress(profile!.email, 'gamble_3');
         setSpinning(false); setTimeout(checkAchievements, 300);
       }
     }, 70);
@@ -110,6 +111,7 @@ export default function GamblePage() {
       DB.saveUser(up); updateProfile(up);
       setCoinResult({ win: didWin, amount: payout, side: result });
       addHistory({ type: 'Coin Flip', bet: betNum, result: payout - betNum, win: didWin, timestamp: Date.now() });
+      DB.incrementQuestProgress(profile!.email, 'gamble_3');
       setCoinFlipping(false); setTimeout(checkAchievements, 300);
     }, 1200);
   }

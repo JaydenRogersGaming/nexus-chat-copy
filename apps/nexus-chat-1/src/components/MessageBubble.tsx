@@ -76,6 +76,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
     DB.updateMessage(msg.chatRoomId, msg.id, { reactions });
     onReactionUpdate();
     DB.saveUser({ ...profile, reactionCount: profile.reactionCount + 1 });
+    DB.incrementQuestProgress(profile.email, 'react_3');
     setShowEmoji(false);
   }
 

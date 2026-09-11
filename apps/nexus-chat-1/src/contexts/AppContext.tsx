@@ -3,6 +3,7 @@ import { useAuth } from 'zitejs/auth';
 import { ACHIEVEMENTS, OWNER_EMAIL } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import * as DB from '../lib/storage';
+import { toast } from 'sonner';
 
 type AppContextType = {
   profile: DB.UserProfile | null;
@@ -56,6 +57,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshProfile = useCallback(() => {
     if (!user?.email) return;
     const p = DB.getOrCreateUser(user.email);
+    // Backfill new fields
+    if (p.streak === undefined) { p.streak = 0; p.lastStreakDate = ''; p.lastMessageTime = 0; DB.saveUser(p); }
     if (user.email === OWNER_EMAIL) {
       let changed = false;
       if (p.role !== 'owner') { p.role = 'owner'; changed = true; }
@@ -66,6 +69,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [user?.email]);
 
   useEffect(() => { refreshProfile(); }, [refreshProfile]);
+
+  // Check streak on login
+  const streakChecked = useRef(false);
+  useEffect(() => {
+    if (!user?.email || streakChecked.current) return;
+    streakChecked.current = true;
+    const result = DB.checkAndUpdateStreak(user.email);
+    if (result.isNewDay) {
+      if (result.streak > 1) {
+        toast.success(`🔥 ${result.streak}-day streak! +${result.gemsAwarded} gems`, { duration: 5000 });
+      } else {
+        toast.success(`👋 Welcome back! +${result.gemsAwarded} gems`, { duration: 4000 });
+      }
+      refreshProfile();
+    }
+  }, [user?.email, refreshProfile]);
 
   const updateProfile = useCallback((updates: Partial<DB.UserProfile>) => {
     setProfile(prev => {
