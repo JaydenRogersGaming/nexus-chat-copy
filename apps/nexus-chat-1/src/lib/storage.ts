@@ -31,7 +31,24 @@ export type UserProfile = {
   streak: number;
   lastStreakDate: string;
   lastMessageTime: number;
+  language: string;
 };
+
+/** Format streak as days / months / years */
+export function formatStreak(days: number): string {
+  if (days >= 365) {
+    const years = Math.floor(days / 365);
+    const remaining = days % 365;
+    const months = Math.floor(remaining / 30);
+    return months > 0 ? `${years}y ${months}m` : `${years}y`;
+  }
+  if (days >= 30) {
+    const months = Math.floor(days / 30);
+    const remaining = days % 30;
+    return remaining > 0 ? `${months}m ${remaining}d` : `${months}m`;
+  }
+  return `${days}d`;
+}
 
 export type Message = {
   id: string;
@@ -147,7 +164,7 @@ export function getOrCreateUser(email: string): UserProfile {
     messageCount: 0, gambleCount: 0, gambleWins: 0, gambleLoseStreak: 0,
     reactionCount: 0, dmCount: 0, groupCount: 0, bugCount: 0, suggestionCount: 0,
     voiceJoined: false, proxyUsed: false, lastSeen: Date.now(),
-    streak: 0, lastStreakDate: '', lastMessageTime: 0,
+    streak: 0, lastStreakDate: '', lastMessageTime: 0, language: 'en',
   };
   saveUser(p); return p;
 }

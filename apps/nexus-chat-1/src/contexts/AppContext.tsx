@@ -59,6 +59,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const p = DB.getOrCreateUser(user.email);
     // Backfill new fields
     if (p.streak === undefined) { p.streak = 0; p.lastStreakDate = ''; p.lastMessageTime = 0; DB.saveUser(p); }
+    if (!p.language) { p.language = 'en'; DB.saveUser(p); }
+    // Apply language
+    document.documentElement.lang = p.language;
     if (user.email === OWNER_EMAIL) {
       let changed = false;
       if (p.role !== 'owner') { p.role = 'owner'; changed = true; }
@@ -91,6 +94,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!prev) return prev;
       const updated = { ...prev, ...updates };
       DB.saveUser(updated);
+      if (updates.language) document.documentElement.lang = updates.language;
       return updated;
     });
   }, []);

@@ -4,6 +4,7 @@ import { Button } from '@project/components/ui/button';
 import { Progress } from '@project/components/ui/progress';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
+import { formatStreak } from '../lib/storage';
 import { toast } from 'sonner';
 import { Flame, Gift } from 'lucide-react';
 
@@ -46,7 +47,7 @@ export default function DailyQuestsModal({ open, onClose }: Props) {
         <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20">
           <Flame className="w-8 h-8 text-orange-400" />
           <div>
-            <p className="text-2xl font-black text-orange-400">{profile.streak || 0}</p>
+            <p className="text-2xl font-black text-orange-400">{formatStreak(profile.streak || 0)}</p>
             <p className="text-[10px] text-muted-foreground font-semibold">Day Streak</p>
           </div>
           <div className="ml-auto text-right">

@@ -5,6 +5,7 @@ import { useApp } from '../contexts/AppContext';
 import { logout } from 'zitejs/auth';
 import TitleBadge from './TitleBadge';
 import * as DB from '../lib/storage';
+import { formatStreak } from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
 import type { AppSettings } from '../lib/storage';
 
@@ -82,7 +83,7 @@ export default function Sidebar({ onProfileClick }: Props) {
             )}
             {profile.activeTitle && <TitleBadge title={profile.activeTitle} effect={profile.activeTitleEffect} color={profile.activeTitleColor} />}
             {(profile.streak || 0) > 0 && (
-              <span className="flex items-center gap-0.5 text-[9px] text-orange-400 font-bold"><Flame className="w-2.5 h-2.5" />{profile.streak}d</span>
+              <span className="flex items-center gap-0.5 text-[9px] text-orange-400 font-bold"><Flame className="w-2.5 h-2.5" />{formatStreak(profile.streak)}</span>
             )}
           </div>
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />

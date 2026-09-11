@@ -8,8 +8,31 @@ import { useApp } from '../contexts/AppContext';
 import { useUpload } from 'zitejs/upload';
 import TitleBadge from './TitleBadge';
 import * as DB from '../lib/storage';
-import { Camera, ShoppingBag } from 'lucide-react';
+import { Camera, ShoppingBag, Globe } from 'lucide-react';
 import { toast } from 'sonner';
+
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'pt', label: 'Português' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'ja', label: '日本語' },
+  { code: 'ko', label: '한국어' },
+  { code: 'zh', label: '中文' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'ru', label: 'Русский' },
+  { code: 'tr', label: 'Türkçe' },
+  { code: 'nl', label: 'Nederlands' },
+  { code: 'pl', label: 'Polski' },
+  { code: 'sv', label: 'Svenska' },
+  { code: 'vi', label: 'Tiếng Việt' },
+  { code: 'th', label: 'ไทย' },
+  { code: 'id', label: 'Bahasa Indonesia' },
+  { code: 'fil', label: 'Filipino' },
+];
 
 type Props = { open: boolean; onClose: () => void; onOpenShop: () => void };
 
@@ -23,6 +46,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
   const [selectedTitle, setSelectedTitle] = useState('');
   const [selectedTitleEffect, setSelectedTitleEffect] = useState('');
   const [selectedTitleColor, setSelectedTitleColor] = useState('');
+  const [language, setLanguage] = useState('en');
   const { upload, isUploading } = useUpload();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -37,6 +61,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
       setSelectedTitle(profile.activeTitle || '');
       setSelectedTitleEffect(profile.activeTitleEffect || '');
       setSelectedTitleColor(profile.activeTitleColor || '');
+      setLanguage(profile.language || 'en');
     }
   }, [open, profile]);
 
@@ -73,6 +98,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
       activeTitle: selectedTitle,
       activeTitleEffect: selectedTitleEffect,
       activeTitleColor: selectedTitleColor,
+      language,
     });
     toast.success('Profile saved!');
     onClose();
@@ -144,6 +170,21 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Language */}
+          <div>
+            <Label className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" />Language</Label>
+            <select
+              value={language}
+              onChange={e => setLanguage(e.target.value)}
+              className="mt-1 w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              {LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Changes how the app's text appears for you</p>
           </div>
 
           {/* Actions */}
