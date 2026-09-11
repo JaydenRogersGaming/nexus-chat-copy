@@ -136,12 +136,12 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     }
 
     // Self unmute (owner only)
-    if ((text === '/unmute' || text === '/unmute ') && isOwner) {
+    if (text === '/unmute' && isOwner) {
       DB.unmuteUser(profile.email); setMuteInfo(null);
       toast.success('🔊 You unmuted yourself'); return true;
     }
 
-    if (text.trimEnd() === '/clearchat' && isStaff) {
+    if (text === '/clearchat' && isStaff) {
       if (profile.role !== 'owner' && profile.role !== 'co-owner') { toast.error('Only owner/co-owner can clear chat'); return true; }
       DB.clearChat(room.id); load(); toast.success('Chat cleared!'); return true;
     }
@@ -176,7 +176,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       DB.saveUser({ ...targetUser, role }); toast.success(`Set ${targetUser.name} as ${role}`); return true;
     }
 
-    if (text.trimEnd() === '/online') {
+    if (text === '/online') {
       const online = DB.getOnlineUsers();
       toast.info(`🟢 ${online.length} online: ${online.map(u => u.name).join(', ')}`); return true;
     }
@@ -216,11 +216,6 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   async function send() {
     if (!input.trim() || !profile) return;
 
-    const text = input.trim();
-
-    // Process commands first — they bypass cooldown and mute
-    if (text.startsWith('/') && handleCommand(text)) { setInput(''); setShowSuggestions(false); return; }
-
     // Cooldown check (3 seconds between messages, owner bypasses)
     if (!isOwner && cooldown > 0) {
       toast.error(`⏳ Wait ${cooldown}s before sending again`);
@@ -236,6 +231,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         return;
       }
     }
+
+    const text = input.trim();
+
+    if (text.startsWith('/') && handleCommand(text)) { setInput(''); return; }
 
     const { censored, hadProfanity } = censorMessage(text);
 
@@ -402,16 +401,13 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         {input === '/' && (
           <div className="absolute bottom-full left-4 right-4 mb-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto">
             <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">Available Commands</div>
-            {visibleCommands.map(c => {
-              const noArgs = ['/clearchat', '/online'].includes(c.cmd);
-              return (
-              <button key={c.cmd} onClick={() => { if (noArgs) { setInput(c.cmd); setTimeout(() => send(), 0); } else { setInput(c.cmd + ' '); } }}
+            {visibleCommands.map(c => (
+              <button key={c.cmd} onClick={() => setInput(c.cmd + ' ')}
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary/50 transition-colors text-left">
                 <span className="text-xs font-mono font-bold text-primary">{c.cmd}</span>
                 <span className="text-xs text-muted-foreground">{c.desc}</span>
               </button>
-              );
-            })}
+            ))}
           </div>
         )}
 
