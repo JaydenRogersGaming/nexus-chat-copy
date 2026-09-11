@@ -123,7 +123,7 @@ export default function ChatPage() {
       </div>
 
       {/* Online Users Panel */}
-      <OnlinePanel currentUserEmail={profile?.email} />
+      <OnlinePanel currentUserEmail={profile?.email} onStartDM={startDMWith} />
 
       <Dialog open={showNewGroup} onOpenChange={setShowNewGroup}>
         <DialogContent className="bg-card border-border max-w-sm">
