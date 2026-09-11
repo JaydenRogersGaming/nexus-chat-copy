@@ -123,7 +123,7 @@ export default function ChatPage() {
       </div>
 
       {/* Online Users Panel */}
-      <OnlinePanel roomId={activeRoom?.id || 'global'} currentUserEmail={profile?.email} />
+      <OnlinePanel currentUserEmail={profile?.email} />
 
       <Dialog open={showNewGroup} onOpenChange={setShowNewGroup}>
         <DialogContent className="bg-card border-border max-w-sm">

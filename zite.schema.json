@@ -1,3 +1,228 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "id": "tdZwaYxTv76",
+      "sdkName": "presence",
+      "name": "Presence",
+      "primaryFieldId": "fk6bUqAw9u7",
+      "fields": [
+        {
+          "id": "fk6bUqAw9u7",
+          "sdkName": "email",
+          "definition": {
+            "name": "Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fg5TiPFLvzZ",
+          "sdkName": "displayName",
+          "definition": {
+            "name": "Display Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f6b4X1pgfN7",
+          "sdkName": "profilePic",
+          "definition": {
+            "name": "Profile Pic",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fe9vLCDHF82",
+          "sdkName": "nameColor",
+          "definition": {
+            "name": "Name Color",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fgbGSkgV8m3",
+          "sdkName": "activeTitle",
+          "definition": {
+            "name": "Active Title",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fwZGJzMGEKt",
+          "sdkName": "activeTitleColor",
+          "definition": {
+            "name": "Active Title Color",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fo4M1LRyprc",
+          "sdkName": "activeTitleEffect",
+          "definition": {
+            "name": "Active Title Effect",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f9iAkw92reg",
+          "sdkName": "role",
+          "definition": {
+            "name": "Role",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fvVCuyua5C7",
+          "sdkName": "lastSeen",
+          "definition": {
+            "name": "Last Seen",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tju1nx3PL3K",
+      "sdkName": "chatMessages",
+      "name": "Chat Messages",
+      "primaryFieldId": "fxt1pvVkqyL",
+      "fields": [
+        {
+          "id": "fxt1pvVkqyL",
+          "sdkName": "messageId",
+          "definition": {
+            "name": "Message Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fqXyi8uo47o",
+          "sdkName": "roomId",
+          "definition": {
+            "name": "Room Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f8mGN1VxbBr",
+          "sdkName": "senderEmail",
+          "definition": {
+            "name": "Sender Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fvJqQtYGHS9",
+          "sdkName": "senderName",
+          "definition": {
+            "name": "Sender Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fd5KyYKoj1k",
+          "sdkName": "content",
+          "definition": {
+            "name": "Content",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpjs9bMN9b1",
+          "sdkName": "senderTitle",
+          "definition": {
+            "name": "Sender Title",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fwJwA8q24Hn",
+          "sdkName": "senderTitleColor",
+          "definition": {
+            "name": "Sender Title Color",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fq4T7fhayXm",
+          "sdkName": "senderTitleEffect",
+          "definition": {
+            "name": "Sender Title Effect",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f74Ly5a4w3J",
+          "sdkName": "senderNameColor",
+          "definition": {
+            "name": "Sender Name Color",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fuzLzq9otxf",
+          "sdkName": "reactionsJson",
+          "definition": {
+            "name": "Reactions Json",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f9NUb9KDmrQ",
+          "sdkName": "replyToJson",
+          "definition": {
+            "name": "Reply To Json",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f8qZEozZayJ",
+          "sdkName": "deleted",
+          "definition": {
+            "name": "Deleted",
+            "type": "checkbox",
+            "template": {}
+          }
+        },
+        {
+          "id": "f2DVFaLEfid",
+          "sdkName": "sentAt",
+          "definition": {
+            "name": "Sent At",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

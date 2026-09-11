@@ -84,6 +84,72 @@ export type ZiteAttachmentInput =
   | { url: string; filename?: string }
   | ZiteAttachment;
 
+/** A record in the "Presence" table, as it is read back. */
+export type PresenceRecordType = {
+  id: string;
+  /** Primary field. "Email" */
+  email?: string;
+  displayName?: string;
+  profilePic?: string;
+  nameColor?: string;
+  activeTitle?: string;
+  activeTitleColor?: string;
+  activeTitleEffect?: string;
+  role?: string;
+  /** "Last Seen". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  lastSeen?: string;
+};
+
+/** What you may write when creating or updating a record in the "Presence" table. */
+export type PresenceRecordInput = {
+  email: string | null;
+  displayName: string | null;
+  profilePic: string | null;
+  nameColor: string | null;
+  activeTitle: string | null;
+  activeTitleColor: string | null;
+  activeTitleEffect: string | null;
+  role: string | null;
+  lastSeen: string | Date | null;
+};
+
+/** A record in the "Chat Messages" table, as it is read back. */
+export type ChatMessagesRecordType = {
+  id: string;
+  /** Primary field. "Message Id" */
+  messageId?: string;
+  roomId?: string;
+  senderEmail?: string;
+  senderName?: string;
+  content?: string;
+  senderTitle?: string;
+  senderTitleColor?: string;
+  senderTitleEffect?: string;
+  senderNameColor?: string;
+  reactionsJson?: string;
+  replyToJson?: string;
+  deleted?: boolean;
+  /** "Sent At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  sentAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Chat Messages" table. */
+export type ChatMessagesRecordInput = {
+  messageId: string | null;
+  roomId: string | null;
+  senderEmail: string | null;
+  senderName: string | null;
+  content: string | null;
+  senderTitle: string | null;
+  senderTitleColor: string | null;
+  senderTitleEffect: string | null;
+  senderNameColor: string | null;
+  reactionsJson: string | null;
+  replyToJson: string | null;
+  deleted: string | boolean | null;
+  sentAt: string | Date | null;
+};
+
 export interface NotificationLink {
   path?: string;
   params?: Record<string, string>;
@@ -114,6 +180,8 @@ export interface ZiteAuthUser {
 }
 
 export const zite = {
+  presence: createTableClient<PresenceRecordType, PresenceRecordInput>('Presence'), // "Presence"
+  chatMessages: createTableClient<ChatMessagesRecordType, ChatMessagesRecordInput>('ChatMessages'), // "Chat Messages"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };
