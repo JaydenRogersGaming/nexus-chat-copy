@@ -132,7 +132,6 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
           {/* Member since */}
           <p className="text-[10px] text-muted-foreground text-center">
             {isOnline ? '🟢 Online now' : `Last seen ${new Date(user.lastSeen).toLocaleString()}`}
-            {user.joinedAt ? ` · 📅 Joined ${new Date(user.joinedAt).toLocaleDateString()}` : ''}
           </p>
         </div>
       </DialogContent>

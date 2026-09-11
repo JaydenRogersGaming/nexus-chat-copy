@@ -31,7 +31,6 @@ export type UserProfile = {
   streak: number;
   lastStreakDate: string;
   lastMessageTime: number;
-  joinedAt: number;
 };
 
 export type Message = {
@@ -148,7 +147,7 @@ export function getOrCreateUser(email: string): UserProfile {
     messageCount: 0, gambleCount: 0, gambleWins: 0, gambleLoseStreak: 0,
     reactionCount: 0, dmCount: 0, groupCount: 0, bugCount: 0, suggestionCount: 0,
     voiceJoined: false, proxyUsed: false, lastSeen: Date.now(),
-    streak: 0, lastStreakDate: '', lastMessageTime: 0, joinedAt: Date.now(),
+    streak: 0, lastStreakDate: '', lastMessageTime: 0,
   };
   saveUser(p); return p;
 }
