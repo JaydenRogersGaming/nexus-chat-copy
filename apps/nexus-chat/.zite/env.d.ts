@@ -5,6 +5,10 @@ declare namespace NodeJS {
     ZITE_APP_URL: string;
     /** openai access token (openai) */
     ZITE_OPENAI_ACCESS_TOKEN: string;
+    /** Giphy API key for the GIF search feature in chat */
+    ZITE_GIPHY_API_KEY: string;
+    /** Google Tenor API key for GIF search (powered by Google) */
+    ZITE_TENOR_API_KEY: string;
     [key: string]: string | undefined;
   }
 }
