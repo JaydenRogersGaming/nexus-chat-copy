@@ -10,7 +10,6 @@ import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
-import { messages as messagesApi } from 'zitejs/api';
 
 type Props = { room: DB.ChatRoom; onStartDM?: (email: string) => void };
 
@@ -40,23 +39,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     return () => clearInterval(t);
   }, [profile?.email]);
 
-  const load = useCallback(async () => {
-    if (room.type === 'global') {
-      // Load from database for global chat (cross-user)
-      try {
-        const res = await messagesApi({ action: 'getMessages', roomId: room.id, limit: 200 });
-        if (res.messages) {
-          const filtered = (res.messages as DB.Message[]).filter(m => !m.deleted || (profile?.role && ['owner','admin','mod'].includes(profile.role)));
-          setMessages(filtered);
-        }
-      } catch { /* fallback to local */ 
-        setMessages(DB.getMessages(room.id).filter(m => !m.deleted || (profile?.role && ['owner','admin','mod'].includes(profile.role))));
-      }
-    } else {
-      setMessages(DB.getMessages(room.id).filter(m => !m.deleted || (profile?.role && ['owner','admin','mod'].includes(profile.role))));
-    }
+  const load = useCallback(() => {
+    setMessages(DB.getMessages(room.id).filter(m => !m.deleted || (profile?.role && ['owner','admin','mod'].includes(profile.role))));
     setTypingList(DB.getTyping(room.id).filter(t => t.email !== profile?.email));
-  }, [room.id, room.type, profile?.email, profile?.role]);
+  }, [room.id, profile?.email, profile?.role]);
 
   useEffect(() => { load(); const t = setInterval(load, 2000); return () => clearInterval(t); }, [load]);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages.length]);
@@ -216,11 +202,6 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   async function send() {
     if (!input.trim() || !profile) return;
 
-    const text = input.trim();
-
-    // Process commands first — they bypass cooldown and mute
-    if (text.startsWith('/') && handleCommand(text)) { setInput(''); setShowSuggestions(false); return; }
-
     // Cooldown check (3 seconds between messages, owner bypasses)
     if (!isOwner && cooldown > 0) {
       toast.error(`⏳ Wait ${cooldown}s before sending again`);
@@ -236,6 +217,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         return;
       }
     }
+
+    const text = input.trim();
+
+    if (text.startsWith('/') && handleCommand(text)) { setInput(''); return; }
 
     const { censored, hadProfanity } = censorMessage(text);
 
@@ -255,17 +240,6 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       timestamp: Date.now(),
     };
     DB.addMessage(msg);
-
-    // Also save to database for global chat (cross-user)
-    if (room.type === 'global') {
-      messagesApi({
-        action: 'send', roomId: room.id, content: censored,
-        senderName: profile.name, senderTitle: profile.activeTitle,
-        senderTitleColor: profile.activeTitleColor, senderTitleEffect: profile.activeTitleEffect,
-        senderNameColor: profile.nameColor,
-        replyTo: replyingTo ? { id: replyingTo.id, senderName: replyingTo.senderName, content: replyingTo.content.slice(0, 80) } : undefined,
-      }).catch(() => {});
-    }
     DB.clearTyping(room.id, profile.email);
     const newCount = profile.messageCount + 1;
     DB.saveUser({ ...profile, messageCount: newCount });

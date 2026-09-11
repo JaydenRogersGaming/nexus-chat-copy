@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
+import * as DB from '../lib/storage';
 import TitleBadge from './TitleBadge';
-import UserProfileModal from './UserProfileModal';
 import { cn } from '@project/components/lib/utils';
-import { presence } from 'zitejs/api';
 
 const ROLE_COLOR: Record<string, string> = {
   owner: 'text-yellow-400',
@@ -13,60 +12,67 @@ const ROLE_COLOR: Record<string, string> = {
   user: 'text-muted-foreground',
 };
 
-type OnlineUser = {
-  email: string;
-  displayName: string;
-  profilePic: string;
-  nameColor: string;
-  activeTitle: string;
-  activeTitleColor: string;
-  activeTitleEffect: string;
-  role: string;
-};
+type Props = { roomId: string; currentUserEmail?: string };
 
-type Props = { currentUserEmail?: string; onStartDM?: (email: string) => void };
-
-export default function OnlinePanel({ currentUserEmail, onStartDM }: Props) {
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [viewProfileEmail, setViewProfileEmail] = useState<string | null>(null);
+export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
+  const [onlineUsers, setOnlineUsers] = useState<DB.UserProfile[]>([]);
+  const [typing, setTyping] = useState<DB.TypingUser[]>([]);
 
   useEffect(() => {
-    let mounted = true;
-    const update = async () => {
-      try {
-        const res = await presence({ action: 'getOnline' });
-        if (mounted && res.online) setOnlineUsers(res.online);
-      } catch { /* ignore */ }
+    const update = () => {
+      setOnlineUsers(DB.getOnlineUsers());
+      setTyping(DB.getTyping(roomId).filter(t => t.email !== currentUserEmail));
     };
     update();
-    const t = setInterval(update, 5000);
-    return () => { mounted = false; clearInterval(t); };
-  }, []);
+    const t = setInterval(update, 2000);
+    return () => clearInterval(t);
+  }, [roomId, currentUserEmail]);
 
   return (
     <div className="w-44 flex-shrink-0 bg-card/40 border-l border-border flex flex-col overflow-y-auto">
+      {/* Online header */}
       <div className="px-3 pt-3 pb-2 border-b border-border">
         <div className="flex items-center gap-1.5">
           <Circle className="w-2.5 h-2.5 fill-green-400 text-green-400" />
           <span className="text-[11px] font-bold uppercase tracking-widest text-green-400">Online</span>
           <span className="ml-auto text-[11px] text-muted-foreground font-semibold">{onlineUsers.length}</span>
         </div>
+        <p className="text-[9px] text-muted-foreground/60 mt-1 leading-tight">Same device only — connect a database to see everyone</p>
       </div>
 
+      {/* Typing indicator */}
+      {typing.length > 0 && (
+        <div className="px-3 py-2 border-b border-border bg-primary/5">
+          <p className="text-[10px] text-primary font-semibold mb-1">✍️ Typing…</p>
+          {typing.map(t => (
+            <div key={t.email} className="flex items-center gap-1.5 py-0.5">
+              <span className="text-[10px] text-foreground/80 truncate">{t.name}</span>
+              <span className="flex gap-0.5 ml-auto">
+                {[0,1,2].map(i => (
+                  <span key={i} className="w-1 h-1 rounded-full bg-primary animate-bounce"
+                    style={{ animationDelay: `${i * 0.15}s` }} />
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* User list */}
       <div className="flex-1 p-2 space-y-0.5">
         {onlineUsers.map(u => (
-          <button key={u.email} onClick={() => setViewProfileEmail(u.email)} className={cn('w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left hover:bg-secondary/50 transition-colors cursor-pointer', u.email === currentUserEmail && 'bg-primary/10')}>
+          <div key={u.email} className={cn('flex items-center gap-2 px-2 py-1.5 rounded-lg', u.email === currentUserEmail && 'bg-primary/10')}>
             <div className="relative flex-shrink-0">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
                 {u.profilePic
                   ? <img src={u.profilePic} alt="" className="w-full h-full object-cover" />
-                  : <span className="text-[10px] font-bold text-primary">{u.displayName[0]?.toUpperCase()}</span>}
+                  : <span className="text-[10px] font-bold text-primary">{u.name[0]?.toUpperCase()}</span>}
               </div>
               <Circle className="w-2 h-2 fill-green-400 text-green-400 absolute -bottom-0.5 -right-0.5" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-semibold truncate leading-tight" style={{ color: u.nameColor || undefined }}>
-                {u.displayName}{u.email === currentUserEmail && <span className="text-muted-foreground font-normal"> (you)</span>}
+                {u.name}{u.email === currentUserEmail && <span className="text-muted-foreground font-normal"> (you)</span>}
               </p>
               {u.activeTitle ? (
                 <TitleBadge title={u.activeTitle} effect={u.activeTitleEffect} color={u.activeTitleColor} />
@@ -76,13 +82,12 @@ export default function OnlinePanel({ currentUserEmail, onStartDM }: Props) {
                 </span>
               )}
             </div>
-          </button>
+          </div>
         ))}
         {onlineUsers.length === 0 && (
           <p className="text-[10px] text-muted-foreground text-center py-4">No one online</p>
         )}
       </div>
-      <UserProfileModal email={viewProfileEmail} onClose={() => setViewProfileEmail(null)} onStartDM={onStartDM} />
     </div>
   );
 }

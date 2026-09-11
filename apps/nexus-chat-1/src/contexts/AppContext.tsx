@@ -4,7 +4,6 @@ import { ACHIEVEMENTS, OWNER_EMAIL } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
-import { presence as presenceApi } from 'zitejs/api';
 
 type AppContextType = {
   profile: DB.UserProfile | null;
@@ -161,28 +160,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(t);
   }, [profile, activeRoomId]);
 
-  // Ping online presence (local + database)
+  // Ping online presence
   useEffect(() => {
     if (!profile?.email) return;
     DB.pingOnline(profile.email);
-    const pingDb = () => {
-      presenceApi({
-        action: 'ping',
-        displayName: profile.name,
-        profilePic: profile.profilePic,
-        nameColor: profile.nameColor,
-        activeTitle: profile.activeTitle,
-        activeTitleColor: profile.activeTitleColor,
-        activeTitleEffect: profile.activeTitleEffect,
-        role: profile.role,
-      }).catch(() => {});
-    };
-    pingDb();
-    const t = setInterval(() => {
-      if (profile?.email) { DB.pingOnline(profile.email); pingDb(); }
-    }, 30000);
+    const t = setInterval(() => { if (profile?.email) DB.pingOnline(profile.email); }, 30000);
     return () => clearInterval(t);
-  }, [profile?.email, profile?.name, profile?.profilePic, profile?.nameColor, profile?.activeTitle, profile?.activeTitleColor, profile?.activeTitleEffect, profile?.role]);
+  }, [profile?.email]);
 
   // Init broadcast
   useEffect(() => DB.initBroadcast(), []);
