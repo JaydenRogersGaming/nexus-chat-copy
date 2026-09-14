@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from 'zitejs/auth';
+import { useAuth, loginWithRedirect } from 'zitejs/auth';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
 import ChatPage from './pages/ChatPage';
@@ -26,13 +26,23 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         <h1 className="text-4xl font-black text-white mb-2" style={{ textShadow: `0 0 20px ${settings.matrixColor}` }}>
           {settings.appName}
         </h1>
-        <div className="flex gap-1 mt-4">
-          {[0,1,2].map(i => (
-            <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
-              style={{ backgroundColor: settings.matrixColor, animationDelay: `${i * 0.15}s` }} />
-          ))}
-        </div>
-        <p className="text-xs mt-4" style={{ color: settings.matrixColor + '88' }}>Loading...</p>
+        {isLoading ? (
+          <>
+            <div className="flex gap-1 mt-4">
+              {[0,1,2].map(i => (
+                <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
+                  style={{ backgroundColor: settings.matrixColor, animationDelay: `${i * 0.15}s` }} />
+              ))}
+            </div>
+            <p className="text-xs mt-4" style={{ color: settings.matrixColor + '88' }}>Loading...</p>
+          </>
+        ) : (
+          <button onClick={() => loginWithRedirect()}
+            className="mt-6 px-8 py-3 rounded-xl font-bold text-sm text-white border border-white/20 hover:scale-105 transition-all"
+            style={{ backgroundColor: settings.matrixColor + '33', borderColor: settings.matrixColor + '66' }}>
+            🔑 Sign In / Sign Up
+          </button>
+        )}
       </div>
     </div>
   );
