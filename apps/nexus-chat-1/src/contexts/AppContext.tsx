@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from 'zitejs/auth';
-import { ACHIEVEMENTS, OWNER_EMAIL } from '../lib/gameData';
+import { ACHIEVEMENTS, isOwnerEmail } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
@@ -63,7 +63,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (p.verified === undefined) { p.verified = false; DB.saveUser(p); }
     // Apply language
     document.documentElement.lang = p.language;
-    if (user.email === OWNER_EMAIL) {
+    if (isOwnerEmail(user.email)) {
       let changed = false;
       if (p.role !== 'owner') { p.role = 'owner'; changed = true; }
       if (p.name !== 'Jayden Rogres') { p.name = 'Jayden Rogres'; changed = true; }

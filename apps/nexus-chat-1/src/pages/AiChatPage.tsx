@@ -5,13 +5,13 @@ import { Markdown } from '@project/components/markdown';
 import { toast } from 'sonner';
 import { chat, generateArt } from 'zitejs/api';
 import { useAuth } from 'zitejs/auth';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 
 type Message = { role: 'user' | 'assistant'; content: string; imageUrl?: string };
 
 export default function AiChatPage() {
   const { user } = useAuth();
-  const isOwner = user?.email === OWNER_EMAIL;
+  const isOwner = user?.email ? isOwnerEmail(user.email) : false;
   const [conversations, setConversations] = useState<Message[][]>([[]]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [input, setInput] = useState('');
