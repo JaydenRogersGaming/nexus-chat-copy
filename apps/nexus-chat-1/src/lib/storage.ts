@@ -157,7 +157,7 @@ export function getOrCreateUser(email: string): UserProfile {
     return existing;
   }
   const p: UserProfile = {
-    email, name: email === OWNER_EMAIL ? 'Jayden Rogres' : email.split('@')[0], profilePic: '', nameColor: '#e0e0ff', nameColor2: '', bio: '',
+    email, name: email.split('@')[0], profilePic: '', nameColor: '#e0e0ff', nameColor2: '', bio: '',
     gems: 0, activeTitle: email === OWNER_EMAIL ? 'Owner' : '',
     activeTitleEffect: '', activeTitleColor: email === OWNER_EMAIL ? '#ffd700' : '',
     role: email === OWNER_EMAIL ? 'owner' : 'user', badges: [],
