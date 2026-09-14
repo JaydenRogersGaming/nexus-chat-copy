@@ -28,7 +28,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const [cooldown, setCooldown] = useState(0);
   const cooldownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const isOwner = profile?.email ? isOwnerEmail(profile.email) : false || profile?.role === 'owner';
+  const isOwner = (profile?.email ? isOwnerEmail(profile.email) : false) || profile?.role === 'owner';
   const isStaff = profile && ['owner', 'co-owner', 'admin', 'mod'].includes(profile.role);
 
   useEffect(() => {
