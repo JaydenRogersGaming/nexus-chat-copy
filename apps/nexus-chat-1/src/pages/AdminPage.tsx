@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Gem, Shield, Crown, Bug, Users, Star, Trash2, Plus, Dices, Settings, Ban, AlertTriangle, UserX, Megaphone, Pin, Tag, VolumeX, Clock, BadgeCheck } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
-import { isOwnerEmail, EFFECT_TO_CLASS } from '../lib/gameData';
+import { OWNER_EMAIL, EFFECT_TO_CLASS } from '../lib/gameData';
 import { toast } from 'sonner';
 
 const ROLE_META: Record<string, { color: string; label: string }> = {
@@ -94,7 +94,7 @@ export default function AdminPage() {
     <div className="flex items-center justify-center h-full"><p className="text-muted-foreground">Access Denied 🚫</p></div>
   );
 
-  const isOwner   = isOwnerEmail(profile.email) || profile.role === 'owner';
+  const isOwner   = profile.email === OWNER_EMAIL || profile.role === 'owner';
   const isCoOwner = isOwner || profile.role === 'co-owner';
   const isAdmin   = isCoOwner || profile.role === 'admin';
   const isMod     = isAdmin || profile.role === 'mod';
@@ -680,7 +680,7 @@ export default function AdminPage() {
               <Button variant="destructive" className="w-full" onClick={() => {
                 const email = banEmail.trim();
                 if (!email) { toast.error('Enter an email'); return; }
-                if (isOwnerEmail(email)) { toast.error("Can't ban the owner!"); return; }
+                if (email === OWNER_EMAIL) { toast.error("Can't ban the owner!"); return; }
                 DB.banUser(email, profile?.name || 'Admin', `Banned by ${profile?.name || 'Admin'}`);
                 reload(); setBanEmail(''); toast.success(`🔨 Banned ${email}`);
               }}>
@@ -747,7 +747,7 @@ export default function AdminPage() {
                     ✅ Dismiss
                   </Button>
                   <Button size="sm" variant="destructive" className="flex-1" onClick={() => {
-                    if (isOwnerEmail(report.email)) { toast.error("Can't ban the owner!"); return; }
+                    if (report.email === OWNER_EMAIL) { toast.error("Can't ban the owner!"); return; }
                     DB.banUser(report.email, profile?.name || 'Owner', 'Banned for profanity');
                     DB.resolveCussReport(report.id);
                     reload();
@@ -811,7 +811,7 @@ export default function AdminPage() {
                 {(() => { const mute = DB.isUserMuted(u.email); return mute ? <span className="text-[9px] text-orange-400 font-bold flex items-center gap-0.5"><VolumeX className="w-3 h-3" />Muted</span> : null; })()}
                 {u.verified && <span className="text-[9px] text-blue-400 font-bold flex items-center gap-0.5"><BadgeCheck className="w-3 h-3" />Verified</span>}
               </div>
-              {!isOwnerEmail(u.email) && u.email !== profile.email && (
+              {u.email !== OWNER_EMAIL && u.email !== profile.email && (
                 <div className="flex gap-1 ml-2 flex-shrink-0">
                   {isOwner && (
                     <button onClick={() => { DB.saveUser({ ...u, verified: !u.verified }); reload(); toast.success(u.verified ? `Unverified ${u.name}` : `✅ Verified ${u.name}`); }}

@@ -3,7 +3,7 @@ import { Trophy, Gem } from 'lucide-react';
 import TitleBadge from '../components/TitleBadge';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
-import { isOwnerEmail } from '../lib/gameData';
+import { OWNER_EMAIL } from '../lib/gameData';
 import { cn } from '@project/components/lib/utils';
 
 export default function LeaderboardPage() {
@@ -14,7 +14,7 @@ export default function LeaderboardPage() {
     const load = () => {
       const all = DB.getAllUsers().sort((a, b) => b.gems - a.gems);
       // Owner always on top
-      const ownerIdx = all.findIndex(u => isOwnerEmail(u.email) || u.role === 'owner');
+      const ownerIdx = all.findIndex(u => u.email === OWNER_EMAIL || u.role === 'owner');
       if (ownerIdx > 0) {
         const [owner] = all.splice(ownerIdx, 1);
         all.unshift(owner);
@@ -34,7 +34,7 @@ export default function LeaderboardPage() {
   }
 
   function isOwner(u: DB.UserProfile) {
-    return isOwnerEmail(u.email) || u.role === 'owner';
+    return u.email === OWNER_EMAIL || u.role === 'owner';
   }
 
   return (

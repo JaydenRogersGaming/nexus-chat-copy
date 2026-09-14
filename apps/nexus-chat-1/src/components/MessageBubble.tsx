@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck } from 'lucide-react';
 import TitleBadge from './TitleBadge';
 import { useApp } from '../contexts/AppContext';
-import { EMOJI_LIST, isOwnerEmail } from '../lib/gameData';
+import { EMOJI_LIST, OWNER_EMAIL } from '../lib/gameData';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
 
@@ -101,15 +101,15 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
               ? { backgroundImage: `linear-gradient(90deg, ${senderUser.nameColor}, ${senderUser.nameColor2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
               : { color: msg.senderNameColor || '#e0e0ff' }
           }>{msg.senderName}</button>
-          {(senderUser?.verified || isOwnerEmail(msg.senderEmail)) && (
+          {(senderUser?.verified || msg.senderEmail === OWNER_EMAIL) && (
             <BadgeCheck className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
           )}
-          {isOwnerEmail(msg.senderEmail) && (
+          {msg.senderEmail === OWNER_EMAIL && (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: '#ffd700', backgroundColor: '#ffd70022', border: '1px solid #ffd70055' }}>
               <Crown className="w-2.5 h-2.5" />OWNER
             </span>
           )}
-          {!isOwnerEmail(msg.senderEmail) && senderCustomRole && (
+          {msg.senderEmail !== OWNER_EMAIL && senderCustomRole && (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded border"
               style={{ color: senderCustomRoleColor, borderColor: senderCustomRoleColor + '55', backgroundColor: senderCustomRoleColor + '18' }}>
               {senderCustomRole}
@@ -121,7 +121,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
               {tag.icon} {tag.name}
             </span>
           ) : null; })()}
-          {!isOwnerEmail(msg.senderEmail) && displayTitle && <TitleBadge title={displayTitle} effect={displayTitleEffect} color={displayTitleColor} />}
+          {msg.senderEmail !== OWNER_EMAIL && displayTitle && <TitleBadge title={displayTitle} effect={displayTitleEffect} color={displayTitleColor} />}
         </div>
 
         {/* Reply reference */}

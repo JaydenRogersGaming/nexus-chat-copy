@@ -6,7 +6,7 @@ import MessageBubble from './MessageBubble';
 import UserProfileModal from './UserProfileModal';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
-import { OWNER_EMAIL, isOwnerEmail, censorMessage } from '../lib/gameData';
+import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
@@ -28,7 +28,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const [cooldown, setCooldown] = useState(0);
   const cooldownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const isOwner = profile?.email ? isOwnerEmail(profile.email) : false || profile?.role === 'owner';
+  const isOwner = profile?.email === OWNER_EMAIL || profile?.role === 'owner';
   const isStaff = profile && ['owner', 'co-owner', 'admin', 'mod'].includes(profile.role);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     // Command suggestions
     if (val.startsWith('/ban ') && isStaff) {
       const query = val.slice(5).toLowerCase().trim();
-      const users = DB.getAllUsers().filter(u => u.email !== profile.email && !isOwnerEmail(u.email) && (!query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)));
+      const users = DB.getAllUsers().filter(u => u.email !== profile.email && u.email !== OWNER_EMAIL && (!query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)));
       setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
     } else if (val.startsWith('/unban ') && isStaff) {
       const query = val.slice(7).toLowerCase().trim();
@@ -90,7 +90,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     if (text.startsWith('/ban ') && isStaff) {
       const target = text.slice(5).trim();
       if (!target) { toast.error('Usage: /ban email'); return true; }
-      if (isOwnerEmail(target)) { toast.error("Can't ban the owner!"); return true; }
+      if (target === OWNER_EMAIL) { toast.error("Can't ban the owner!"); return true; }
       if (target === profile.email) { toast.error("Can't ban yourself!"); return true; }
       const targetUser = DB.getUser(target);
       if (!targetUser) { toast.error('User not found'); return true; }
