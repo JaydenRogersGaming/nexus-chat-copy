@@ -1,10 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
-import { Crown, ShieldCheck, Shield, Star, MessageSquare, Gem, Trophy, Dices, MessageCircle } from 'lucide-react';
+import { Crown, ShieldCheck, Shield, Star, MessageSquare, Gem, Trophy, Dices, MessageCircle, UserPlus, UserMinus, Check, Clock } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
 import TitleBadge from './TitleBadge';
 import { BADGE_DEFS } from '../lib/badges';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
+import { useApp } from '../contexts/AppContext';
+import { toast } from 'sonner';
 
 type Props = { email: string | null; onClose: () => void; onStartDM?: (email: string) => void };
 
@@ -20,12 +22,33 @@ function getRoleBadge(role: string) {
 
 export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
   const user = email ? DB.getUser(email) : null;
-  if (!user) return null;
+  const { profile } = useApp();
+  if (!user || !profile) return null;
 
   const roleBadge = getRoleBadge(user.role);
   const achievements = DB.getUserAchievements(user.email);
   const userBadges = user.badges || [];
   const isOnline = (Date.now() - (user.lastSeen || 0)) < 2 * 60 * 1000;
+
+  const isFriend = DB.areFriends(profile.email, user.email);
+  const pendingToThem = DB.getOutgoingRequests(profile.email).find(r => r.toEmail === user.email);
+  const pendingFromThem = DB.getPendingRequestsForUser(profile.email).find(r => r.fromEmail === user.email);
+  const isSelf = profile.email === user.email;
+
+  function handleFriendAction() {
+    if (isFriend) {
+      DB.removeFriend(profile!.email, user!.email);
+      toast.success(`Removed ${user!.name} from friends`);
+    } else if (pendingFromThem) {
+      DB.acceptFriendRequest(pendingFromThem.id);
+      toast.success(`You and ${user!.name} are now friends! 🎉`);
+    } else {
+      const result = DB.sendFriendRequest(profile!.email, user!.email);
+      if (result === 'sent') toast.success(`Friend request sent to ${user!.name}!`);
+      else if (result === 'already_pending') toast.info('Request already pending');
+      else if (result === 'already_friends') toast.info('Already friends!');
+    }
+  }
 
   return (
     <Dialog open={!!email} onOpenChange={v => !v && onClose()}>
@@ -122,11 +145,21 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
             )}
           </div>
 
-          {/* Message button */}
-          {onStartDM && (
-            <Button className="w-full gap-2" onClick={() => { onStartDM(user.email); onClose(); }}>
-              <MessageCircle className="w-4 h-4" /> Send Message
-            </Button>
+          {/* Action buttons */}
+          {!isSelf && (
+            <div className="flex gap-2">
+              {onStartDM && (
+                <Button className="flex-1 gap-2" onClick={() => { onStartDM(user.email); onClose(); }}>
+                  <MessageCircle className="w-4 h-4" /> Message
+                </Button>
+              )}
+              <Button variant={isFriend ? 'destructive' : pendingToThem ? 'secondary' : 'outline'} className="flex-1 gap-2" onClick={handleFriendAction} disabled={!!pendingToThem}>
+                {isFriend ? <><UserMinus className="w-4 h-4" /> Unfriend</>
+                  : pendingFromThem ? <><Check className="w-4 h-4" /> Accept</>
+                  : pendingToThem ? <><Clock className="w-4 h-4" /> Pending</>
+                  : <><UserPlus className="w-4 h-4" /> Add Friend</>}
+              </Button>
+            </div>
           )}
 
           {/* Member since */}

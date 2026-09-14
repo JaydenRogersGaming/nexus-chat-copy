@@ -7,8 +7,9 @@ import ProfileModal from './ProfileModal';
 import ShopModal from './ShopModal';
 import FeedbackModal from './FeedbackModal';
 import DailyQuestsModal from './DailyQuestsModal';
+import FriendsModal from './FriendsModal';
 import { Button } from '@project/components/ui/button';
-import { Bug, EyeOff, Megaphone, X, Settings, Flame } from 'lucide-react';
+import { Bug, EyeOff, Megaphone, X, Settings, Flame, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import * as DB from '../lib/storage';
 
@@ -159,6 +160,7 @@ export default function Layout() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [questsOpen, setQuestsOpen] = useState(false);
+  const [friendsOpen, setFriendsOpen] = useState(false);
   const [announcement, setAnnouncement] = useState<DB.Announcement | null>(null);
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(sessionStorage.getItem('dismissed_anns') || '[]')); } catch { return new Set(); }
@@ -193,6 +195,12 @@ export default function Layout() {
         <header className="h-12 border-b border-border bg-card/50 flex items-center px-4 gap-2 flex-shrink-0">
           <GemDisplay />
           <div className="flex items-center gap-1.5 ml-2">
+            <button
+              onClick={() => setFriendsOpen(true)}
+              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors flex items-center gap-1"
+            >
+              <Users className="w-3.5 h-3.5" /> Friends
+            </button>
             <button
               onClick={() => setQuestsOpen(true)}
               className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors flex items-center gap-1"
@@ -236,6 +244,7 @@ export default function Layout() {
       <ShopModal    open={shopOpen}    onClose={() => setShopOpen(false)} />
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
       <DailyQuestsModal open={questsOpen} onClose={() => setQuestsOpen(false)} />
+      <FriendsModal open={friendsOpen} onClose={() => setFriendsOpen(false)} />
       <Toaster position="top-right" richColors />
     </div>
   );
