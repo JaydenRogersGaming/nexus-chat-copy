@@ -8,7 +8,8 @@ import { useApp } from '../contexts/AppContext';
 import { useUpload } from 'zitejs/upload';
 import TitleBadge from './TitleBadge';
 import * as DB from '../lib/storage';
-import { Camera, ShoppingBag, Globe } from 'lucide-react';
+import { Camera, ShoppingBag, Globe, Trash2 } from 'lucide-react';
+import { logout } from 'zitejs/auth';
 import { toast } from 'sonner';
 
 const LANGUAGES = [
@@ -192,6 +193,18 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
             <Button onClick={save} className="flex-1">{isUploading ? 'Uploading…' : 'Save'}</Button>
             <Button variant="outline" onClick={onOpenShop} className="flex items-center gap-1"><ShoppingBag className="w-4 h-4" />Shop</Button>
           </div>
+
+          {/* Delete Account */}
+          <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 text-xs mt-2" onClick={() => {
+            if (!window.confirm('Are you sure you want to delete your account? This will remove all your data permanently and cannot be undone.')) return;
+            if (!window.confirm('This is your LAST chance. Delete everything forever?')) return;
+            if (profile) {
+              DB.deleteUser(profile.email);
+            }
+            logout();
+          }}>
+            <Trash2 className="w-3.5 h-3.5 mr-1" />Delete My Account Forever
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

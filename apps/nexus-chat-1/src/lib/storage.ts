@@ -151,6 +151,11 @@ export function saveUser(p: UserProfile) {
   const users = g<Record<string,UserProfile>>('users') || {};
   users[p.email] = p; s('users', users);
 }
+
+export function deleteUser(email: string) {
+  const users = g<Record<string,UserProfile>>('users') || {};
+  delete users[email]; s('users', users);
+}
 export function getOrCreateUser(email: string): UserProfile {
   const existing = getUser(email);
   if (existing) {
