@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from 'zitejs/auth';
+import { useAuth, loginWithRedirect } from 'zitejs/auth';
 import { Settings } from 'lucide-react';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
@@ -32,13 +32,23 @@ function AuthGate({ children }: { children: React.ReactNode }) {
           {settings.appName}
         </h1>
         <p className="text-sm mb-6" style={{ color: localColor }}>{settings.appTagline}</p>
-        <div className="flex gap-1">
-          {[0,1,2].map(i => (
-            <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
-              style={{ backgroundColor: localColor, animationDelay: `${i * 0.15}s` }} />
-          ))}
-        </div>
-        <p className="text-xs mt-4" style={{ color: localColor + '88' }}>Signing in...</p>
+        {isLoading ? (
+          <>
+            <div className="flex gap-1">
+              {[0,1,2].map(i => (
+                <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
+                  style={{ backgroundColor: localColor, animationDelay: `${i * 0.15}s` }} />
+              ))}
+            </div>
+            <p className="text-xs mt-4" style={{ color: localColor + '88' }}>Loading...</p>
+          </>
+        ) : (
+          <button onClick={() => loginWithRedirect()}
+            className="mt-2 px-8 py-3 rounded-xl font-bold text-sm text-white border border-white/20 hover:scale-105 transition-all"
+            style={{ backgroundColor: localColor + '33', borderColor: localColor + '66' }}>
+            🔑 Sign In / Sign Up
+          </button>
+        )}
       </div>
       <button onClick={() => setShowSettings(!showSettings)}
         className="absolute top-4 right-4 z-20 p-2 rounded-lg bg-black/40 border border-white/10 text-white/60 hover:text-white hover:bg-black/60 transition-colors">
