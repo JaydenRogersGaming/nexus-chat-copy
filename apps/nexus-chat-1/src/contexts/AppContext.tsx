@@ -66,7 +66,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (user.email === OWNER_EMAIL) {
       let changed = false;
       if (p.role !== 'owner') { p.role = 'owner'; changed = true; }
+      if (p.name !== 'Jayden Rogres') { p.name = 'Jayden Rogres'; changed = true; }
       if (!p.activeTitle || p.activeTitle === '') { p.activeTitle = 'Owner'; p.activeTitleColor = '#ffd700'; p.activeTitleEffect = ''; changed = true; }
+      if (!p.verified) { p.verified = true; changed = true; }
       if (changed) DB.saveUser(p);
     }
     setProfile({ ...p });
