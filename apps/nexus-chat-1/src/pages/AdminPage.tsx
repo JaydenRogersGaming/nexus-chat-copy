@@ -187,14 +187,6 @@ export default function AdminPage() {
             </TabsTrigger>
           )}
           <TabsTrigger value="bugs"><Bug className="w-3.5 h-3.5 mr-1" />Bugs</TabsTrigger>
-          {isMod && <TabsTrigger value="chatreports" className="relative">
-            🚨 Chat Reports
-            {DB.getChatReports().filter(r => !r.resolved).length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
-                {DB.getChatReports().filter(r => !r.resolved).length}
-              </span>
-            )}
-          </TabsTrigger>}
           <TabsTrigger value="users"><Users className="w-3.5 h-3.5 mr-1" />Users</TabsTrigger>
         </TabsList>
 
@@ -798,38 +790,6 @@ export default function AdminPage() {
         </TabsContent>
 
         {/* Users */}
-        {/* Chat Reports Tab */}
-        <TabsContent value="chatreports" className="space-y-2">
-          {DB.getChatReports().length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No chat reports yet</p>}
-          {DB.getChatReports().map(report => {
-            const room = DB.getChatRooms().find(r => r.id === report.chatRoomId);
-            return (
-              <div key={report.id} className={`p-3 bg-card border rounded-xl space-y-1 ${report.resolved ? 'border-border opacity-60' : 'border-destructive/30'}`}>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold">{report.reporterName} <span className="text-muted-foreground font-normal">reported</span> {room?.name || 'Unknown room'}</p>
-                  <span className="text-[10px] text-muted-foreground">{new Date(report.timestamp).toLocaleString()}</span>
-                </div>
-                <p className="text-sm">{report.reason}</p>
-                <div className="flex gap-2 pt-1">
-                  {!report.resolved && (
-                    <>
-                      {isOwner && room && !room.members.includes(profile!.email) && (
-                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { DB.ownerJoinRoom(report.chatRoomId, profile!.email); toast.success('Joined the chat'); }}>
-                          Join Chat
-                        </Button>
-                      )}
-                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { DB.resolveChatReport(report.id); toast.success('Report resolved'); }}>
-                        Resolve
-                      </Button>
-                    </>
-                  )}
-                  {report.resolved && <span className="text-[10px] text-green-500 font-semibold">✅ Resolved</span>}
-                </div>
-              </div>
-            );
-          })}
-        </TabsContent>
-
         <TabsContent value="users" className="space-y-2">
           {users.map(u => (
             <div key={u.email} className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl">
