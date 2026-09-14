@@ -60,6 +60,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Backfill new fields
     if (p.streak === undefined) { p.streak = 0; p.lastStreakDate = ''; p.lastMessageTime = 0; DB.saveUser(p); }
     if (!p.language) { p.language = 'en'; DB.saveUser(p); }
+    if (p.verified === undefined) { p.verified = false; DB.saveUser(p); }
     // Apply language
     document.documentElement.lang = p.language;
     if (user.email === OWNER_EMAIL) {

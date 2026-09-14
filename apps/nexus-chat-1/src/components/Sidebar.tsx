@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, LogOut, Globe, Flame } from 'lucide-react';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, LogOut, Globe, Flame, BadgeCheck } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { logout } from 'zitejs/auth';
 import TitleBadge from './TitleBadge';
@@ -81,6 +81,7 @@ export default function Sidebar({ onProfileClick }: Props) {
             ) : (
               <p className="text-xs font-semibold truncate" style={{ color: profile.nameColor }}>{profile.name}</p>
             )}
+            {profile.verified && <BadgeCheck className="w-3 h-3 text-blue-400 inline-block ml-0.5" />}
             {profile.activeTitle && <TitleBadge title={profile.activeTitle} effect={profile.activeTitleEffect} color={profile.activeTitleColor} />}
             {(profile.streak || 0) > 0 && (
               <span className="flex items-center gap-0.5 text-[9px] text-orange-400 font-bold"><Flame className="w-2.5 h-2.5" />{formatStreak(profile.streak)}</span>

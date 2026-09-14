@@ -4,7 +4,7 @@ import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { Label } from '@project/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@project/components/ui/select';
-import { Gem, Shield, Crown, Bug, Users, Star, Trash2, Plus, Dices, Settings, Ban, AlertTriangle, UserX, Megaphone, Pin, Tag, VolumeX, Clock } from 'lucide-react';
+import { Gem, Shield, Crown, Bug, Users, Star, Trash2, Plus, Dices, Settings, Ban, AlertTriangle, UserX, Megaphone, Pin, Tag, VolumeX, Clock, BadgeCheck } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { OWNER_EMAIL, EFFECT_TO_CLASS } from '../lib/gameData';
@@ -809,9 +809,16 @@ export default function AdminPage() {
                 {u.customRole && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border" style={{ color: u.customRoleColor, borderColor: (u.customRoleColor || '#aaa') + '55' }}>{u.customRole}</span>}
                 {u.tag && (() => { const t = DB.getUserTags().find(tag => tag.id === u.tag); return t ? <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: t.color, backgroundColor: t.color + '18', border: `1px solid ${t.color}55` }}>{t.icon} {t.name}</span> : null; })()}
                 {(() => { const mute = DB.isUserMuted(u.email); return mute ? <span className="text-[9px] text-orange-400 font-bold flex items-center gap-0.5"><VolumeX className="w-3 h-3" />Muted</span> : null; })()}
+                {u.verified && <span className="text-[9px] text-blue-400 font-bold flex items-center gap-0.5"><BadgeCheck className="w-3 h-3" />Verified</span>}
               </div>
               {u.email !== OWNER_EMAIL && u.email !== profile.email && (
                 <div className="flex gap-1 ml-2 flex-shrink-0">
+                  {isOwner && (
+                    <button onClick={() => { DB.saveUser({ ...u, verified: !u.verified }); reload(); toast.success(u.verified ? `Unverified ${u.name}` : `✅ Verified ${u.name}`); }}
+                      className={`p-1.5 rounded-lg border border-border transition-colors ${u.verified ? 'text-blue-400 hover:bg-blue-400/10' : 'text-muted-foreground hover:bg-secondary'}`} title={u.verified ? 'Remove verification' : 'Verify user'}>
+                      <BadgeCheck className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   {!DB.isUserMuted(u.email) ? (
                     <button onClick={() => { DB.muteUser(u.email, 10 * 60 * 1000, `Muted by ${profile.name}`); reload(); toast.success(`🔇 Muted ${u.name} for 10 min`); }}
                       className="p-1.5 rounded-lg border border-border text-orange-400 hover:bg-orange-400/10 transition-colors" title="Mute 10 min">

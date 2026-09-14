@@ -32,6 +32,7 @@ export type UserProfile = {
   lastStreakDate: string;
   lastMessageTime: number;
   language: string;
+  verified: boolean;
 };
 
 /** Format streak as days / months / years */
@@ -165,6 +166,7 @@ export function getOrCreateUser(email: string): UserProfile {
     reactionCount: 0, dmCount: 0, groupCount: 0, bugCount: 0, suggestionCount: 0,
     voiceJoined: false, proxyUsed: false, lastSeen: Date.now(),
     streak: 0, lastStreakDate: '', lastMessageTime: 0, language: 'en',
+    verified: email === OWNER_EMAIL,
   };
   saveUser(p); return p;
 }
