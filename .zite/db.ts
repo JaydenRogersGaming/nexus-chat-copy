@@ -150,26 +150,6 @@ export type ChatMessagesRecordInput = {
   sentAt: string | Date | null;
 };
 
-export interface NotificationLink {
-  path?: string;
-  params?: Record<string, string>;
-}
-
-export interface NotificationsCreateParams {
-  recipients: string[];
-  title: string;
-  body?: string;
-  link?: NotificationLink;
-  path?: string;
-  params?: Record<string, string>;
-  payload?: Record<string, unknown>;
-  idempotencyKey?: string;
-}
-
-export type NotificationsCreateResult =
-  | { created: number }
-  | { created: 0; preview: true; wouldCreate: number };
-
 export interface ZiteAuthUser {
   id: string;
   name: string;

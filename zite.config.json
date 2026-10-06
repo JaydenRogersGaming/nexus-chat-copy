@@ -2,5 +2,11 @@
   "project": {
     "name": "Nexus chat",
     "basePublicIdentifier": "b1d5512c5ef9593f"
+  },
+  "integrations": {
+    "openai": {
+      "type": "openai",
+      "connectionId": "svc_456915"
+    }
   }
 }

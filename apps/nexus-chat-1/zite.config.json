@@ -16,11 +16,5 @@
       "description": "Google Tenor API key for GIF search (powered by Google)"
     }
   },
-  "integrations": {
-    "openai": {
-      "type": "openai",
-      "connectionId": "svc_456915"
-    }
-  },
   "id": "1vc4gaurvx"
 }
