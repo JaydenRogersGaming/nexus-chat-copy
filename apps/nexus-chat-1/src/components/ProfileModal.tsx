@@ -9,6 +9,7 @@ import { useUpload } from 'zitejs/upload';
 import TitleBadge from './TitleBadge';
 import * as DB from '../lib/storage';
 import { Camera, ShoppingBag, Globe, Trash2 } from 'lucide-react';
+import { logout } from 'zitejs/auth';
 import { toast } from 'sonner';
 
 const LANGUAGES = [
@@ -200,7 +201,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
             if (profile) {
               DB.deleteUser(profile.email);
             }
-            window.location.reload();
+            logout();
           }}>
             <Trash2 className="w-3.5 h-3.5 mr-1" />Delete My Account Forever
           </Button>
