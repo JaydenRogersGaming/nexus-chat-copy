@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { createEndpoint } from 'zitejs/backend';
-import { integrations } from 'zitejs/integrations';
 import OpenAI from 'openai';
 
 export default createEndpoint({
@@ -12,8 +11,7 @@ export default createEndpoint({
   }),
   outputSchema: z.object({ reply: z.string() }),
   execute: async ({ input }) => {
-    const { accessToken } = await integrations.get('openai');
-    const client = new OpenAI({ apiKey: accessToken });
+    const client = new OpenAI({ apiKey: process.env.ZITE_OPENAI_ACCESS_TOKEN });
     const history = input.recent.map(m => `${m.name}: ${m.content}`).join('\n');
     const res = await client.chat.completions.create({
       model: 'gpt-4.1-mini',
