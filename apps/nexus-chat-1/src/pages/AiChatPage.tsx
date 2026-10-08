@@ -71,7 +71,7 @@ export default function AiChatPage() {
     setGeneratingImage(true);
 
     try {
-      const result = await generateArt({ prompt: text });
+      const result = await generateArt({ prompt: text, relaxed: localStorage.getItem('hub:artFilterOff') === '1' });
       const dataUrl = `data:image/png;base64,${result.imageBase64}`;
       const assistantMsg: Message = { role: 'assistant', content: `Here's your generated image for: "${text}"`, imageUrl: dataUrl };
       setConversations(prev => prev.map((c, i) => i === activeIdx ? [...updated, assistantMsg] : c));

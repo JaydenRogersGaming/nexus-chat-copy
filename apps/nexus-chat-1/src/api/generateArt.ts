@@ -6,6 +6,7 @@ export default createEndpoint({
   description: 'Generate AI art from a text prompt using OpenAI',
   inputSchema: z.object({
     prompt: z.string(),
+    relaxed: z.boolean().optional(),
   }),
   outputSchema: z.object({
     imageBase64: z.string(),
@@ -22,6 +23,7 @@ export default createEndpoint({
       n: 1,
       size: '1536x1024',
       quality: 'high',
+      moderation: input.relaxed ? 'low' : 'auto',
     });
 
     const imageBase64 = image.data?.[0]?.b64_json ?? '';

@@ -4,6 +4,11 @@ import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { toast } from 'sonner';
 import { generateArt } from 'zitejs/api';
+import { Switch } from '@project/components/ui/switch';
+import { useApp } from '../contexts/AppContext';
+import { OWNER_EMAIL } from '../lib/gameData';
+
+const RELAX_KEY = 'hub:artFilterOff';
 
 const STYLE_PRESETS = [
   { label: '🎨 Realistic', suffix: ', photorealistic, 8k, highly detailed' },
@@ -21,6 +26,15 @@ export default function AiArtPage() {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<number | null>(null);
+  const { profile } = useApp();
+  const isOwner = !!profile && (profile.email === OWNER_EMAIL || profile.role === 'owner');
+  const [filterOff, setFilterOff] = useState(() => localStorage.getItem(RELAX_KEY) === '1');
+  const relaxed = isOwner && filterOff;
+
+  function toggleFilter(v: boolean) {
+    setFilterOff(v); localStorage.setItem(RELAX_KEY, v ? '1' : '0');
+    toast.success(v ? '🔓 Filter set to relaxed' : '🔒 Filter back to normal');
+  }
 
   async function generate() {
     if (!prompt.trim()) { toast.error('Enter a prompt!'); return; }
@@ -28,7 +42,7 @@ export default function AiArtPage() {
 
     try {
       const finalPrompt = prompt.trim() + (selectedStyle !== null ? STYLE_PRESETS[selectedStyle].suffix : '');
-      const result = await generateArt({ prompt: finalPrompt });
+      const result = await generateArt({ prompt: finalPrompt, relaxed });
       const dataUrl = `data:image/png;base64,${result.imageBase64}`;
       const newImage: GeneratedImage = { prompt: prompt.trim(), dataUrl, timestamp: Date.now() };
       setImages(prev => [newImage, ...prev].slice(0, 20));
@@ -65,6 +79,15 @@ export default function AiArtPage() {
         </div>
 
         {/* Prompt Input */}
+        {isOwner && (
+          <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-sm font-semibold">👑 Relaxed image filter</p>
+              <p className="text-[11px] text-muted-foreground">Owner only. Uses the AI's least strict safety setting so fewer prompts get blocked. The AI provider's own core rules still apply.</p>
+            </div>
+            <Switch checked={filterOff} onCheckedChange={toggleFilter} />
+          </div>
+        )}
         <div className="bg-card border border-border rounded-xl p-4 space-y-3">
           <div className="flex gap-2">
             <Input
