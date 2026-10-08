@@ -4,6 +4,7 @@ import TitleBadge from './TitleBadge';
 import { useApp } from '../contexts/AppContext';
 import { EMOJI_LIST, OWNER_EMAIL } from '../lib/gameData';
 import * as DB from '../lib/storage';
+import { mentionHandle } from '../lib/mentions';
 import { cn } from '@project/components/lib/utils';
 
 type Props = {
@@ -22,6 +23,7 @@ function getRoleInfo(role: string): RoleInfo | null {
     case 'co-owner':  return { label: 'Co-Owner',  color: '#ff9900', icon: <Star className="w-2.5 h-2.5" />,        rank: 3 };
     case 'admin':     return { label: 'Admin',     color: '#ff4444', icon: <ShieldCheck className="w-2.5 h-2.5" />, rank: 2 };
     case 'mod':       return { label: 'Mod',       color: '#44aaff', icon: <Shield className="w-2.5 h-2.5" />,      rank: 1 };
+    case 'temp-mod':  return { label: 'Temp Mod',  color: '#5eead4', icon: <Shield className="w-2.5 h-2.5" />,      rank: 1 };
     default:          return null;
   }
 }
@@ -32,6 +34,7 @@ function getDeleteStyle(deleterRole: string): string {
     case 'co-owner': return 'text-orange-400 hover:bg-orange-400/20';
     case 'admin':    return 'text-destructive hover:bg-destructive/20';
     case 'mod':      return 'text-blue-400 hover:bg-blue-400/20';
+    case 'temp-mod': return 'text-teal-300 hover:bg-teal-300/20';
     default:         return 'text-muted-foreground hover:bg-muted/30';
   }
 }
@@ -105,6 +108,18 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
               <Crown className="w-2.5 h-2.5" />OWNER
             </span>
           )}
+          {senderRoleInfo && msg.senderEmail !== OWNER_EMAIL && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase"
+              style={{ color: senderRoleInfo.color, backgroundColor: senderRoleInfo.color + '22', border: `1px solid ${senderRoleInfo.color}55` }}>
+              {senderRoleInfo.icon}{senderRoleInfo.label}
+            </span>
+          )}
+          {DB.getDailyRolesFor(msg.senderEmail).map(e => (
+            <span key={e.id} className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full animate-pulse"
+              style={{ color: e.color, backgroundColor: e.color + '22', border: `1px solid ${e.color}55` }}>
+              {e.emoji} {e.roleName}
+            </span>
+          ))}
           {msg.senderEmail !== OWNER_EMAIL && senderCustomRole && (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded border"
               style={{ color: senderCustomRoleColor, borderColor: senderCustomRoleColor + '55', backgroundColor: senderCustomRoleColor + '18' }}>
@@ -130,8 +145,9 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
 
         {/* Bubble */}
         <div className={cn('msg-bubble px-4 py-2.5 text-sm relative', isOwn ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-secondary text-foreground rounded-bl-sm')}>
-          {msg.content}
-          {/* Action buttons */}
+          {msg.content.split(/(@[\w.-]+)/g).map((part, i) => part.startsWith('@')
+            ? <span key={i} className={cn('font-semibold rounded px-0.5', profile && part.slice(1).toLowerCase() === mentionHandle(profile.name).toLowerCase() ? 'bg-yellow-400/30 text-yellow-200' : 'bg-cyan-400/20 text-cyan-300')}>{part}</span>
+            : part)}
           <div className="absolute -top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
             <button onClick={() => onReply?.(msg)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Reply">
               <Reply className="w-3.5 h-3.5" />

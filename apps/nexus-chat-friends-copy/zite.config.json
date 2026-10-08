@@ -8,13 +8,6 @@
       "sso": false
     }
   },
-  "envVars": {
-    "ZITE_GIPHY_API_KEY": {
-      "description": "Giphy API key for the GIF search feature in chat"
-    },
-    "ZITE_TENOR_API_KEY": {
-      "description": "Google Tenor API key for GIF search (powered by Google)"
-    }
-  },
+  "envVars": {},
   "id": "3n2y6nzulf"
 }

@@ -13,6 +13,7 @@ import HpClickerPage from './pages/HpClickerPage';
 import AiArtPage from './pages/AiArtPage';
 import AiChatPage from './pages/AiChatPage';
 import BrowserPage from './pages/BrowserPage';
+import CalendarPage from './pages/CalendarPage';
 import BanScreen from './components/BanScreen';
 import MatrixRain from './components/MatrixRain';
 import * as DB from './lib/storage';
@@ -109,6 +110,7 @@ export default function App() {
               <Route path="hpclicker"    element={<HpClickerPage />} />
               <Route path="aiart"         element={<AiArtPage />} />
               <Route path="aichat"        element={<AiChatPage />} />
+              <Route path="calendar"      element={<CalendarPage />} />
               <Route path="browser"       element={<BrowserPage />} />
               <Route path="admin"        element={<AdminPage />} />
             </Route>

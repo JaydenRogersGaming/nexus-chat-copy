@@ -11,7 +11,8 @@ export type UserProfile = {
   activeTitle: string;
   activeTitleEffect: string;
   activeTitleColor: string;
-  role: 'owner' | 'co-owner' | 'admin' | 'mod' | 'user';
+  role: 'owner' | 'co-owner' | 'admin' | 'mod' | 'temp-mod' | 'member' | 'user';
+  roleExpires?: number;
   customRole?: string;
   customRoleColor?: string;
   tag?: string;
@@ -124,6 +125,9 @@ export function getUser(email: string): UserProfile | null {
   if (u.bio === undefined) u.bio = '';
   if (u.nameColor2 === undefined) u.nameColor2 = '';
   if (!u.badges) u.badges = [];
+  if (u.role === 'temp-mod' && u.roleExpires && Date.now() > u.roleExpires) {
+    u.role = 'member'; delete u.roleExpires; saveUser(u);
+  }
   return u;
 }
 export function saveUser(p: UserProfile) {
@@ -140,7 +144,7 @@ export function getOrCreateUser(email: string): UserProfile {
     email, name: email.split('@')[0], profilePic: '', nameColor: '#e0e0ff', nameColor2: '', bio: '',
     gems: 0, activeTitle: email === OWNER_EMAIL ? 'Owner' : '',
     activeTitleEffect: '', activeTitleColor: email === OWNER_EMAIL ? '#ffd700' : '',
-    role: email === OWNER_EMAIL ? 'owner' : 'user', badges: [],
+    role: email === OWNER_EMAIL ? 'owner' : 'member', badges: [],
     messageCount: 0, gambleCount: 0, gambleWins: 0, gambleLoseStreak: 0,
     reactionCount: 0, dmCount: 0, groupCount: 0, bugCount: 0, suggestionCount: 0,
     voiceJoined: false, proxyUsed: false, lastSeen: Date.now(),
@@ -391,6 +395,32 @@ export function deleteAnnouncement(id: string) { s('announcements', getAnnouncem
 export function togglePinAnnouncement(id: string) {
   const list = getAnnouncements(); const i = list.findIndex(a => a.id === id);
   if (i !== -1) { list[i].pinned = !list[i].pinned; s('announcements', list); }
+}
+
+// ── Calendar Events & Daily Roles ─────────────────────────────
+export type CalendarEvent = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  title: string;
+  type: 'holiday' | 'event' | 'birthday';
+  emoji: string;
+  color: string;
+  roleName: string; // daily role shown on that day ('' = none)
+  targetEmail?: string; // birthday person; otherwise role applies to everyone
+  yearly: boolean;
+  createdBy: string;
+};
+export function getEvents(): CalendarEvent[] { return g<CalendarEvent[]>('calendarEvents') || []; }
+export function addEvent(e: CalendarEvent) { const l = getEvents(); l.push(e); s('calendarEvents', l); }
+export function deleteEvent(id: string) { s('calendarEvents', getEvents().filter(e => e.id !== id)); }
+export function toDateKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+export function eventsOn(dateKey: string): CalendarEvent[] {
+  return getEvents().filter(e => e.date === dateKey || (e.yearly && e.date.slice(5) === dateKey.slice(5) && e.date <= dateKey));
+}
+export function getDailyRolesFor(email: string): CalendarEvent[] {
+  return eventsOn(toDateKey(new Date())).filter(e => e.roleName && (!e.targetEmail || e.targetEmail === email));
 }
 
 // ── Clear Chat ────────────────────────────────────────────────

@@ -10,11 +10,15 @@ import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
+import { chatbotJay } from 'zitejs/api';
+import { BOT_EMAIL, BOT_NAME, mentionHandle } from '../lib/mentions';
 
 type Props = { room: DB.ChatRoom; onStartDM?: (email: string) => void };
 
 export default function ChatRoom({ room, onStartDM }: Props) {
   const { profile, addGems, checkAchievements, updateProfile } = useApp();
+  const [mentionMode, setMentionMode] = useState(false);
+  const [botThinking, setBotThinking] = useState(false);
   const [messages, setMessages] = useState<DB.Message[]>([]);
   const [input, setInput] = useState('');
   const [typing, setTypingList] = useState<DB.TypingUser[]>([]);
@@ -27,7 +31,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const [muteInfo, setMuteInfo] = useState<DB.MuteRecord | null>(null);
 
   const isOwner = profile?.email === OWNER_EMAIL || profile?.role === 'owner';
-  const isStaff = profile && ['owner', 'co-owner', 'admin', 'mod'].includes(profile.role);
+  const isStaff = profile && ['owner', 'co-owner', 'admin', 'mod', 'temp-mod'].includes(profile.role);
 
   useEffect(() => {
     if (!profile) return;
@@ -70,12 +74,25 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const query = (parts[1] || '').toLowerCase();
       const users = DB.getAllUsers().filter(u => !query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
       setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
+    } else if (/(^|\s)@([\w.-]*)$/.test(val)) {
+      const query = (val.match(/@([\w.-]*)$/)?.[1] || '').toLowerCase();
+      const bot = { ...profile, email: BOT_EMAIL, name: BOT_NAME, nameColor: '#22d3ee', profilePic: '' };
+      const users = DB.getAllUsers().filter(u => u.email !== profile.email && mentionHandle(u.name).toLowerCase().includes(query));
+      const list = BOT_NAME.toLowerCase().includes(query) ? [bot, ...users] : users;
+      setSuggestions(list.slice(0, 6)); setShowSuggestions(list.length > 0); setMentionMode(true);
+      return;
     } else {
       setShowSuggestions(false);
     }
+    setMentionMode(false);
   }
 
   function selectSuggestion(user: DB.UserProfile) {
+    if (mentionMode) {
+      setInput(input.replace(/@([\w.-]*)$/, `@${mentionHandle(user.name)} `));
+      setShowSuggestions(false); setMentionMode(false);
+      return;
+    }
     const cmd = input.split(' ')[0];
     setInput(`${cmd} ${user.email}`);
     setShowSuggestions(false);
@@ -154,10 +171,13 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const parts = text.slice(9).trim().split(' ');
       const target = parts[0];
       const role = parts[1] as DB.UserProfile['role'];
-      if (!target || !role) { toast.error('Usage: /setrole email role'); return true; }
+      const valid = ['owner', 'co-owner', 'admin', 'mod', 'temp-mod', 'member'];
+      if (!target || !role || !valid.includes(role)) { toast.error('Usage: /setrole email co-owner|admin|mod|temp-mod|member [hours]'); return true; }
       const targetUser = DB.getUser(target);
       if (!targetUser) { toast.error('User not found'); return true; }
-      DB.saveUser({ ...targetUser, role }); toast.success(`Set ${targetUser.name} as ${role}`); return true;
+      const hours = parseFloat(parts[2]) || 24;
+      DB.saveUser({ ...targetUser, role, roleExpires: role === 'temp-mod' ? Date.now() + hours * 3600000 : undefined });
+      toast.success(`Set ${targetUser.name} as ${role}${role === 'temp-mod' ? ` for ${hours}h` : ''}`); return true;
     }
 
     if (text === '/online') {
@@ -223,6 +243,30 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     setReplyingTo(null);
     setShowSuggestions(false);
     setTimeout(() => { checkAchievements(); checkBadges(profile.email); load(); }, 100);
+
+    // Mentions → notifications
+    const handles = Array.from(censored.matchAll(/@([\w.-]+)/g)).map(m => m[1].toLowerCase());
+    if (handles.length) {
+      DB.getAllUsers().filter(u => u.email !== profile.email && handles.includes(mentionHandle(u.name).toLowerCase())).forEach(u => {
+        DB.addNotification({ id: crypto.randomUUID(), recipientEmail: u.email, senderName: `${profile.name} mentioned you`, messagePreview: censored.slice(0, 60), chatRoomId: room.id, roomName: room.name, read: false, timestamp: Date.now() });
+      });
+    }
+    if (handles.includes(BOT_NAME.toLowerCase())) askBot(censored);
+  }
+
+  async function askBot(question: string) {
+    if (!profile) return;
+    setBotThinking(true);
+    try {
+      const recent = DB.getMessages(room.id).filter(m => !m.deleted).slice(-10).map(m => ({ name: m.senderName, content: m.content }));
+      const { reply } = await chatbotJay({ askerName: profile.name, message: question, recent });
+      DB.addMessage({ id: crypto.randomUUID(), chatRoomId: room.id, senderEmail: BOT_EMAIL, senderName: `🤖 ${BOT_NAME}`, content: `@${mentionHandle(profile.name)} ${reply}`, reactions: {}, deleted: false, senderTitle: 'Bot', senderTitleEffect: '', senderTitleColor: '#22d3ee', senderNameColor: '#22d3ee', timestamp: Date.now() });
+      load();
+    } catch {
+      toast.error('ChatbotJay is taking a nap — try again!');
+    } finally {
+      setBotThinking(false);
+    }
   }
 
   const ALL_COMMANDS: { cmd: string; desc: string; level: 'all' | 'staff' | 'owner' }[] = [
@@ -266,6 +310,9 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         ))}
         <div ref={bottomRef} />
       </div>
+      {botThinking && (
+        <div className="px-4 py-1.5 text-xs text-cyan-400 italic">🤖 ChatbotJay is thinking…</div>
+      )}
       {typing.length > 0 && (
         <div className="px-4 py-1.5 flex items-center gap-2">
           <span className="flex gap-0.5">
@@ -303,16 +350,16 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       <div className="relative px-4 py-3 border-t border-border">
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute bottom-full left-4 right-4 mb-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
-            <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">Select user</div>
+            <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">{mentionMode ? 'Mention someone' : 'Select user'}</div>
             {suggestions.map(u => (
               <button key={u.email} onClick={() => selectSuggestion(u)}
                 className="w-full flex items-center gap-2 px-3 py-2 hover:bg-secondary/50 transition-colors text-left">
                 <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs overflow-hidden">
-                  {u.profilePic ? <img src={u.profilePic} alt="" className="w-full h-full object-cover" /> : <span className="text-xs font-bold text-primary">{(u.name[0] || '?').toUpperCase()}</span>}
+                  {u.profilePic ? <img src={u.profilePic} alt="" className="w-full h-full object-cover" /> : u.email === BOT_EMAIL ? <span>🤖</span> : <span className="text-xs font-bold text-primary">{(u.name[0] || '?').toUpperCase()}</span>}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold" style={{ color: u.nameColor }}>{u.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{u.email}</p>
+                  <p className="text-xs font-semibold" style={{ color: u.nameColor }}>{mentionMode ? '@' + mentionHandle(u.name) : u.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{u.email === BOT_EMAIL ? 'AI chat buddy — ask me anything' : u.email}</p>
                 </div>
               </button>
             ))}

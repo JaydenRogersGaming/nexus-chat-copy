@@ -15,6 +15,8 @@ const ROLE_META: Record<string, { color: string; label: string }> = {
   'co-owner': { color: 'text-orange-400',  label: 'Co-Owner' },
   admin:      { color: 'text-red-400',     label: 'Admin' },
   mod:        { color: 'text-blue-400',    label: 'Mod' },
+  'temp-mod': { color: 'text-teal-300',    label: 'Temp Mod' },
+  member:     { color: 'text-muted-foreground', label: 'Member' },
   user:       { color: 'text-muted-foreground', label: 'User' },
 };
 
@@ -26,6 +28,7 @@ export default function AdminPage() {
   const [targetEmail, setTargetEmail] = useState('');
   const [gemAmount, setGemAmount]   = useState('');
   const [newRole, setNewRole]       = useState('');
+  const [tempHours, setTempHours]   = useState('24');
   const [titleToGive, setTitleToGive] = useState('');
 
   // Custom title form
@@ -90,14 +93,14 @@ export default function AdminPage() {
     return () => clearTimeout(timeout);
   }, [settingsName, settingsTagline, settingsWelcome, settingsUrl, matrixColor, matrixSpeed]);
 
-  if (!profile || !['owner','co-owner','admin','mod'].includes(profile.role)) return (
+  if (!profile || !['owner','co-owner','admin','mod','temp-mod'].includes(profile.role)) return (
     <div className="flex items-center justify-center h-full"><p className="text-muted-foreground">Access Denied 🚫</p></div>
   );
 
   const isOwner   = profile.email === OWNER_EMAIL || profile.role === 'owner';
   const isCoOwner = isOwner || profile.role === 'co-owner';
   const isAdmin   = isCoOwner || profile.role === 'admin';
-  const isMod     = isAdmin || profile.role === 'mod';
+  const isMod     = isAdmin || profile.role === 'mod' || profile.role === 'temp-mod';
 
   function giveGems() {
     const amount = parseInt(gemAmount); const email = targetEmail.trim();
@@ -121,8 +124,9 @@ export default function AdminPage() {
     if (!isOwner && (newRole === 'owner' || newRole === 'co-owner')) { toast.error('Only the owner can assign Owner / Co-Owner'); return; }
     if (!isCoOwner && newRole === 'admin') { toast.error('Only Owner / Co-Owner can assign Admin'); return; }
     const user = DB.getUser(email); if (!user) { toast.error('User not found'); return; }
-    DB.saveUser({ ...user, role: newRole as DB.UserProfile['role'] });
-    reload(); toast.success(`Set ${user.name} as ${newRole}!`);
+    const hours = parseFloat(tempHours) || 24;
+    DB.saveUser({ ...user, role: newRole as DB.UserProfile['role'], roleExpires: newRole === 'temp-mod' ? Date.now() + hours * 3600000 : undefined });
+    reload(); toast.success(`Set ${user.name} as ${newRole}${newRole === 'temp-mod' ? ` for ${hours}h` : ''}!`);
   }
 
   function createCustomTitle() {
@@ -227,13 +231,16 @@ export default function AdminPage() {
               <p>🟠 <strong>Co-Owner</strong> — Same as Owner except can't transfer ownership</p>
               <p>🔴 <strong>Admin</strong> — Can delete user/mod messages, give titles, manage bugs</p>
               <p>🔵 <strong>Mod</strong> — Can delete regular user messages only</p>
+              <p>🟢 <strong>Temp Mod</strong> — Mod powers that expire automatically</p>
+              <p>👤 <strong>Member</strong> — Regular member</p>
             </div>
             <div><Label>User Email</Label><Input value={targetEmail} onChange={e => setTargetEmail(e.target.value)} placeholder="user@email.com" className="mt-1" /></div>
             <div><Label>Role</Label>
               <Select value={newRole} onValueChange={setNewRole}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">👤 User</SelectItem>
+                  <SelectItem value="member">👤 Member</SelectItem>
+                  <SelectItem value="temp-mod">🟢 Temp Mod</SelectItem>
                   <SelectItem value="mod">🔵 Mod</SelectItem>
                   <SelectItem value="admin">🔴 Admin</SelectItem>
                   {isCoOwner && <SelectItem value="co-owner">🟠 Co-Owner</SelectItem>}
@@ -241,6 +248,9 @@ export default function AdminPage() {
                 </SelectContent>
               </Select>
             </div>
+            {newRole === 'temp-mod' && (
+              <div><Label>Expires after (hours)</Label><Input type="number" min="1" value={tempHours} onChange={e => setTempHours(e.target.value)} className="mt-1" /></div>
+            )}
             <Button onClick={setRole} className="w-full">Set Role</Button>
           </div>
         </TabsContent>

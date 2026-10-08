@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, LogOut, Globe } from 'lucide-react';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, LogOut, Globe, CalendarDays } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { logout } from 'zitejs/auth';
 import TitleBadge from './TitleBadge';
@@ -18,6 +18,7 @@ const NAV = [
   { to: '/hpclicker',    icon: Heart,         label: 'HP Clicker' },
   { to: '/aiart',         icon: Wand2,         label: 'AI Art' },
   { to: '/aichat',        icon: Bot,           label: 'AI Assistant' },
+  { to: '/calendar',      icon: CalendarDays,  label: 'Calendar' },
   { to: '/browser',       icon: Globe,         label: 'Browser' },
 ];
 
@@ -62,7 +63,7 @@ export default function Sidebar({ onProfileClick }: Props) {
             )}
           </NavLink>
         ))}
-        {profile && ['owner','co-owner','admin','mod'].includes(profile.role) && (
+        {profile && ['owner','co-owner','admin','mod','temp-mod'].includes(profile.role) && (
           <NavLink to="/admin" className={({ isActive }) => cn('flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors', isActive ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-secondary hover:text-foreground')}>
             <Shield className="w-4 h-4" />
             {profile.role === 'owner' ? 'Owner Panel' : profile.role === 'co-owner' ? 'Co-Owner Panel' : profile.role === 'admin' ? 'Admin Panel' : 'Mod Panel'}
