@@ -3,6 +3,7 @@ import { Send, Users, X } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import MessageBubble from './MessageBubble';
+import EmojiGifPicker from './EmojiGifPicker';
 import UserProfileModal from './UserProfileModal';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
@@ -132,9 +133,13 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       toast.success('🔊 You unmuted yourself'); return true;
     }
 
-    if (text === '/clearchat' && isStaff) {
-      if (profile.role !== 'owner' && profile.role !== 'co-owner') { toast.error('Only owner/co-owner can clear chat'); return true; }
-      DB.clearChat(room.id); load(); toast.success('Chat cleared!'); return true;
+    if (text === '/clearchat') {
+      if (!isOwner && profile.role !== 'co-owner') { toast.error('Only owner/co-owner can clear chat'); return true; }
+      setMessages([]);
+      messagesApi({ action: 'clear', roomId: room.id })
+        .then(() => { DB.clearChat(room.id); load(); toast.success('🧹 Chat cleared for everyone!'); })
+        .catch(() => { toast.error("Couldn't clear chat"); load(); });
+      return true;
     }
 
     if (text.startsWith('/give ') && isOwner) {
@@ -204,8 +209,12 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     return false;
   }
 
-  async function send() {
-    if (!input.trim() || !profile) return;
+  async function send(override?: string) {
+    const raw = override ?? input;
+    if (!raw.trim() || !profile) return;
+    const text = raw.trim();
+
+    if (!override && text.startsWith('/') && handleCommand(text)) { setInput(''); return; }
 
     // Cooldown check (3 seconds between messages, owner bypasses)
     if (!isOwner && cooldown > 0) {
@@ -223,11 +232,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       }
     }
 
-    const text = input.trim();
-
-    if (text.startsWith('/') && handleCommand(text)) { setInput(''); return; }
-
-    const { censored, hadProfanity } = censorMessage(text);
+    const isGif = text.startsWith('[gif]');
+    const { censored, hadProfanity } = isGif ? { censored: text, hadProfanity: false } : censorMessage(text);
 
     if (hadProfanity && !isOwner) {
       DB.muteUser(profile.email, 10 * 60 * 1000, 'Profanity');
@@ -262,7 +268,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       DB.saveUser({ ...profile, dmCount: profile.dmCount + 1, messageCount: newCount });
     }
 
-    setInput('');
+    if (!override) setInput('');
     setReplyingTo(null);
     setShowSuggestions(false);
 
@@ -392,9 +398,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
           </div>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <EmojiGifPicker onEmoji={e => setInput(prev => prev + e)} onGif={url => send(`[gif]${url}`)} />
           <Input value={input} onChange={e => handleInputChange(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={replyingTo ? `Reply to ${replyingTo.senderName}…` : `Message ${room.name}…`} className="flex-1 bg-secondary border-border" />
-          <Button onClick={send} size="icon" disabled={!input.trim() || (!isOwner && cooldown > 0)}>
+          <Button onClick={() => send()} size="icon" disabled={!input.trim() || (!isOwner && cooldown > 0)}>
             {cooldown > 0 && !isOwner ? <span className="text-xs font-bold">{cooldown}</span> : <Send className="w-4 h-4" />}
           </Button>
         </div>

@@ -4,6 +4,7 @@ import { createCaller, createStreamingCaller } from 'zitejs/caller';
 
 import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
+import type { default as _GifsEp } from '../src/api/gifs';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
 
@@ -16,6 +17,11 @@ type _GenerateArtCfg = typeof _GenerateArtEp;
 export type GenerateArtInputType = NonNullable<_GenerateArtCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_GenerateArtCfg['execute']>[0]['input'];
 export type GenerateArtOutputType = Awaited<ReturnType<_GenerateArtCfg['execute']>>;
 export const generateArt = createCaller<GenerateArtInputType, GenerateArtOutputType>('generateArt');
+
+type _GifsCfg = typeof _GifsEp;
+export type GifsInputType = NonNullable<_GifsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_GifsCfg['execute']>[0]['input'];
+export type GifsOutputType = Awaited<ReturnType<_GifsCfg['execute']>>;
+export const gifs = createCaller<GifsInputType, GifsOutputType>('gifs');
 
 type _MessagesCfg = typeof _MessagesEp;
 export type MessagesInputType = NonNullable<_MessagesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_MessagesCfg['execute']>[0]['input'];
@@ -31,6 +37,7 @@ export const presence = createCaller<PresenceInputType, PresenceOutputType>('pre
 export const api = {
   chat,
   generateArt,
+  gifs,
   messages,
   presence,
 };

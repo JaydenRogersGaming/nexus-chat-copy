@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createEndpoint } from 'zitejs/backend';
 import { zite } from 'zitejs/db';
+import { censorMessage } from '../lib/gameData';
 
 const messageSchema = z.object({
   id: z.string(),
@@ -21,7 +22,7 @@ const messageSchema = z.object({
 export default createEndpoint({
   description: 'Sends, lists, reacts to and deletes shared chat messages',
   inputSchema: z.object({
-    action: z.enum(['getMessages', 'send', 'react', 'delete']),
+    action: z.enum(['getMessages', 'send', 'react', 'delete', 'clear']),
     roomId: z.string().optional(),
     limit: z.number().optional(),
     message: messageSchema.optional(),
@@ -34,11 +35,19 @@ export default createEndpoint({
       const m = input.message;
       await zite.chatMessages.create({ record: {
         messageId: m.id, roomId: m.chatRoomId, senderEmail: m.senderEmail, senderName: m.senderName,
-        content: m.content, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
+        content: m.content.startsWith('[gif]') ? m.content : censorMessage(m.content).censored, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
         senderTitleEffect: m.senderTitleEffect, senderNameColor: m.senderNameColor,
         reactionsJson: JSON.stringify(m.reactions || {}), replyToJson: m.replyTo ? JSON.stringify(m.replyTo) : null,
         deleted: false, sentAt: new Date(m.timestamp).toISOString(),
       } });
+      return { messages: [] };
+    }
+
+    if (input.action === 'clear') {
+      const { records } = await zite.chatMessages.findAll({ filters: { roomId: input.roomId ?? 'global' }, limit: 2000 });
+      for (let i = 0; i < records.length; i += 25) {
+        await Promise.all(records.slice(i, i + 25).map(r => zite.chatMessages.delete({ id: r.id })));
+      }
       return { messages: [] };
     }
 
