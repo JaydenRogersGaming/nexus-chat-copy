@@ -57,6 +57,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshProfile = useCallback(() => {
     if (!user?.email) return;
     const p = DB.getOrCreateUser(user.email);
+    DB.ensureBotUser();
     // Backfill new fields
     if (p.streak === undefined) { p.streak = 0; p.lastStreakDate = ''; p.lastMessageTime = 0; DB.saveUser(p); }
     if (!p.language) { p.language = 'en'; DB.saveUser(p); }

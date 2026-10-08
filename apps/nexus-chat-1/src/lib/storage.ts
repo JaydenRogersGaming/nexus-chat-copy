@@ -81,6 +81,7 @@ export type CustomRole = {
   color: string;
   icon: string;
   canDelete: boolean;
+  permissions?: RolePerm[];
   createdBy: string;
 };
 
@@ -174,6 +175,34 @@ export function getOrCreateUser(email: string): UserProfile {
     verified: email === OWNER_EMAIL,
   };
   saveUser(p); return p;
+}
+
+// ── JaydenChatBot ─────────────────────────────────────────────
+export const BOT_EMAIL = 'jaydenchatbot@nexus.bot';
+export const BOT_NAME = 'JaydenChatBot';
+export function ensureBotUser(): UserProfile {
+  const existing = getUser(BOT_EMAIL);
+  if (existing) return existing;
+  const p = getOrCreateUser(BOT_EMAIL);
+  const bot: UserProfile = { ...p, name: BOT_NAME, nameColor: '#38bdf8', bio: '🤖 Your AI assistant & friend. Mention @jaydenchatbot to chat!', activeTitle: '🤖 Bot', activeTitleColor: '#38bdf8', verified: true };
+  saveUser(bot); return bot;
+}
+
+// ── Role permissions ──────────────────────────────────────────
+export type RolePerm = 'mute' | 'ban' | 'clearchat' | 'giverole' | 'delete';
+export const ROLE_PERMS: { id: RolePerm; label: string }[] = [
+  { id: 'mute', label: 'Mute / unmute users' },
+  { id: 'ban', label: 'Ban / unban users' },
+  { id: 'clearchat', label: 'Clear chat' },
+  { id: 'giverole', label: 'Give custom roles' },
+  { id: 'delete', label: 'Delete messages' },
+];
+export function hasPerm(p: UserProfile | null | undefined, perm: RolePerm): boolean {
+  if (!p || !p.customRole) return false;
+  const r = getCustomRoles().find(r => r.name === p.customRole);
+  if (!r) return false;
+  if (perm === 'delete' && r.canDelete) return true;
+  return (r.permissions || []).includes(perm);
 }
 
 // ── Messages ──────────────────────────────────────────────────

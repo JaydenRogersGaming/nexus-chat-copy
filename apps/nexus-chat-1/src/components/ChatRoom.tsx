@@ -11,7 +11,7 @@ import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
-import { messages as messagesApi } from 'zitejs/api';
+import { messages as messagesApi, chatBot } from 'zitejs/api';
 
 type Props = { room: DB.ChatRoom; onStartDM?: (email: string) => void };
 
@@ -31,7 +31,11 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const cooldownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isOwner = profile?.email === OWNER_EMAIL || profile?.role === 'owner';
-  const isStaff = profile && ['owner', 'co-owner', 'admin', 'mod'].includes(profile.role);
+  const isStaff = !!profile && (isOwner || ['owner', 'co-owner', 'admin', 'mod'].includes(profile.role));
+  const canMute = isStaff || DB.hasPerm(profile, 'mute');
+  const canBan = isStaff || DB.hasPerm(profile, 'ban');
+  const canClear = isOwner || profile?.role === 'co-owner' || DB.hasPerm(profile, 'clearchat');
+  const canGiveRole = isOwner || profile?.role === 'co-owner' || DB.hasPerm(profile, 'giverole');
 
   useEffect(() => {
     if (!profile) return;
@@ -65,15 +69,15 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     stopTyping();
 
     // Command suggestions
-    if (val.startsWith('/ban ') && isStaff) {
+    if (val.startsWith('/ban ') && canBan) {
       const query = val.slice(5).toLowerCase().trim();
       const users = DB.getAllUsers().filter(u => u.email !== profile.email && u.email !== OWNER_EMAIL && (!query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)));
       setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
-    } else if (val.startsWith('/unban ') && isStaff) {
+    } else if (val.startsWith('/unban ') && canBan) {
       const query = val.slice(7).toLowerCase().trim();
       const users = DB.getBans().filter(b => !query || b.email.toLowerCase().includes(query)).map(b => DB.getUser(b.email)).filter(Boolean) as DB.UserProfile[];
       setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
-    } else if ((val.startsWith('/mute ') || val.startsWith('/unmute ') || val.startsWith('/give ') || val.startsWith('/infgems ') || val.startsWith('/setstreak ') || val.startsWith('/setquest ')) && isStaff) {
+    } else if ((val.startsWith('/mute ') || val.startsWith('/unmute ') || val.startsWith('/give ') || val.startsWith('/infgems ') || val.startsWith('/setstreak ') || val.startsWith('/setquest ') || val.startsWith('/giverole ')) && (isStaff || canMute || canGiveRole)) {
       const parts = val.split(' ');
       const query = (parts[1] || '').toLowerCase();
       const users = DB.getAllUsers().filter(u => !query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
@@ -93,7 +97,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     if (!profile) return false;
 
     // Owner/staff commands
-    if (text.startsWith('/ban ') && isStaff) {
+    if (text.startsWith('/ban ') && canBan) {
       const target = text.slice(5).trim();
       if (!target) { toast.error('Usage: /ban email'); return true; }
       if (target === OWNER_EMAIL) { toast.error("Can't ban the owner!"); return true; }
@@ -106,13 +110,13 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       messagesApi({ action: 'send', message: sysMsg }).then(load); return true;
     }
 
-    if (text.startsWith('/unban ') && isStaff) {
+    if (text.startsWith('/unban ') && canBan) {
       const target = text.slice(7).trim();
       if (!target) { toast.error('Usage: /unban email'); return true; }
       DB.unbanUser(target); toast.success(`Unbanned ${target}`); return true;
     }
 
-    if (text.startsWith('/mute ') && isStaff) {
+    if (text.startsWith('/mute ') && canMute) {
       const parts = text.slice(6).trim().split(' ');
       const target = parts[0];
       const mins = parseInt(parts[1]) || 10;
@@ -121,20 +125,26 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       toast.success(`🔇 Muted ${target} for ${mins} min`); return true;
     }
 
-    if (text.startsWith('/unmute ') && isStaff) {
+    if (text.startsWith('/unmute ') && canMute) {
       const target = text.slice(8).trim();
       if (!target) { toast.error('Usage: /unmute email'); return true; }
+      if (target === profile.email) { toast.error("You can't unmute yourself — ask another staff member"); return true; }
       DB.unmuteUser(target); toast.success(`🔊 Unmuted ${target}`); return true;
     }
 
-    // Self unmute (owner only)
-    if (text === '/unmute' && isOwner) {
-      DB.unmuteUser(profile.email); setMuteInfo(null);
-      toast.success('🔊 You unmuted yourself'); return true;
+    if (text.startsWith('/giverole ') && canGiveRole) {
+      const [target, ...rest] = text.slice(10).trim().split(' ');
+      const roleName = rest.join(' ').trim();
+      if (!target || !roleName) { toast.error('Usage: /giverole email RoleName (or "none")'); return true; }
+      if (!DB.getUser(target)) { toast.error('User not found'); return true; }
+      if (roleName.toLowerCase() === 'none') { DB.assignCustomRole(target, null); toast.success('Custom role removed'); return true; }
+      const r = DB.getCustomRoles().find(r => r.name.toLowerCase() === roleName.toLowerCase());
+      if (!r) { toast.error(`No role named "${roleName}"`); return true; }
+      DB.assignCustomRole(target, r.id); toast.success(`Gave ${r.icon} ${r.name} to ${target}`); return true;
     }
 
     if (text === '/clearchat') {
-      if (!isOwner && profile.role !== 'co-owner') { toast.error('Only owner/co-owner can clear chat'); return true; }
+      if (!canClear) { toast.error("You don't have permission to clear chat"); return true; }
       setMessages([]);
       messagesApi({ action: 'clear', roomId: room.id })
         .then(() => { DB.clearChat(room.id); load(); toast.success('🧹 Chat cleared for everyone!'); })
@@ -222,14 +232,12 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       return;
     }
 
-    // Check mute (owner can bypass)
-    if (!isOwner) {
-      const muteCheck = DB.isUserMuted(profile.email);
-      if (muteCheck) {
-        const remaining = Math.ceil((muteCheck.until - Date.now()) / 60000);
-        toast.error(`🔇 Muted for ${remaining} more min (${muteCheck.reason})`);
-        return;
-      }
+    // Check mute (applies to everyone, including owners)
+    const muteCheck = DB.isUserMuted(profile.email);
+    if (muteCheck) {
+      const remaining = Math.ceil((muteCheck.until - Date.now()) / 60000);
+      toast.error(`🔇 Muted for ${remaining} more min (${muteCheck.reason})`);
+      return;
     }
 
     const isGif = text.startsWith('[gif]');
@@ -286,15 +294,49 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     DB.incrementQuestProgress(profile.email, 'send_20');
     DB.incrementQuestProgress(profile.email, 'send_50');
 
+    if (/@jaydenchatbot\b/i.test(text)) handleBot(text, censored);
+
     setTimeout(() => { checkAchievements(); checkBadges(profile.email); load(); }, 100);
+  }
+
+  function postBot(content: string) {
+    const bot = DB.ensureBotUser();
+    const m: DB.Message = { id: crypto.randomUUID(), chatRoomId: room.id, senderEmail: bot.email, senderName: bot.name, content, reactions: {}, deleted: false, senderTitle: bot.activeTitle, senderTitleEffect: '', senderTitleColor: bot.activeTitleColor, senderNameColor: bot.nameColor, timestamp: Date.now() };
+    return messagesApi({ action: 'send', message: m }).then(load);
+  }
+
+  async function handleBot(text: string, censored: string) {
+    if (!profile) return;
+    const roleMatch = text.match(/make\s+(?:a\s+)?custom\s+roles?\s*:\s*(.+)/i);
+    if (roleMatch) {
+      const name = roleMatch[1].trim().slice(0, 24);
+      const fresh = DB.getUser(profile.email) ?? profile;
+      if (!name) { postBot(`@${profile.name} give your role a name! e.g. @jaydenchatbot make custom roles: VIP`); return; }
+      if (DB.getCustomRoles().some(r => r.name.toLowerCase() === name.toLowerCase())) { postBot(`@${profile.name} a role called "${name}" already exists 😅 pick another name.`); return; }
+      if (fresh.gems < 250) { postBot(`@${profile.name} custom roles cost 💎 250 gems — you've only got ${fresh.gems}. Grind a bit more! 💪`); return; }
+      const colors = ['#f472b6', '#38bdf8', '#a3e635', '#fbbf24', '#fb923c', '#2dd4bf'];
+      const role: DB.CustomRole = { id: crypto.randomUUID(), name, color: colors[Math.floor(Math.random() * colors.length)], icon: '✨', canDelete: false, permissions: [], createdBy: profile.email };
+      DB.addCustomRole(role);
+      addGems(-250);
+      DB.assignCustomRole(profile.email, role.id);
+      updateProfile({ customRole: role.name, customRoleColor: role.color });
+      postBot(`🎉 Done! @${profile.name} now has the custom role ✨ ${name}. That'll be 💎 250 gems, pleasure doing business 😎`);
+      return;
+    }
+    try {
+      const history = messages.slice(-15).map(m => ({ name: m.senderName, content: m.content }));
+      const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/@jaydenchatbot/ig, '').trim() || 'hi', history });
+      postBot(censorMessage(reply).censored);
+    } catch { postBot("Beep boop… my brain lagged 🤖 try again in a sec!"); }
   }
 
   const ALL_COMMANDS: { cmd: string; desc: string; level: 'all' | 'staff' | 'owner' }[] = [
     { cmd: '/ban', desc: 'Ban a user', level: 'staff' },
     { cmd: '/unban', desc: 'Unban a user', level: 'staff' },
     { cmd: '/mute', desc: 'Mute user [email] [mins]', level: 'staff' },
-    { cmd: '/unmute', desc: 'Unmute a user (or self)', level: 'staff' },
-    { cmd: '/clearchat', desc: 'Clear chat (owner/co-owner)', level: 'staff' },
+    { cmd: '/unmute', desc: 'Unmute a user', level: 'staff' },
+    { cmd: '/clearchat', desc: 'Clear chat', level: 'staff' },
+    { cmd: '/giverole', desc: 'Give custom role [email] [RoleName]', level: 'staff' },
     { cmd: '/give', desc: 'Give gems [email] [amount]', level: 'owner' },
     { cmd: '/infgems', desc: 'Give ∞ gems [email]', level: 'owner' },
     { cmd: '/setrole', desc: 'Set role [email] [role]', level: 'owner' },
@@ -305,6 +347,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
   const visibleCommands = ALL_COMMANDS.filter(c => {
     if (c.level === 'owner') return isOwner;
+    if (c.cmd === '/ban' || c.cmd === '/unban') return canBan;
+    if (c.cmd === '/mute' || c.cmd === '/unmute') return canMute;
+    if (c.cmd === '/clearchat') return canClear;
+    if (c.cmd === '/giverole') return canGiveRole;
     if (c.level === 'staff') return isStaff;
     return true;
   });
@@ -351,7 +397,6 @@ export default function ChatRoom({ room, onStartDM }: Props) {
           <span className="text-xs text-destructive font-semibold">
             Muted for {Math.max(1, Math.ceil((muteInfo.until - Date.now()) / 60000))} min — {muteInfo.reason}
           </span>
-          {isOwner && <button onClick={() => { DB.unmuteUser(profile!.email); setMuteInfo(null); toast.success('Unmuted!'); }} className="text-[10px] text-primary font-bold ml-auto hover:underline">Unmute self</button>}
         </div>
       )}
 

@@ -40,6 +40,7 @@ export default function AdminPage() {
   const [crColor, setCrColor] = useState('#ffffff');
   const [crIcon, setCrIcon]   = useState('⚡');
   const [crCanDelete, setCrCanDelete] = useState(false);
+  const [crPerms, setCrPerms] = useState<DB.RolePerm[]>([]);
   const [crAssignEmail, setCrAssignEmail] = useState('');
   const [crAssignId, setCrAssignId] = useState('__none__');
 
@@ -134,9 +135,9 @@ export default function AdminPage() {
 
   function createCustomRole() {
     if (!crName.trim() || !profile) { toast.error('Enter a role name'); return; }
-    DB.addCustomRole({ id: crypto.randomUUID(), name: crName.trim(), color: crColor, icon: crIcon, canDelete: crCanDelete, createdBy: profile.email });
+    DB.addCustomRole({ id: crypto.randomUUID(), name: crName.trim(), color: crColor, icon: crIcon, canDelete: crCanDelete || crPerms.includes('delete'), permissions: crPerms, createdBy: profile.email });
     reload(); toast.success(`Role "${crName}" created!`);
-    setCrName(''); setCrColor('#ffffff'); setCrIcon('⚡'); setCrCanDelete(false);
+    setCrName(''); setCrColor('#ffffff'); setCrIcon('⚡'); setCrCanDelete(false); setCrPerms([]);
   }
 
   function assignCustomRole() {
@@ -306,6 +307,17 @@ export default function AdminPage() {
                 <div><Label>Badge Color</Label><Input type="color" value={crColor} onChange={e => setCrColor(e.target.value)} className="mt-1 h-9 cursor-pointer" /></div>
                 <div className="flex items-end pb-1"><label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={crCanDelete} onChange={e => setCrCanDelete(e.target.checked)} className="w-4 h-4 accent-primary" /><span className="text-sm">Can delete messages</span></label></div>
               </div>
+              <div className="space-y-1.5">
+                <Label>What can this role do?</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {DB.ROLE_PERMS.map(p => (
+                    <label key={p.id} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50">
+                      <input type="checkbox" checked={crPerms.includes(p.id)} onChange={e => setCrPerms(prev => e.target.checked ? [...prev, p.id] : prev.filter(x => x !== p.id))} className="w-4 h-4 accent-primary" />
+                      <span className="text-xs">{p.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
               <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
                 <span className="text-xs text-muted-foreground">Preview:</span>
                 <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded border"
@@ -326,7 +338,7 @@ export default function AdminPage() {
                       style={{ color: r.color, borderColor: r.color + '55', backgroundColor: r.color + '18' }}>
                       {r.icon} {r.name}
                     </span>
-                    {r.canDelete && <span className="text-[10px] text-muted-foreground">Can delete</span>}
+                    {(r.permissions?.length || r.canDelete) ? <span className="text-[10px] text-muted-foreground">{[...(r.permissions || []), ...(r.canDelete && !r.permissions?.includes('delete') ? ['delete'] : [])].join(' · ')}</span> : null}
                     <button onClick={() => deleteCustomRole(r.id)} className="ml-auto text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
