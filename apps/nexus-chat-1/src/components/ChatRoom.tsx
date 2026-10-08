@@ -11,7 +11,7 @@ import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
-import { messages as messagesApi, chatBot } from 'zitejs/api';
+import { messages as messagesApi, chatBot, typing as typingApi } from 'zitejs/api';
 
 type Props = { room: DB.ChatRoom; onStartDM?: (email: string) => void };
 
@@ -52,10 +52,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const lastTypingPing = useRef(0);
 
   const load = useCallback(async () => {
-    setTypingList(prev => {
-      const next = DB.getTyping(room.id).filter(t => t.email !== profile?.email);
-      return prev.length === next.length && prev.every((p, i) => p.email === next[i].email) ? prev : next;
-    });
+    typingApi({ action: 'list', roomId: room.id }).then(({ typing: list }) => {
+      const next = list.filter(t => t.email !== profile?.email).map(t => ({ ...t, lastActive: Date.now() }));
+      setTypingList(prev => prev.length === next.length && prev.every((p, i) => p.email === next[i].email) ? prev : next);
+    }).catch(() => {});
     if (loadingRef.current) return;
     loadingRef.current = true;
     try {
@@ -74,7 +74,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages.length]);
 
   const stopTyping = useDebouncedCallback(() => {
-    if (profile) { DB.clearTyping(room.id, profile.email); isTypingRef.current = false; }
+    if (profile) { DB.clearTyping(room.id, profile.email); isTypingRef.current = false; lastTypingPing.current = 0; typingApi({ action: 'stop', roomId: room.id, email: profile.email }).catch(() => {}); }
   }, 3000);
 
   function handleInputChange(val: string) {
@@ -84,6 +84,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     const now = Date.now();
     if (!isTypingRef.current || now - lastTypingPing.current > 1500) {
       DB.setTyping(room.id, profile.email, profile.name);
+      if (now - lastTypingPing.current > 2500) typingApi({ action: 'start', roomId: room.id, email: profile.email, name: profile.name }).catch(() => {});
       isTypingRef.current = true; lastTypingPing.current = now;
     }
     stopTyping();
@@ -289,6 +290,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         toast.error("Message didn't send — try again");
       });
     DB.clearTyping(room.id, profile.email);
+    stopTyping.cancel(); isTypingRef.current = false; lastTypingPing.current = 0;
+    typingApi({ action: 'stop', roomId: room.id, email: profile.email }).catch(() => {});
     const newCount = profile.messageCount + 1;
     DB.saveUser({ ...profile, messageCount: newCount });
     addGems(5);

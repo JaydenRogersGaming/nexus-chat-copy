@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Gem, Shield, Crown, Bug, Users, Star, Trash2, Plus, Dices, Settings, Ban, AlertTriangle, UserX, Megaphone, Pin, Tag, VolumeX, Clock, BadgeCheck } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
-import { OWNER_EMAIL, EFFECT_TO_CLASS } from '../lib/gameData';
+import { OWNER_EMAIL, EFFECT_TO_CLASS, TITLE_FONTS } from '../lib/gameData';
+import TitleBadge from '../components/TitleBadge';
 import { toast } from 'sonner';
 
 const ROLE_META: Record<string, { color: string; label: string }> = {
@@ -30,6 +31,9 @@ export default function AdminPage() {
 
   // Custom title form
   const [ctName, setCtName]   = useState('');
+  const [ctEmoji, setCtEmoji] = useState('');
+  const [ctFont, setCtFont]   = useState('default');
+  const [titleReqs, setTitleReqs] = useState<DB.TitleRequest[]>(DB.getTitleRequests());
   const [ctEffect, setCtEffect] = useState('none');
   const [ctColor, setCtColor] = useState('#ffffff');
   const [ctCost, setCtCost]   = useState('100');
@@ -128,7 +132,9 @@ export default function AdminPage() {
 
   function createCustomTitle() {
     if (!ctName.trim() || !profile) { toast.error('Enter a title name'); return; }
-    DB.addCustomTitle({ id: crypto.randomUUID(), name: ctName.trim(), effect: ctEffect, cost: parseInt(ctCost) || 100, color: ctColor, createdBy: profile.email, availableInShop: ctShop });
+    const fullName = (ctEmoji.trim() ? ctEmoji.trim() + ' ' : '') + ctName.trim();
+    DB.addCustomTitle({ id: crypto.randomUUID(), name: fullName, effect: ctEffect, cost: parseInt(ctCost) || 100, color: ctColor, font: ctFont, createdBy: profile.email, availableInShop: ctShop });
+    setCtEmoji(''); setCtFont('default');
     toast.success(`Title "${ctName}" created!`);
     setCtName(''); setCtEffect('none'); setCtColor('#ffffff'); setCtCost('100'); setCtShop(false);
   }
@@ -170,6 +176,14 @@ export default function AdminPage() {
           {isAdmin && <TabsTrigger value="roles"><Shield className="w-3.5 h-3.5 mr-1" />Roles</TabsTrigger>}
           {isAdmin && <TabsTrigger value="titles">🎖️ Titles</TabsTrigger>}
           {isAdmin && <TabsTrigger value="custom">✨ Custom Title</TabsTrigger>}
+          {isOwner && (
+            <TabsTrigger value="titlereqs" className="relative">
+              📨 Title Requests
+              {titleReqs.filter(r => r.status === 'pending').length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full flex items-center justify-center">{titleReqs.filter(r => r.status === 'pending').length}</span>
+              )}
+            </TabsTrigger>
+          )}
           {isCoOwner && <TabsTrigger value="customroles">⚡ Custom Roles</TabsTrigger>}
           {isOwner && <TabsTrigger value="casino"><Dices className="w-3.5 h-3.5 mr-1" />Casino Rig</TabsTrigger>}
           {isOwner && <TabsTrigger value="appsettings"><Settings className="w-3.5 h-3.5 mr-1" />Edit App</TabsTrigger>}
@@ -260,7 +274,19 @@ export default function AdminPage() {
         <TabsContent value="custom" className="space-y-4">
           <div className="p-4 bg-card border border-border rounded-xl space-y-3">
             <h3 className="font-semibold">Create Custom Title</h3>
-            <div><Label>Title Name</Label><Input value={ctName} onChange={e => setCtName(e.target.value)} className="mt-1" /></div>
+            <div className="grid grid-cols-[1fr_80px] gap-2">
+              <div><Label>Title Name</Label><Input value={ctName} onChange={e => setCtName(e.target.value)} className="mt-1" /></div>
+              <div><Label>Emoji</Label><Input value={ctEmoji} onChange={e => setCtEmoji(e.target.value)} placeholder="optional" maxLength={4} className="mt-1 text-center" /></div>
+            </div>
+            <div><Label>Font</Label>
+              <Select value={ctFont} onValueChange={setCtFont}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{Object.entries(TITLE_FONTS).map(([k, f]) => <SelectItem key={k} value={k}><span style={{ fontFamily: f.family }}>{f.label}</span></SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary/30 flex justify-center">
+              <TitleBadge title={(ctEmoji.trim() ? ctEmoji.trim() + ' ' : '') + (ctName.trim() || 'Preview')} effect={ctEffect} color={ctColor} font={ctFont} size="md" />
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <div><Label>Effect</Label>
                 <Select value={ctEffect} onValueChange={setCtEffect}>
@@ -286,12 +312,29 @@ export default function AdminPage() {
           <div className="space-y-2">
             {DB.getCustomTitles().map(t => (
               <div key={t.id} className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl">
-                <span className={`font-semibold text-sm ${EFFECT_TO_CLASS[t.effect] || ''}`} style={{ color: t.color }}>{t.name}</span>
+                <TitleBadge title={t.name} effect={t.effect} color={t.color} font={t.font} />
                 <span className="text-xs text-muted-foreground ml-auto">{t.availableInShop ? `Shop: ${t.cost} gems` : 'Admin only'}</span>
               </div>
             ))}
           </div>
         </TabsContent>
+
+        {/* AI Title Requests (owner) */}
+        {isOwner && (
+          <TabsContent value="titlereqs" className="space-y-2">
+            {titleReqs.filter(r => r.status === 'pending').length === 0 && <p className="text-center text-muted-foreground text-sm py-6">No pending title requests 🎉</p>}
+            {titleReqs.filter(r => r.status === 'pending').map(r => (
+              <div key={r.id} className="p-3 bg-card border border-border rounded-xl flex items-center gap-3 flex-wrap">
+                <div className="flex-1 min-w-0 space-y-1">
+                  <TitleBadge title={r.name} effect={r.effect} color={r.color} font={r.font} size="md" />
+                  <p className="text-[11px] text-muted-foreground">{r.userName} · {r.effect} · {TITLE_FONTS[r.font]?.label ?? 'Default'} · 💎 {r.cost}{r.idea ? ` · "${r.idea}"` : ''}</p>
+                </div>
+                <Button size="sm" onClick={() => { DB.resolveTitleRequest(r.id, true); setTitleReqs(DB.getTitleRequests()); toast.success(`Approved "${r.name}"`); }}>Approve</Button>
+                <Button size="sm" variant="outline" onClick={() => { DB.resolveTitleRequest(r.id, false); setTitleReqs(DB.getTitleRequests()); toast.success('Rejected — gems refunded'); }}>Reject</Button>
+              </div>
+            ))}
+          </TabsContent>
+        )}
 
         {/* Custom Roles (owner/co-owner only) */}
         {isCoOwner && (

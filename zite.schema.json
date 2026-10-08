@@ -91,6 +91,29 @@
               "displayTimeZone": false
             }
           }
+        },
+        {
+          "id": "fhpdnNvy3wV",
+          "sdkName": "typingRoom",
+          "definition": {
+            "name": "Typing Room",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f7HCWcLZzNk",
+          "sdkName": "typingAt",
+          "definition": {
+            "name": "Typing At",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
         }
       ]
     },

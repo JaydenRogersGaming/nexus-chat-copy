@@ -9,6 +9,7 @@ import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
+import type { default as _TypingEp } from '../src/api/typing';
 
 type _AiTitleCfg = typeof _AiTitleEp;
 export type AiTitleInputType = NonNullable<_AiTitleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiTitleCfg['execute']>[0]['input'];
@@ -45,6 +46,11 @@ export type PresenceInputType = NonNullable<_PresenceCfg['inputSchema']> extends
 export type PresenceOutputType = Awaited<ReturnType<_PresenceCfg['execute']>>;
 export const presence = createCaller<PresenceInputType, PresenceOutputType>('presence');
 
+type _TypingCfg = typeof _TypingEp;
+export type TypingInputType = NonNullable<_TypingCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_TypingCfg['execute']>[0]['input'];
+export type TypingOutputType = Awaited<ReturnType<_TypingCfg['execute']>>;
+export const typing = createCaller<TypingInputType, TypingOutputType>('typing');
+
 
 export const api = {
   aiTitle,
@@ -54,4 +60,5 @@ export const api = {
   gifs,
   messages,
   presence,
+  typing,
 };

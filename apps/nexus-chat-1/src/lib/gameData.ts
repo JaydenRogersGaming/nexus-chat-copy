@@ -94,6 +94,17 @@ export function censorMessage(text: string): { censored: string; hadProfanity: b
   return { censored, hadProfanity };
 }
 
+export const TITLE_FONTS: Record<string, { label: string; family: string }> = {
+  default:   { label: 'Default', family: 'inherit' },
+  comic:     { label: 'Comic (Bangers)', family: "'Bangers', cursive" },
+  pixel:     { label: 'Pixel (Press Start)', family: "'Press Start 2P', monospace" },
+  script:    { label: 'Script (Pacifico)', family: "'Pacifico', cursive" },
+  future:    { label: 'Futuristic (Orbitron)', family: "'Orbitron', sans-serif" },
+  spooky:    { label: 'Spooky (Creepster)', family: "'Creepster', cursive" },
+  marker:    { label: 'Marker', family: "'Permanent Marker', cursive" },
+  royal:     { label: 'Royal (Cinzel)', family: "'Cinzel', serif" },
+};
+
 export const EFFECT_TO_CLASS: Record<string, string> = {
   rainbow:          'title-rainbow',
   'pink-glow':      'title-pink-glow',

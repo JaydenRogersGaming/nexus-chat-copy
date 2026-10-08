@@ -93,7 +93,40 @@ export type CustomTitle = {
   color: string;
   createdBy: string;
   availableInShop: boolean;
+  font?: string;
 };
+
+export type TitleRequest = {
+  id: string;
+  email: string;
+  userName: string;
+  idea: string;
+  name: string;
+  effect: string;
+  color: string;
+  font: string;
+  cost: number;
+  status: 'pending' | 'approved' | 'rejected';
+  timestamp: number;
+};
+export function getTitleRequests(): TitleRequest[] { return g<TitleRequest[]>('titleRequests') || []; }
+export function addTitleRequest(r: TitleRequest) { const l = getTitleRequests(); l.unshift(r); s('titleRequests', l.slice(0, 200)); }
+export function resolveTitleRequest(id: string, approve: boolean) {
+  const l = getTitleRequests(); const r = l.find(x => x.id === id);
+  if (!r || r.status !== 'pending') return;
+  r.status = approve ? 'approved' : 'rejected';
+  s('titleRequests', l);
+  if (approve) {
+    if (!getCustomTitles().some(c => c.name === r.name)) {
+      addCustomTitle({ id: crypto.randomUUID(), name: r.name, effect: r.effect, color: r.color, font: r.font, cost: r.cost, createdBy: r.email, availableInShop: false });
+    }
+    addUserTitle(r.email, r.name);
+  } else {
+    const u = getUser(r.email);
+    if (u && u.gems < 999999999) saveUser({ ...u, gems: u.gems + r.cost });
+  }
+}
+
 
 export type Bug = {
   id: string;
