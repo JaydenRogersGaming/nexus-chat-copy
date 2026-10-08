@@ -5,6 +5,7 @@ import { useApp } from '../contexts/AppContext';
 import { EMOJI_LIST, OWNER_EMAIL } from '../lib/gameData';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
+import { messages as messagesApi } from 'zitejs/api';
 
 type Props = {
   msg: DB.Message;
@@ -73,8 +74,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
     const idx = reactions[emoji].indexOf(profile.email);
     if (idx !== -1) reactions[emoji].splice(idx, 1);
     else reactions[emoji].push(profile.email);
-    DB.updateMessage(msg.chatRoomId, msg.id, { reactions });
-    onReactionUpdate();
+    messagesApi({ action: 'react', messageId: msg.id, reactions }).then(onReactionUpdate).catch(() => {});
     DB.saveUser({ ...profile, reactionCount: profile.reactionCount + 1 });
     DB.incrementQuestProgress(profile.email, 'react_3');
     setShowEmoji(false);
@@ -145,7 +145,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             </button>
             {canDelete && (
               <button
-                onClick={() => { DB.updateMessage(msg.chatRoomId, msg.id, { deleted: true }); onDeleted(); }}
+                onClick={() => { messagesApi({ action: 'delete', messageId: msg.id }).then(onDeleted).catch(() => {}); }}
                 className={cn('p-0.5 rounded transition-colors', deleteStyle)}
                 title={isOwn ? 'Delete your message' : `Delete (${profile?.role})`}
               >

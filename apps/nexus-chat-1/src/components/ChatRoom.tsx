@@ -10,6 +10,7 @@ import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
+import { messages as messagesApi } from 'zitejs/api';
 
 type Props = { room: DB.ChatRoom; onStartDM?: (email: string) => void };
 
@@ -39,9 +40,13 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     return () => clearInterval(t);
   }, [profile?.email]);
 
-  const load = useCallback(() => {
-    setMessages(DB.getMessages(room.id).filter(m => !m.deleted || (profile?.role && ['owner','admin','mod'].includes(profile.role))));
+  const load = useCallback(async () => {
     setTypingList(DB.getTyping(room.id).filter(t => t.email !== profile?.email));
+    try {
+      const { messages: remote } = await messagesApi({ action: 'getMessages', roomId: room.id, limit: 200 });
+      const canSeeDeleted = profile?.role && ['owner','admin','mod'].includes(profile.role);
+      setMessages(remote.filter(m => !m.deleted || canSeeDeleted));
+    } catch { /* keep current messages on a failed poll */ }
   }, [room.id, profile?.email, profile?.role]);
 
   useEffect(() => { load(); const t = setInterval(load, 2000); return () => clearInterval(t); }, [load]);
@@ -97,7 +102,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       DB.banUser(target, profile.name, `Banned by ${profile.name}`);
       toast.success(`🔨 Banned ${targetUser.name}`);
       const sysMsg: DB.Message = { id: crypto.randomUUID(), chatRoomId: room.id, senderEmail: 'system', senderName: '⚠️ System', content: `${targetUser.name} has been banned by ${profile.name}.`, reactions: {}, deleted: false, senderTitle: '', senderTitleEffect: '', senderTitleColor: '', senderNameColor: '#ff4444', timestamp: Date.now() };
-      DB.addMessage(sysMsg); load(); return true;
+      messagesApi({ action: 'send', message: sysMsg }).then(load); return true;
     }
 
     if (text.startsWith('/unban ') && isStaff) {
@@ -239,7 +244,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       replyTo: replyingTo ? { id: replyingTo.id, senderName: replyingTo.senderName, content: replyingTo.content.slice(0, 80) } : undefined,
       timestamp: Date.now(),
     };
-    DB.addMessage(msg);
+    setMessages(prev => [...prev, msg]);
+    messagesApi({ action: 'send', message: msg }).catch(() => toast.error("Message didn't send — try again"));
     DB.clearTyping(room.id, profile.email);
     const newCount = profile.messageCount + 1;
     DB.saveUser({ ...profile, messageCount: newCount });

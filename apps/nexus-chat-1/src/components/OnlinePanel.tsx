@@ -3,6 +3,7 @@ import { Circle } from 'lucide-react';
 import * as DB from '../lib/storage';
 import TitleBadge from './TitleBadge';
 import { cn } from '@project/components/lib/utils';
+import { useOnlineUsers } from '../hooks/useOnlineUsers';
 
 const ROLE_COLOR: Record<string, string> = {
   owner: 'text-yellow-400',
@@ -15,14 +16,11 @@ const ROLE_COLOR: Record<string, string> = {
 type Props = { roomId: string; currentUserEmail?: string };
 
 export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
-  const [onlineUsers, setOnlineUsers] = useState<DB.UserProfile[]>([]);
+  const onlineUsers = useOnlineUsers();
   const [typing, setTyping] = useState<DB.TypingUser[]>([]);
 
   useEffect(() => {
-    const update = () => {
-      setOnlineUsers(DB.getOnlineUsers());
-      setTyping(DB.getTyping(roomId).filter(t => t.email !== currentUserEmail));
-    };
+    const update = () => setTyping(DB.getTyping(roomId).filter(t => t.email !== currentUserEmail));
     update();
     const t = setInterval(update, 2000);
     return () => clearInterval(t);
@@ -37,7 +35,7 @@ export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
           <span className="text-[11px] font-bold uppercase tracking-widest text-green-400">Online</span>
           <span className="ml-auto text-[11px] text-muted-foreground font-semibold">{onlineUsers.length}</span>
         </div>
-        <p className="text-[9px] text-muted-foreground/60 mt-1 leading-tight">Same device only — connect a database to see everyone</p>
+        <p className="text-[9px] text-muted-foreground/60 mt-1 leading-tight">Everyone in Nexus right now</p>
       </div>
 
       {/* Typing indicator */}

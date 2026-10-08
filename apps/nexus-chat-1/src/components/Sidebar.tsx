@@ -4,6 +4,7 @@ import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart
 import { useApp } from '../contexts/AppContext';
 import { logout } from 'zitejs/auth';
 import TitleBadge from './TitleBadge';
+import { useOnlineUsers } from '../hooks/useOnlineUsers';
 import * as DB from '../lib/storage';
 import { formatStreak } from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
@@ -24,13 +25,12 @@ const NAV = [
 
 export default function Sidebar({ onProfileClick }: Props) {
   const { profile, unreadCount } = useApp();
-  const [onlineCount, setOnlineCount] = useState(0);
+  const onlineCount = useOnlineUsers().length;
   const [totalUsers, setTotalUsers] = useState(0);
   const [appSettings, setAppSettings] = useState<AppSettings>(DB.getAppSettings());
 
   useEffect(() => {
     const update = () => {
-      setOnlineCount(DB.getOnlineCount());
       setTotalUsers(DB.getAllUsers().length);
       setAppSettings(DB.getAppSettings());
     };
