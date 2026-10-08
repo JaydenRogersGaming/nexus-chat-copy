@@ -45,13 +45,29 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     return () => clearInterval(t);
   }, [profile?.email]);
 
+  // Messages sent locally that the server hasn't returned yet — kept visible so they never flicker away
+  const pendingRef = useRef<Map<string, DB.Message>>(new Map());
+  const loadingRef = useRef(false);
+  const sigRef = useRef('');
+  const lastTypingPing = useRef(0);
+
   const load = useCallback(async () => {
-    setTypingList(DB.getTyping(room.id).filter(t => t.email !== profile?.email));
+    setTypingList(prev => {
+      const next = DB.getTyping(room.id).filter(t => t.email !== profile?.email);
+      return prev.length === next.length && prev.every((p, i) => p.email === next[i].email) ? prev : next;
+    });
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     try {
       const { messages: remote } = await messagesApi({ action: 'getMessages', roomId: room.id, limit: 200 });
       const canSeeDeleted = profile?.role && ['owner','admin','mod'].includes(profile.role);
-      setMessages(remote.filter(m => !m.deleted || canSeeDeleted));
+      const ids = new Set(remote.map(m => m.id));
+      pendingRef.current.forEach((_, id) => { if (ids.has(id)) pendingRef.current.delete(id); });
+      const merged = [...remote.filter(m => !m.deleted || canSeeDeleted), ...pendingRef.current.values()];
+      const sig = merged.map(m => `${m.id}:${m.deleted ? 1 : 0}:${JSON.stringify(m.reactions)}`).join('|');
+      if (sig !== sigRef.current) { sigRef.current = sig; setMessages(merged); }
     } catch { /* keep current messages on a failed poll */ }
+    finally { loadingRef.current = false; }
   }, [room.id, profile?.email, profile?.role]);
 
   useEffect(() => { load(); const t = setInterval(load, 2000); return () => clearInterval(t); }, [load]);
@@ -64,11 +80,16 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   function handleInputChange(val: string) {
     setInput(val);
     if (!profile) return;
-    if (!isTypingRef.current) { DB.setTyping(room.id, profile.email, profile.name); isTypingRef.current = true; }
-    else DB.setTyping(room.id, profile.email, profile.name);
+    // Throttle typing pings so every keystroke doesn't hit storage
+    const now = Date.now();
+    if (!isTypingRef.current || now - lastTypingPing.current > 1500) {
+      DB.setTyping(room.id, profile.email, profile.name);
+      isTypingRef.current = true; lastTypingPing.current = now;
+    }
     stopTyping();
 
-    // Command suggestions
+    // Command suggestions (only when it looks like a command)
+    if (!val.startsWith('/')) { if (showSuggestions) setShowSuggestions(false); return; }
     if (val.startsWith('/ban ') && canBan) {
       const query = val.slice(5).toLowerCase().trim();
       const users = DB.getAllUsers().filter(u => u.email !== profile.email && u.email !== OWNER_EMAIL && (!query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)));
@@ -258,8 +279,15 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       replyTo: replyingTo ? { id: replyingTo.id, senderName: replyingTo.senderName, content: replyingTo.content.slice(0, 80) } : undefined,
       timestamp: Date.now(),
     };
+    pendingRef.current.set(msg.id, msg);
     setMessages(prev => [...prev, msg]);
-    messagesApi({ action: 'send', message: msg }).catch(() => toast.error("Message didn't send — try again"));
+    messagesApi({ action: 'send', message: msg })
+      .then(() => load())
+      .catch(() => {
+        pendingRef.current.delete(msg.id);
+        setMessages(prev => prev.filter(m => m.id !== msg.id));
+        toast.error("Message didn't send — try again");
+      });
     DB.clearTyping(room.id, profile.email);
     const newCount = profile.messageCount + 1;
     DB.saveUser({ ...profile, messageCount: newCount });
@@ -296,7 +324,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
     if (/@jaydenchatbot\b/i.test(text)) handleBot(text, censored);
 
-    setTimeout(() => { checkAchievements(); checkBadges(profile.email); load(); }, 100);
+    setTimeout(() => { checkAchievements(); checkBadges(profile.email); }, 100);
   }
 
   function postBot(content: string) {
