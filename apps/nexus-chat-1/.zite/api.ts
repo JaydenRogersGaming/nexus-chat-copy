@@ -2,12 +2,18 @@
 
 import { createCaller, createStreamingCaller } from 'zitejs/caller';
 
+import type { default as _AiTitleEp } from '../src/api/aiTitle';
 import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _ChatBotEp } from '../src/api/chatBot';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
+
+type _AiTitleCfg = typeof _AiTitleEp;
+export type AiTitleInputType = NonNullable<_AiTitleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiTitleCfg['execute']>[0]['input'];
+export type AiTitleOutputType = Awaited<ReturnType<_AiTitleCfg['execute']>>;
+export const aiTitle = createCaller<AiTitleInputType, AiTitleOutputType>('aiTitle');
 
 type _ChatCfg = typeof _ChatEp;
 export type ChatInputType = NonNullable<_ChatCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ChatCfg['execute']>[0]['input'];
@@ -41,6 +47,7 @@ export const presence = createCaller<PresenceInputType, PresenceOutputType>('pre
 
 
 export const api = {
+  aiTitle,
   chat,
   chatBot,
   generateArt,

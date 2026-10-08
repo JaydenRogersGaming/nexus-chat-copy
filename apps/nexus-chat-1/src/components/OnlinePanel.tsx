@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
 import * as DB from '../lib/storage';
 import TitleBadge from './TitleBadge';
+import UserProfileModal from './UserProfileModal';
 import { cn } from '@project/components/lib/utils';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
 
@@ -18,6 +19,7 @@ type Props = { roomId: string; currentUserEmail?: string };
 export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
   const onlineUsers = useOnlineUsers();
   const [typing, setTyping] = useState<DB.TypingUser[]>([]);
+  const [viewEmail, setViewEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const update = () => setTyping(DB.getTyping(roomId).filter(t => t.email !== currentUserEmail));
@@ -59,7 +61,7 @@ export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
       {/* User list */}
       <div className="flex-1 p-2 space-y-0.5">
         {onlineUsers.map(u => (
-          <div key={u.email} className={cn('flex items-center gap-2 px-2 py-1.5 rounded-lg', u.email === currentUserEmail && 'bg-primary/10')}>
+          <button key={u.email} onClick={() => setViewEmail(u.email)} className={cn('w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-secondary/60 transition-colors', u.email === currentUserEmail && 'bg-primary/10')}>
             <div className="relative flex-shrink-0">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
                 {u.profilePic
@@ -80,12 +82,13 @@ export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
                 </span>
               )}
             </div>
-          </div>
+          </button>
         ))}
         {onlineUsers.length === 0 && (
           <p className="text-[10px] text-muted-foreground text-center py-4">No one online</p>
         )}
       </div>
+      <UserProfileModal email={viewEmail} onClose={() => setViewEmail(null)} />
     </div>
   );
 }

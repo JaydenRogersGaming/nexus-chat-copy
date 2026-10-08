@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Gem } from 'lucide-react';
 import TitleBadge from '../components/TitleBadge';
+import UserProfileModal from '../components/UserProfileModal';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { OWNER_EMAIL } from '../lib/gameData';
@@ -9,6 +10,7 @@ import { cn } from '@project/components/lib/utils';
 export default function LeaderboardPage() {
   const { profile } = useApp();
   const [users, setUsers] = useState<DB.UserProfile[]>([]);
+  const [viewEmail, setViewEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const load = () => {
@@ -52,7 +54,7 @@ export default function LeaderboardPage() {
             const rank = i === 0 ? 2 : i === 1 ? 1 : 3;
             const heights = ['h-24', 'h-32', 'h-20'];
             return (
-              <div key={u.email} className={cn('flex flex-col items-center gap-2', i === 1 && 'scale-110')}>
+              <div key={u.email} onClick={() => setViewEmail(u.email)} className={cn('cursor-pointer flex flex-col items-center gap-2', i === 1 && 'scale-110')}>
                 <div className="text-2xl">{medals[rank-1]}</div>
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/40">
                   {u.profilePic ? <img src={u.profilePic} alt="" className="w-full h-full object-cover" /> : <span className="font-bold text-primary text-sm">{u.name[0]?.toUpperCase()}</span>}
@@ -75,7 +77,7 @@ export default function LeaderboardPage() {
           const isMe = u.email === profile?.email;
           const roleLabel = getRoleLabel(u);
           return (
-            <div key={u.email} className={cn('flex items-center gap-3 p-3 rounded-xl border transition-colors', isMe ? 'border-primary/50 bg-primary/10' : 'border-border bg-card/50 hover:bg-secondary/30')}>
+            <div key={u.email} onClick={() => setViewEmail(u.email)} className={cn('cursor-pointer flex items-center gap-3 p-3 rounded-xl border transition-colors', isMe ? 'border-primary/50 bg-primary/10' : 'border-border bg-card/50 hover:bg-secondary/30')}>
               <span className="text-sm font-bold w-8 text-center text-muted-foreground">{i < 3 ? medals[i] : `#${i+1}`}</span>
               <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {u.profilePic ? <img src={u.profilePic} alt="" className="w-full h-full object-cover" /> : <span className="font-semibold text-primary text-sm">{u.name[0]?.toUpperCase()}</span>}
@@ -98,6 +100,7 @@ export default function LeaderboardPage() {
         })}
         {users.length === 0 && <p className="text-center text-muted-foreground py-8">No users yet. Be the first!</p>}
       </div>
+      <UserProfileModal email={viewEmail} onClose={() => setViewEmail(null)} />
     </div>
   );
 }
