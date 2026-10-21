@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from 'zitejs/auth';
+import { useAuth, loginWithRedirect } from 'zitejs/auth';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
 import ChatPage from './pages/ChatPage';
@@ -36,7 +36,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
             </div>
             <p className="text-xs mt-4" style={{ color: settings.matrixColor + '88' }}>Loading...</p>
           </>
-        ) : null}
+        ) : (
+          <button onClick={() => loginWithRedirect()}
+            className="mt-6 px-8 py-3 rounded-xl font-bold text-sm text-white border border-white/20 hover:scale-105 transition-all"
+            style={{ backgroundColor: settings.matrixColor + '33', borderColor: settings.matrixColor + '66' }}>
+            🔑 Sign In / Sign Up
+          </button>
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ async function roleOf(email: string): Promise<string> {
 }
 
 export default createEndpoint({
+  authenticated: true,
   description: 'Lists everyone who signed up with their role, and lets staff change roles',
   inputSchema: z.object({
     action: z.enum(['list', 'set', 'mine']),
@@ -25,7 +26,7 @@ export default createEndpoint({
     users: z.array(z.object({ email: z.string(), name: z.string(), role: z.string() })),
   }),
   execute: async ({ input, context }) => {
-    const me = context.user!;
+    const me = context.user;
     const myRole = await roleOf(me.email);
 
     if (input.action === 'mine') return { myRole, users: [] };
