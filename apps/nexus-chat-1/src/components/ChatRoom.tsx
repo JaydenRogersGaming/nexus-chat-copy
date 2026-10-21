@@ -11,7 +11,15 @@ import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
-import { messages as messagesApi, chatBot, typing as typingApi } from 'zitejs/api';
+import { messages as messagesApi, chatBot, typing as typingApi, roles as rolesApi, RolesOutputType } from 'zitejs/api';
+
+const ROLE_OPTIONS = [
+  { id: 'user', label: '👤 User', desc: 'Regular member' },
+  { id: 'mod', label: '🔵 Mod', desc: 'Delete user messages, mute, ban' },
+  { id: 'admin', label: '🔴 Admin', desc: 'Titles, bugs, delete mod messages' },
+  { id: 'co-owner', label: '🟠 Co-Owner', desc: 'Almost everything' },
+  { id: 'owner', label: '🟡 Owner', desc: 'Full control' },
+] as const;
 
 type Props = { room: DB.ChatRoom; onStartDM?: (email: string) => void };
 
@@ -36,6 +44,9 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const canBan = isStaff || DB.hasPerm(profile, 'ban');
   const canClear = isOwner || profile?.role === 'co-owner' || DB.hasPerm(profile, 'clearchat');
   const canGiveRole = isOwner || profile?.role === 'co-owner' || DB.hasPerm(profile, 'giverole');
+  const [signedUp, setSignedUp] = useState<RolesOutputType['users']>([]);
+  const signedUpLoaded = useRef(false);
+  const loadSignedUp = () => rolesApi({ action: 'list' }).then(r => setSignedUp(r.users)).catch(() => {});
 
   useEffect(() => {
     if (!profile) return;
@@ -91,6 +102,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
     // Command suggestions (only when it looks like a command)
     if (!val.startsWith('/')) { if (showSuggestions) setShowSuggestions(false); return; }
+    if (val.startsWith('/setrole') && isOwner && !signedUpLoaded.current) { signedUpLoaded.current = true; loadSignedUp(); }
     if (val.startsWith('/ban ') && canBan) {
       const query = val.slice(5).toLowerCase().trim();
       const users = DB.getAllUsers().filter(u => u.email !== profile.email && u.email !== OWNER_EMAIL && (!query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)));
@@ -194,14 +206,20 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       toast.success(`♾️ Gave infinite gems to ${targetUser.name}`); return true;
     }
 
-    if (text.startsWith('/setrole ') && isOwner) {
-      const parts = text.slice(9).trim().split(' ');
-      const target = parts[0];
+    if (text.startsWith('/setrole') && isOwner) {
+      const parts = text.slice(8).trim().split(/\s+/);
+      const target = (parts[0] || '').toLowerCase();
       const role = parts[1] as DB.UserProfile['role'];
       if (!target || !role) { toast.error('Usage: /setrole email role'); return true; }
-      const targetUser = DB.getUser(target);
-      if (!targetUser) { toast.error('User not found'); return true; }
-      DB.saveUser({ ...targetUser, role }); toast.success(`Set ${targetUser.name} as ${role}`); return true;
+      if (!ROLE_OPTIONS.some(r => r.id === role)) { toast.error(`Unknown role "${role}". Use: ${ROLE_OPTIONS.map(r => r.id).join(', ')}`); return true; }
+      rolesApi({ action: 'set', email: target, role }).then(r => {
+        setSignedUp(r.users);
+        const u = r.users.find(x => x.email.toLowerCase() === target);
+        const local = DB.getUser(u?.email || target);
+        if (local) DB.saveUser({ ...local, role });
+        toast.success(`Set ${u?.name || target} as ${role}`);
+      }).catch((e: { userFacingMessage?: string; message?: string }) => toast.error(e?.userFacingMessage || e?.message || 'Could not set role'));
+      return true;
     }
 
     if (text === '/online') {
@@ -443,6 +461,42 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       )}
 
       <div className="relative px-4 py-3 border-t border-border">
+        {isOwner && input.startsWith('/setrole ') && (() => {
+          const parts = input.slice(9).split(' ');
+          if (parts.length === 1) {
+            const q = parts[0].toLowerCase();
+            const list = signedUp.filter(u => !q || u.email.toLowerCase().includes(q) || u.name.toLowerCase().includes(q)).slice(0, 8);
+            return (
+              <div className="absolute bottom-full left-4 right-4 mb-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50 max-h-72 overflow-y-auto">
+                <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">Pick who to give a role ({signedUp.length} signed up)</div>
+                {list.length === 0 && <p className="px-3 py-3 text-xs text-muted-foreground">{signedUp.length ? 'No matches' : 'Loading users…'}</p>}
+                {list.map(u => (
+                  <button key={u.email} onClick={() => setInput(`/setrole ${u.email} `)} className="w-full flex items-center justify-between gap-2 px-3 py-2 hover:bg-secondary/50 text-left">
+                    <div><p className="text-xs font-semibold">{u.name}</p><p className="text-[10px] text-muted-foreground">{u.email}</p></div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{u.role}</span>
+                  </button>
+                ))}
+              </div>
+            );
+          }
+          const target = signedUp.find(u => u.email.toLowerCase() === parts[0].toLowerCase());
+          const q = (parts[1] || '').toLowerCase();
+          if (ROLE_OPTIONS.some(r => r.id === q)) return null;
+          return (
+            <div className="absolute bottom-full left-4 right-4 mb-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
+              <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">
+                Roles you can give {target ? `${target.name} (now: ${target.role})` : parts[0]}
+              </div>
+              {ROLE_OPTIONS.filter(r => r.id.startsWith(q)).map(r => (
+                <button key={r.id} onClick={() => setInput(`/setrole ${parts[0]} ${r.id}`)} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary/50 text-left">
+                  <span className="text-xs font-bold w-24">{r.label}</span>
+                  <span className="text-xs text-muted-foreground">{r.desc}</span>
+                  {target?.role === r.id && <span className="ml-auto text-[10px] text-primary">current</span>}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute bottom-full left-4 right-4 mb-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
             <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">Select user</div>

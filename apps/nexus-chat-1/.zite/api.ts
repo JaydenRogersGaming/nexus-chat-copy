@@ -9,6 +9,7 @@ import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
+import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _TypingEp } from '../src/api/typing';
 
 type _AiTitleCfg = typeof _AiTitleEp;
@@ -46,6 +47,11 @@ export type PresenceInputType = NonNullable<_PresenceCfg['inputSchema']> extends
 export type PresenceOutputType = Awaited<ReturnType<_PresenceCfg['execute']>>;
 export const presence = createCaller<PresenceInputType, PresenceOutputType>('presence');
 
+type _RolesCfg = typeof _RolesEp;
+export type RolesInputType = NonNullable<_RolesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_RolesCfg['execute']>[0]['input'];
+export type RolesOutputType = Awaited<ReturnType<_RolesCfg['execute']>>;
+export const roles = createCaller<RolesInputType, RolesOutputType>('roles');
+
 type _TypingCfg = typeof _TypingEp;
 export type TypingInputType = NonNullable<_TypingCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_TypingCfg['execute']>[0]['input'];
 export type TypingOutputType = Awaited<ReturnType<_TypingCfg['execute']>>;
@@ -60,5 +66,6 @@ export const api = {
   gifs,
   messages,
   presence,
+  roles,
   typing,
 };

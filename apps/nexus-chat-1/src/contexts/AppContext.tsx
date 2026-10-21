@@ -4,6 +4,7 @@ import { ACHIEVEMENTS, OWNER_EMAIL } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
+import { roles as rolesApi } from 'zitejs/api';
 
 type AppContextType = {
   profile: DB.UserProfile | null;
@@ -175,6 +176,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const t = setInterval(() => { if (profile?.email) DB.pingOnline(profile.email); }, 30000);
     return () => clearInterval(t);
   }, [profile?.email]);
+
+  // Sync my role from the shared server (roles set by staff on any device)
+  useEffect(() => {
+    if (!user?.email) return;
+    const sync = () => rolesApi({ action: 'mine' }).then(({ myRole }) => {
+      const p = DB.getUser(user.email);
+      if (p && p.role !== myRole && user.email !== OWNER_EMAIL) {
+        DB.saveUser({ ...p, role: myRole as DB.UserProfile['role'] });
+        setProfile(prev => prev ? { ...prev, role: myRole as DB.UserProfile['role'] } : prev);
+      }
+    }).catch(() => {});
+    sync();
+    const t = setInterval(sync, 20000);
+    return () => clearInterval(t);
+  }, [user?.email]);
 
   // Init broadcast
   useEffect(() => DB.initBroadcast(), []);

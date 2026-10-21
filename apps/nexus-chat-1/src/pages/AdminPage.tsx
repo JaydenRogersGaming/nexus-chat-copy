@@ -10,6 +10,7 @@ import * as DB from '../lib/storage';
 import { OWNER_EMAIL, EFFECT_TO_CLASS, TITLE_FONTS } from '../lib/gameData';
 import TitleBadge from '../components/TitleBadge';
 import { toast } from 'sonner';
+import { roles as rolesApi, RolesOutputType } from 'zitejs/api';
 
 const ROLE_META: Record<string, { color: string; label: string }> = {
   owner:      { color: 'text-yellow-400',  label: 'Owner' },
@@ -27,6 +28,11 @@ export default function AdminPage() {
   const [targetEmail, setTargetEmail] = useState('');
   const [gemAmount, setGemAmount]   = useState('');
   const [newRole, setNewRole]       = useState('');
+  const [signedUp, setSignedUp]     = useState<RolesOutputType['users']>([]);
+  const [roleSearch, setRoleSearch] = useState('');
+  const [roleTarget, setRoleTarget] = useState('');
+  const [settingRole, setSettingRole] = useState(false);
+  useEffect(() => { rolesApi({ action: 'list' }).then(r => setSignedUp(r.users)).catch(() => {}); }, []);
   const [titleToGive, setTitleToGive] = useState('');
 
   // Custom title form
@@ -120,14 +126,20 @@ export default function AdminPage() {
     DB.addUserTitle(email, titleToGive.trim()); toast.success(`Gave title "${titleToGive}" to ${user.name}!`);
   }
 
-  function setRole() {
-    const email = targetEmail.trim();
-    if (!newRole || !email) { toast.error('Enter email and role'); return; }
-    if (!isOwner && (newRole === 'owner' || newRole === 'co-owner')) { toast.error('Only the owner can assign Owner / Co-Owner'); return; }
-    if (!isCoOwner && newRole === 'admin') { toast.error('Only Owner / Co-Owner can assign Admin'); return; }
-    const user = DB.getUser(email); if (!user) { toast.error('User not found'); return; }
-    DB.saveUser({ ...user, role: newRole as DB.UserProfile['role'] });
-    reload(); toast.success(`Set ${user.name} as ${newRole}!`);
+  async function setRole() {
+    const email = roleTarget;
+    if (!newRole || !email) { toast.error('Pick a user and a role'); return; }
+    setSettingRole(true);
+    try {
+      const r = await rolesApi({ action: 'set', email, role: newRole as DB.UserProfile['role'] });
+      setSignedUp(r.users);
+      const local = DB.getUser(email);
+      if (local) DB.saveUser({ ...local, role: newRole as DB.UserProfile['role'] });
+      reload(); toast.success(`Set ${r.users.find(u => u.email === email)?.name || email} as ${newRole}!`);
+    } catch (e) {
+      const err = e as { userFacingMessage?: string; message?: string };
+      toast.error(err.userFacingMessage || err.message || 'Could not set role');
+    } finally { setSettingRole(false); }
   }
 
   function createCustomTitle() {
@@ -243,7 +255,20 @@ export default function AdminPage() {
               <p>🔴 <strong>Admin</strong> — Can delete user/mod messages, give titles, manage bugs</p>
               <p>🔵 <strong>Mod</strong> — Can delete regular user messages only</p>
             </div>
-            <div><Label>User Email</Label><Input value={targetEmail} onChange={e => setTargetEmail(e.target.value)} placeholder="user@email.com" className="mt-1" /></div>
+            <div>
+              <Label>Pick a user ({signedUp.length} signed up)</Label>
+              <Input value={roleSearch} onChange={e => setRoleSearch(e.target.value)} placeholder="Search name or email…" className="mt-1" />
+              <div className="mt-2 max-h-56 overflow-y-auto border border-border rounded-lg divide-y divide-border">
+                {signedUp.filter(u => { const q = roleSearch.toLowerCase(); return !q || u.email.toLowerCase().includes(q) || u.name.toLowerCase().includes(q); }).map(u => (
+                  <button key={u.email} type="button" onClick={() => setRoleTarget(u.email)}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-left text-xs hover:bg-secondary/50 ${roleTarget === u.email ? 'bg-primary/15' : ''}`}>
+                    <span><span className="font-semibold">{u.name}</span> <span className="text-muted-foreground">{u.email}</span></span>
+                    <span className={ROLE_META[u.role]?.color}>{ROLE_META[u.role]?.label || u.role}</span>
+                  </button>
+                ))}
+                {signedUp.length === 0 && <p className="px-3 py-3 text-xs text-muted-foreground">Loading users…</p>}
+              </div>
+            </div>
             <div><Label>Role</Label>
               <Select value={newRole} onValueChange={setNewRole}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
@@ -256,7 +281,7 @@ export default function AdminPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={setRole} className="w-full">Set Role</Button>
+            <Button onClick={setRole} disabled={settingRole || !roleTarget || !newRole} className="w-full">{settingRole ? 'Saving…' : 'Set Role'}</Button>
           </div>
         </TabsContent>
 
