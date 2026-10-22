@@ -183,7 +183,7 @@ export default function Layout() {
     return () => clearInterval(t);
   }, [dismissedIds]);
 
-  const { profile } = useApp();
+  const { profile, impersonating, impersonate } = useApp();
   const [bgId, setBgId] = useState('');
   useEffect(() => {
     if (!profile) return;
@@ -215,6 +215,12 @@ export default function Layout() {
     <div className="flex h-screen overflow-hidden bg-background" style={bgCss ? { background: bgCss } : undefined}>
       <Sidebar onProfileClick={() => setProfileOpen(true)} />
       <div className="flex-1 flex flex-col min-w-0">
+        {impersonating && (
+          <div className="bg-amber-500 text-black text-xs font-semibold px-4 py-1.5 flex items-center gap-2">
+            👀 Signed in as {profile?.name} ({impersonating})
+            <button onClick={() => impersonate('')} className="ml-auto underline">Back to my account</button>
+          </div>
+        )}
         {/* Top Bar */}
         <header className="h-12 border-b border-border bg-card/50 flex items-center px-4 gap-2 flex-shrink-0">
           <GemDisplay />

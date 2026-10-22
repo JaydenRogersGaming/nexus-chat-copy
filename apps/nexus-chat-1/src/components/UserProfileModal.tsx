@@ -3,6 +3,7 @@ import { Crown, ShieldCheck, Shield, Star, MessageSquare, Gem, Trophy, Dices, Me
 import { Button } from '@project/components/ui/button';
 import TitleBadge from './TitleBadge';
 import RoleChip from './RoleChip';
+import StaffUserActions from './StaffUserActions';
 import ProBadge, { badgeLook } from './ProBadge';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
@@ -151,6 +152,8 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
               </div>
             )}
           </div>
+
+          <StaffUserActions email={user.email} name={user.name} onDone={onClose} />
 
           {/* Message button */}
           {onStartDM && (

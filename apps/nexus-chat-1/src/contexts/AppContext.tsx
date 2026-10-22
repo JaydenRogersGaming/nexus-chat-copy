@@ -16,11 +16,15 @@ type AppContextType = {
   setUnreadCount: (n: number) => void;
   playNotifSound: () => void;
   activeRoomId: string;
+  impersonating: string;
+  isRealOwner: boolean;
+  impersonate: (email: string) => void;
   setActiveRoomId: (id: string) => void;
 };
 
 // HMR-safe: reuse the same context reference across hot reloads so the
 // provider and hook always share the exact same object.
+const IMP_KEY = 'nexus_impersonate';
 const CTX_KEY = '__hubx_app_ctx__';
 declare global { interface Window { [key: string]: unknown } }
 if (!window[CTX_KEY]) {
@@ -50,14 +54,21 @@ function playBeep() {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const [impersonating, setImpersonating] = useState<string>(() => localStorage.getItem(IMP_KEY) || '');
+  const realEmail = user?.email || '';
+  const email = realEmail === OWNER_EMAIL && impersonating ? impersonating : realEmail;
+  const impersonate = useCallback((target: string) => {
+    if (target) localStorage.setItem(IMP_KEY, target); else localStorage.removeItem(IMP_KEY);
+    setImpersonating(target);
+  }, []);
   const [profile, setProfile] = useState<DB.UserProfile | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [activeRoomId, setActiveRoomId] = useState('global');
   const prevNotifCount = useRef(0);
 
   const refreshProfile = useCallback(() => {
-    if (!user?.email) return;
-    const p = DB.getOrCreateUser(user.email);
+    if (!email) return;
+    const p = DB.getOrCreateUser(email);
     DB.ensureBotUser();
     // Backfill new fields
     if (p.streak === undefined) { p.streak = 0; p.lastStreakDate = ''; p.lastMessageTime = 0; DB.saveUser(p); }
@@ -65,25 +76,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (p.verified === undefined) { p.verified = false; DB.saveUser(p); }
     // Apply language
     document.documentElement.lang = p.language;
-    if (user.email === OWNER_EMAIL) {
+    if (email === OWNER_EMAIL) {
       let changed = false;
       if (p.role !== 'owner') { p.role = 'owner'; changed = true; }
-      if (!p.name || p.name === user.email.split('@')[0]) { p.name = 'Jayden Rogres'; changed = true; }
+      if (!p.name || p.name === email.split('@')[0]) { p.name = 'Jayden Rogres'; changed = true; }
       if (!p.activeTitle || p.activeTitle === '') { p.activeTitle = 'Owner'; p.activeTitleColor = '#ffd700'; p.activeTitleEffect = ''; changed = true; }
       if (!p.verified) { p.verified = true; changed = true; }
       if (changed) DB.saveUser(p);
     }
     setProfile({ ...p });
-  }, [user?.email]);
+  }, [email]);
 
   useEffect(() => { refreshProfile(); }, [refreshProfile]);
 
   // Check streak on login
   const streakChecked = useRef(false);
   useEffect(() => {
-    if (!user?.email || streakChecked.current) return;
+    if (!email || streakChecked.current) return;
     streakChecked.current = true;
-    const result = DB.checkAndUpdateStreak(user.email);
+    const result = DB.checkAndUpdateStreak(email);
     if (result.isNewDay) {
       if (result.streak > 1) {
         toast.success(`🔥 ${result.streak}-day streak! +${result.gemsAwarded} gems`, { duration: 5000 });
@@ -92,7 +103,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       refreshProfile();
     }
-  }, [user?.email, refreshProfile]);
+  }, [email, refreshProfile]);
 
   const updateProfile = useCallback((updates: Partial<DB.UserProfile>) => {
     setProfile(prev => {
@@ -180,15 +191,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Sync my role from the shared server (roles set by staff on any device)
   useEffect(() => {
-    if (!user?.email) return;
+    if (!email) return;
     const sync = () => rolesApi({ action: 'list' }).then(({ myRole, users }) => {
       // Keep every locally-known user's role in line with the shared server copy
       for (const su of users) {
         const lu = DB.getUser(su.email);
         if (lu && lu.role !== su.role && su.email !== OWNER_EMAIL) DB.saveUser({ ...lu, role: su.role as DB.UserProfile['role'] });
       }
-      const p = DB.getUser(user.email);
-      if (p && p.role !== myRole && user.email !== OWNER_EMAIL) {
+      const p = DB.getUser(email);
+      if (p && p.role !== myRole && email !== OWNER_EMAIL && email === realEmail) {
         DB.saveUser({ ...p, role: myRole as DB.UserProfile['role'] });
         setProfile(prev => prev ? { ...prev, role: myRole as DB.UserProfile['role'] } : prev);
       }
@@ -196,13 +207,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     sync();
     const t = setInterval(sync, 10000);
     return () => clearInterval(t);
-  }, [user?.email]);
+  }, [email]);
 
   // Init broadcast
   useEffect(() => DB.initBroadcast(), []);
 
   return (
-    <Ctx.Provider value={{ profile, refreshProfile, updateProfile, addGems, checkAchievements, unreadCount, setUnreadCount, playNotifSound: playBeep, activeRoomId, setActiveRoomId }}>
+    <Ctx.Provider value={{ profile, refreshProfile, updateProfile, addGems, checkAchievements, unreadCount, setUnreadCount, playNotifSound: playBeep, activeRoomId, setActiveRoomId, impersonating: realEmail === OWNER_EMAIL ? impersonating : '', isRealOwner: realEmail === OWNER_EMAIL, impersonate }}>
       {children}
     </Ctx.Provider>
   );
