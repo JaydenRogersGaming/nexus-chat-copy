@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
 import ChatPage from './pages/ChatPage';
@@ -21,12 +20,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const settings = DB.getAppSettings();
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
-
-  // Public mode: send signed-out visitors to sign in. In internal mode the user
-  // is always signed in already, so this never fires — safe to keep in both modes.
-  useEffect(() => {
-    if (!isLoading && !user) loginWithRedirect();
-  }, [isLoading, user]);
 
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
