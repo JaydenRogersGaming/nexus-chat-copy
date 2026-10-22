@@ -138,6 +138,7 @@ export type ChatMessagesRecordType = {
   deleted?: boolean;
   /** "Sent At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
   sentAt?: string;
+  edited?: boolean;
 };
 
 /** What you may write when creating or updating a record in the "Chat Messages" table. */
@@ -155,6 +156,7 @@ export type ChatMessagesRecordInput = {
   replyToJson: string | null;
   deleted: string | boolean | null;
   sentAt: string | Date | null;
+  edited: string | boolean | null;
 };
 
 /** A record in the "Bans" table, as it is read back. */

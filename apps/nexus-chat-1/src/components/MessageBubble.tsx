@@ -1,6 +1,7 @@
 import RoleChip from './RoleChip';
 import { useState } from 'react';
-import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck } from 'lucide-react';
+import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
 import TitleBadge from './TitleBadge';
 import { useApp } from '../contexts/AppContext';
 import { EMOJI_LIST, OWNER_EMAIL, censorMessage } from '../lib/gameData';
@@ -56,7 +57,25 @@ function canDeleteMsg(deleter: DB.UserProfile, msgSenderEmail: string, msgSender
 export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onReply, onViewProfile }: Props) {
   const { profile } = useApp();
   const [showEmoji, setShowEmoji] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
   const isOwn = profile?.email === msg.senderEmail;
+  const isGif = /^\[gif\]https:\/\/[^\s]+$/.test(msg.content);
+
+  async function saveEdit() {
+    const text = draft.trim();
+    if (!text || text === msg.content) { setEditing(false); return; }
+    setSaving(true);
+    try {
+      await messagesApi({ action: 'edit', messageId: msg.id, content: text });
+      setEditing(false);
+      onDeleted(); // reloads the room
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Could not edit message');
+    }
+    setSaving(false);
+  }
 
   const senderUser = DB.getUser(msg.senderEmail);
   const senderRole = senderUser?.role ?? 'user';
@@ -139,11 +158,31 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
 
         {/* Bubble */}
         <div className={cn('msg-bubble px-4 py-2.5 text-sm relative', isOwn ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-secondary text-foreground rounded-bl-sm')}>
-          {/^\[gif\]https:\/\/[^\s]+$/.test(msg.content)
+          {editing ? (
+            <div className="flex flex-col gap-1.5 min-w-[220px]">
+              <textarea
+                autoFocus value={draft} onChange={e => setDraft(e.target.value)} rows={2}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveEdit(); }
+                  if (e.key === 'Escape') setEditing(false);
+                }}
+                className="w-full rounded-md bg-background/90 text-foreground text-sm px-2 py-1 border border-border resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <div className="flex justify-end gap-1.5 text-[11px]">
+                <button onClick={() => setEditing(false)} className="px-2 py-0.5 rounded bg-background/30 hover:bg-background/50">Cancel</button>
+                <button onClick={saveEdit} disabled={saving || !draft.trim()} className="px-2 py-0.5 rounded bg-background text-foreground font-semibold disabled:opacity-50">{saving ? 'Saving…' : 'Save'}</button>
+              </div>
+            </div>
+          ) : isGif
             ? <img src={msg.content.slice(5)} alt="GIF" className="rounded-lg max-w-[240px] max-h-60 object-contain" loading="lazy" />
             : <span style={textStyleCss(getRoleTextStyle(senderRole))}>{censorMessage(msg.content).censored}</span>}
           {/* Action buttons */}
-          <div className="absolute -top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
+          {!editing && <div className="absolute -top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
+            {isOwn && !isGif && (
+              <button onClick={() => { setDraft(msg.content); setEditing(true); }} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Edit">
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
             <button onClick={() => onReply?.(msg)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Reply">
               <Reply className="w-3.5 h-3.5" />
             </button>
@@ -159,7 +198,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             )}
-          </div>
+          </div>}
           {showEmoji && (
             <div className="absolute top-8 right-0 z-50 bg-card border border-border rounded-xl p-2 flex flex-wrap gap-1 w-48 shadow-xl">
               {EMOJI_LIST.map(e => <button key={e} onClick={() => handleReact(e)} className="text-lg hover:scale-125 transition-transform">{e}</button>)}
@@ -177,7 +216,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             ))}
           </div>
         )}
-        <span className="text-[10px] text-muted-foreground px-1">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        <span className="text-[10px] text-muted-foreground px-1">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{msg.edited ? ' · edited' : ''}</span>
       </div>
     </div>
   );

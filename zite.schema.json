@@ -253,6 +253,15 @@
               "displayTimeZone": false
             }
           }
+        },
+        {
+          "id": "fepWCGALKt3",
+          "sdkName": "edited",
+          "definition": {
+            "name": "Edited",
+            "type": "checkbox",
+            "template": {}
+          }
         }
       ]
     },

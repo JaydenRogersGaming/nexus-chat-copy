@@ -66,6 +66,7 @@ export type Message = {
   senderNameColor: string;
   replyTo?: { id: string; senderName: string; content: string };
   timestamp: number;
+  edited?: boolean;
 };
 
 export type ChatRoom = {
