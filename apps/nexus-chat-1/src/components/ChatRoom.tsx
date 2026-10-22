@@ -4,6 +4,7 @@ import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import MessageBubble from './MessageBubble';
 import EmojiGifPicker from './EmojiGifPicker';
+import PhotoUploadButton from './PhotoUploadButton';
 import UserProfileModal from './UserProfileModal';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
@@ -354,7 +355,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     DB.incrementQuestProgress(profile.email, 'send_20');
     DB.incrementQuestProgress(profile.email, 'send_50');
 
-    if (/@jaydenchatbot\b/i.test(text)) handleBot(text, censored);
+    if (/@(jaydenchatbot|nexusbot)\b/i.test(text)) handleBot(text, censored);
 
     setTimeout(() => { checkAchievements(); checkBadges(profile.email); }, 100);
   }
@@ -385,7 +386,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     }
     try {
       const history = messages.slice(-15).map(m => ({ name: m.senderName, content: m.content }));
-      const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/@jaydenchatbot/ig, '').trim() || 'hi', history });
+      const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/@(jaydenchatbot|nexusbot)/ig, '').trim() || 'hi', history });
       postBot(censorMessage(reply).censored);
     } catch { postBot("Beep boop… my brain lagged 🤖 try again in a sec!"); }
   }
@@ -545,6 +546,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
         <div className="flex gap-2 items-center">
           <EmojiGifPicker onEmoji={e => setInput(prev => prev + e)} onGif={url => send(`[gif]${url}`)} />
+          <PhotoUploadButton onUploaded={url => send(`[gif]${url}`)} />
           <Input value={input} onChange={e => handleInputChange(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={replyingTo ? `Reply to ${replyingTo.senderName}…` : `Message ${room.name}…`} className="flex-1 bg-secondary border-border" />
           <Button onClick={() => send()} size="icon" disabled={!input.trim() || (!isOwner && cooldown > 0)}>
             {cooldown > 0 && !isOwner ? <span className="text-xs font-bold">{cooldown}</span> : <Send className="w-4 h-4" />}
