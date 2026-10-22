@@ -13,6 +13,7 @@ import TitleBadge from './TitleBadge';
 import * as DB from '../lib/storage';
 
 const COST = 1000;
+const EMOJIS = ['🔥','⚡','👑','💎','🌟','✨','💀','😎','🗡️','🛡️','🐉','🦊','🐺','🦁','👻','🤖','👽','🎮','🎯','🏆','🚀','🌙','☀️','❄️','🌊','🍕','🎵','💜','❤️','🖤','🌈','⭐'];
 const AUTO = '__ai__';
 
 export default function AiTitleMaker() {
@@ -93,6 +94,12 @@ export default function AiTitleMaker() {
                 )}
               </div>
               <div><Label>Emoji</Label><Input value={emoji} onChange={e => setEmoji(e.target.value)} placeholder="🔥" maxLength={4} className="mt-1 text-center" /></div>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              <button type="button" onClick={() => setEmoji('')} className={`h-8 px-2 rounded-md border text-[11px] ${!emoji ? 'border-primary bg-primary/15' : 'border-border text-muted-foreground'}`}>None</button>
+              {EMOJIS.map(e => (
+                <button key={e} type="button" onClick={() => setEmoji(e)} className={`h-8 w-8 rounded-md border text-base ${emoji === e ? 'border-primary bg-primary/15' : 'border-border hover:bg-secondary'}`}>{e}</button>
+              ))}
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div><Label>Effect</Label>

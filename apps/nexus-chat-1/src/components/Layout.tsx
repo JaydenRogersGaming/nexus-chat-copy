@@ -8,7 +8,7 @@ import ShopModal from './ShopModal';
 import FeedbackModal from './FeedbackModal';
 import DailyQuestsModal from './DailyQuestsModal';
 import { Button } from '@project/components/ui/button';
-import { Bug, EyeOff, Megaphone, X, Settings, Flame } from 'lucide-react';
+import { Bug, EyeOff, Megaphone, X, Settings, Flame, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import * as DB from '../lib/storage';
 import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
@@ -32,7 +32,7 @@ function openCloakedTab() {
   const win = window.open('about:blank', '_blank');
   if (!win) {
     toast.error('Pop-ups are blocked! Allow pop-ups for this site first.');
-    return;
+    return false;
   }
 
   const saved = JSON.parse(localStorage.getItem('nexus_cloak') || '{}');
@@ -53,6 +53,21 @@ function openCloakedTab() {
   win.document.close();
 
   toast.success(`🔒 Opened as "${title.slice(0, 30)}…"`);
+  return true;
+}
+
+// Auto about:blank: on the first click, reopen the app inside a cloaked tab
+// and send this tab somewhere harmless. Skipped when already inside the cloak.
+function useAutoCloak() {
+  useEffect(() => {
+    if (window.self !== window.top) return;
+    if (localStorage.getItem('nexus_autocloak') === 'off') return;
+    const go = () => {
+      if (openCloakedTab()) window.location.replace('https://classroom.google.com');
+    };
+    window.addEventListener('click', go, { once: true });
+    return () => window.removeEventListener('click', go);
+  }, []);
 }
 
 function AnnouncementPopup({ announcement, onDismiss }: { announcement: DB.Announcement; onDismiss: () => void }) {
@@ -92,6 +107,7 @@ function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }
   const [selectedPreset, setSelectedPreset] = useState<string>(saved.preset || CLOAK_PRESETS[0].label);
   const [customTitle, setCustomTitle] = useState<string>(saved.customTitle || '');
   const [customFavicon, setCustomFavicon] = useState<string>(saved.customFavicon || '');
+  const [autoCloak, setAutoCloak] = useState(localStorage.getItem('nexus_autocloak') !== 'off');
 
   if (!open) return null;
 
@@ -122,6 +138,10 @@ function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }
           <button onClick={onClose} className="ml-auto text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          <label className="flex items-center gap-2 p-3 rounded-xl border border-border bg-secondary/20 text-xs cursor-pointer">
+            <input type="checkbox" checked={autoCloak} className="w-4 h-4 accent-primary" onChange={e => { setAutoCloak(e.target.checked); localStorage.setItem('nexus_autocloak', e.target.checked ? 'on' : 'off'); }} />
+            <span><strong>Auto about:blank</strong> — open the app in a cloaked tab automatically</span>
+          </label>
           <SettingsExtras />
           {/* Cloak Presets */}
           <div>
@@ -161,6 +181,7 @@ function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }
 }
 
 export default function Layout() {
+  useAutoCloak();
   const [profileOpen, setProfileOpen] = useState(false);
   const [shopOpen,    setShopOpen]    = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -225,6 +246,12 @@ export default function Layout() {
         <header className="h-12 border-b border-border bg-card/50 flex items-center px-4 gap-2 flex-shrink-0">
           <GemDisplay />
           <div className="flex items-center gap-1.5 ml-2">
+            <button
+              onClick={() => setShopOpen(true)}
+              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors flex items-center gap-1"
+            >
+              <ShoppingBag className="w-3.5 h-3.5 text-pink-400" /> Shop
+            </button>
             <button
               onClick={() => setQuestsOpen(true)}
               className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors flex items-center gap-1"
