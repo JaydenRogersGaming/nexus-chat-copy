@@ -5,6 +5,7 @@ import TitleBadge from './TitleBadge';
 import { useApp } from '../contexts/AppContext';
 import { EMOJI_LIST, OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import * as DB from '../lib/storage';
+import { getRoleTextStyle, textStyleCss } from '../lib/personalize';
 import { cn } from '@project/components/lib/utils';
 import { messages as messagesApi } from 'zitejs/api';
 
@@ -140,7 +141,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
         <div className={cn('msg-bubble px-4 py-2.5 text-sm relative', isOwn ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-secondary text-foreground rounded-bl-sm')}>
           {/^\[gif\]https:\/\/[^\s]+$/.test(msg.content)
             ? <img src={msg.content.slice(5)} alt="GIF" className="rounded-lg max-w-[240px] max-h-60 object-contain" loading="lazy" />
-            : censorMessage(msg.content).censored}
+            : <span style={textStyleCss(getRoleTextStyle(senderRole))}>{censorMessage(msg.content).censored}</span>}
           {/* Action buttons */}
           <div className="absolute -top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
             <button onClick={() => onReply?.(msg)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Reply">

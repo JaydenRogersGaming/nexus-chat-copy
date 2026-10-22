@@ -14,6 +14,9 @@ import * as DB from '../lib/storage';
 import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
 import { BG_THEMES } from '../lib/cosmetics';
 import { useApp } from '../contexts/AppContext';
+import MusicPlayer from './MusicPlayer';
+import * as P from '../lib/personalize';
+import { OWNER_EMAIL } from '../lib/gameData';
 
 const CLOAK_PRESETS = [
   { label: 'Google Docs', title: 'Untitled document - Google Docs', favicon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
@@ -190,6 +193,14 @@ export default function Layout() {
     return () => window.removeEventListener(COSMETICS_EVENT, sync);
   }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
   const bgCss = BG_THEMES.find(b => b.id === bgId)?.css;
+  const [myCss, setMyCss] = useState('');
+  useEffect(() => {
+    if (!profile) return;
+    const sync = () => setMyCss(P.hasCustomCss(profile.email) || profile.email === OWNER_EMAIL ? P.getCustomCss(profile.email) : '');
+    sync();
+    window.addEventListener(P.PERSONALIZE_EVENT, sync);
+    return () => window.removeEventListener(P.PERSONALIZE_EVENT, sync);
+  }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function dismissAnnouncement() {
     if (!announcement) return;
@@ -222,6 +233,7 @@ export default function Layout() {
             </button>
           </div>
           <div className="ml-auto flex items-center gap-1">
+            <MusicPlayer />
             <button
               onClick={() => setSettingsOpen(true)}
               title="Settings"
@@ -251,6 +263,7 @@ export default function Layout() {
       <ShopModal    open={shopOpen}    onClose={() => setShopOpen(false)} />
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
       <DailyQuestsModal open={questsOpen} onClose={() => setQuestsOpen(false)} />
+      {myCss && <style>{myCss}</style>}
       <Toaster position="top-right" richColors />
     </div>
   );

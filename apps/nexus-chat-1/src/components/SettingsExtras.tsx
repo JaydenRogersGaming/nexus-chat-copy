@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Lightbulb, Palette, Sparkles } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
 import SuggestionsModal from './SuggestionsModal';
+import PersonalizeSettings from './PersonalizeSettings';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { BG_THEMES, TYPING_STYLES } from '../lib/cosmetics';
@@ -58,6 +59,7 @@ export default function SettingsExtras() {
         {owned.length === 0 && <p className="text-[11px] text-muted-foreground mt-2">Buy backgrounds and typing styles in the Shop.</p>}
       </div>
 
+      <PersonalizeSettings />
       <SuggestionsModal open={ideasOpen} onClose={() => setIdeasOpen(false)} />
     </div>
   );
