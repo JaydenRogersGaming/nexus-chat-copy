@@ -68,7 +68,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (user.email === OWNER_EMAIL) {
       let changed = false;
       if (p.role !== 'owner') { p.role = 'owner'; changed = true; }
-      if (p.name !== 'Jayden Rogres') { p.name = 'Jayden Rogres'; changed = true; }
+      if (!p.name || p.name === user.email.split('@')[0]) { p.name = 'Jayden Rogres'; changed = true; }
       if (!p.activeTitle || p.activeTitle === '') { p.activeTitle = 'Owner'; p.activeTitleColor = '#ffd700'; p.activeTitleEffect = ''; changed = true; }
       if (!p.verified) { p.verified = true; changed = true; }
       if (changed) DB.saveUser(p);
@@ -97,7 +97,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = useCallback((updates: Partial<DB.UserProfile>) => {
     setProfile(prev => {
       if (!prev) return prev;
-      const updated = { ...prev, ...updates };
+      const updated = { ...(DB.getUser(prev.email) || prev), ...updates };
       DB.saveUser(updated);
       if (updates.language) document.documentElement.lang = updates.language;
       return updated;
@@ -109,7 +109,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!prev) return prev;
       // Infinite gems (999999999+) can never be reduced
       if (prev.gems >= 999999999 && amount < 0) return prev;
-      const updated = { ...prev, gems: Math.max(0, prev.gems + amount) };
+      const base = DB.getUser(prev.email) || prev;
+      const updated = { ...base, gems: Math.max(0, base.gems + amount) };
       DB.saveUser(updated);
       return updated;
     });
