@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, Loader2, Trash2, Plus, ImageIcon, Paperclip, X, Award } from 'lucide-react';
+import { Bot, Send, Loader2, Trash2, Plus, ImageIcon, Paperclip, X, Award, Palette } from 'lucide-react';
 import { useUpload } from 'zitejs/upload';
 import BadgeMaker from '../components/BadgeMaker';
+import ThemeMaker from '../components/ThemeMaker';
 import { Button } from '@project/components/ui/button';
 import { Markdown } from '@project/components/markdown';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ export default function AiChatPage() {
   const [generatingImage, setGeneratingImage] = useState(false);
   const [attach, setAttach] = useState<string | null>(null);
   const [badgeOpen, setBadgeOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const { upload, isUploading } = useUpload();
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -127,6 +129,7 @@ export default function AiChatPage() {
         </div>
         <div className="flex gap-1.5">
           {isOwner && <Button size="sm" variant="outline" onClick={() => setBadgeOpen(true)}><Award className="w-3.5 h-3.5 mr-1" />Badge Maker</Button>}
+          {isOwner && <Button size="sm" variant="outline" onClick={() => setThemeOpen(true)}><Palette className="w-3.5 h-3.5 mr-1" />Theme Maker</Button>}
           <AiTitleMaker />
           <Button size="sm" variant="outline" onClick={newChat}>
             <Plus className="w-3.5 h-3.5 mr-1" /> New
@@ -215,6 +218,7 @@ export default function AiChatPage() {
         </p>
       </div>
       {isOwner && <BadgeMaker open={badgeOpen} onClose={() => setBadgeOpen(false)} />}
+      {isOwner && <ThemeMaker open={themeOpen} onClose={() => setThemeOpen(false)} />}
     </div>
   );
 }

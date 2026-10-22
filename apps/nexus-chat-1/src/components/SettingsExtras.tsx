@@ -5,7 +5,7 @@ import SuggestionsModal from './SuggestionsModal';
 import PersonalizeSettings from './PersonalizeSettings';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
-import { BG_THEMES, TYPING_STYLES } from '../lib/cosmetics';
+import { getAllBgThemes, TYPING_STYLES } from '../lib/cosmetics';
 import { toast } from 'sonner';
 
 export const COSMETICS_EVENT = 'nexus-cosmetics';
@@ -49,7 +49,7 @@ export default function SettingsExtras() {
         <h3 className="text-sm font-semibold flex items-center gap-2 mb-2"><Sparkles className="w-4 h-4" />My Background</h3>
         <div className="flex flex-wrap gap-1.5">
           <button className={chip(!eq.bg)} onClick={() => equip({ bg: '' })}>Default</button>
-          {BG_THEMES.filter(b => owned.includes(b.id)).map(b => <button key={b.id} className={chip(eq.bg === b.id)} onClick={() => equip({ bg: b.id })}>{b.name}</button>)}
+          {getAllBgThemes().filter(b => owned.includes(b.id)).map(b => <button key={b.id} className={chip(eq.bg === b.id)} onClick={() => equip({ bg: b.id })}>{b.name}</button>)}
         </div>
         <h3 className="text-sm font-semibold mt-3 mb-2">My Typing Style</h3>
         <div className="flex flex-wrap gap-1.5">

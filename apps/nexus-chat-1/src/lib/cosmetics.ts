@@ -8,6 +8,20 @@ export const BG_THEMES: BgTheme[] = [
   { id: 'bg-candy', name: '🍬 Candy', cost: 600, css: 'linear-gradient(135deg, #3b0a45 0%, #a21caf 50%, #f472b6 100%)' },
   { id: 'bg-gold', name: '👑 Royal Gold', cost: 2000, css: 'linear-gradient(135deg, #1a1203 0%, #5c4306 50%, #b8860b 100%)' },
 ];
+export type CustomTheme = BgTheme & { inShop: boolean };
+export const THEMES_EVENT = 'nexus-themes';
+export function getCustomThemes(): CustomTheme[] {
+  try { return JSON.parse(localStorage.getItem('hub:customThemes') || '[]'); } catch { return []; }
+}
+export function saveCustomThemes(list: CustomTheme[]) {
+  localStorage.setItem('hub:customThemes', JSON.stringify(list));
+  window.dispatchEvent(new Event(THEMES_EVENT));
+}
+/** Every background: built-in + owner-made themes. */
+export function getAllBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes()]; }
+/** Backgrounds that appear for sale in the shop. */
+export function getShopBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes().filter(t => t.inShop)]; }
+
 export type TypingStyle = { id: string; name: string; cost: number; text: string; className: string; color: string };
 export const TYPING_STYLES: TypingStyle[] = [
   { id: 'type-fire', name: '🔥 On Fire', cost: 250, text: 'is cooking something up 🔥', className: 'animate-pulse', color: '#f97316' },

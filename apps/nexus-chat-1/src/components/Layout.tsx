@@ -12,7 +12,7 @@ import { Bug, EyeOff, Megaphone, X, Settings, Flame, ShoppingBag } from 'lucide-
 import { toast } from 'sonner';
 import * as DB from '../lib/storage';
 import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
-import { BG_THEMES } from '../lib/cosmetics';
+import { getAllBgThemes } from '../lib/cosmetics';
 import { useApp } from '../contexts/AppContext';
 import MusicPlayer from './MusicPlayer';
 import * as P from '../lib/personalize';
@@ -213,7 +213,7 @@ export default function Layout() {
     window.addEventListener(COSMETICS_EVENT, sync);
     return () => window.removeEventListener(COSMETICS_EVENT, sync);
   }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
-  const bgCss = BG_THEMES.find(b => b.id === bgId)?.css;
+  const bgCss = getAllBgThemes().find(b => b.id === bgId)?.css;
   const [myCss, setMyCss] = useState('');
   const [myBg, setMyBg] = useState('');
   useEffect(() => {

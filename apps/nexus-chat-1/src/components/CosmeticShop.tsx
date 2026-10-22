@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Gem } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
-import { BG_THEMES, TYPING_STYLES } from '../lib/cosmetics';
+import { getShopBgThemes, TYPING_STYLES } from '../lib/cosmetics';
 import { COSMETICS_EVENT } from './SettingsExtras';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
@@ -14,7 +14,7 @@ export default function CosmeticShop({ kind }: { kind: 'bg' | 'typing' }) {
   if (!profile) return null;
   const owned = DB.getUserItems(profile.email);
   const eq = DB.getEquipped(profile.email);
-  const items = kind === 'bg' ? BG_THEMES : TYPING_STYLES;
+  const items = kind === 'bg' ? getShopBgThemes() : TYPING_STYLES;
 
   function equip(id: string) {
     DB.setEquipped(profile!.email, kind === 'bg' ? { bg: id } : { typing: id });
