@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
 import ChatPage from './pages/ChatPage';
@@ -14,6 +13,7 @@ import AiChatPage from './pages/AiChatPage';
 import BrowserPage from './pages/BrowserPage';
 import CalendarPage from './pages/CalendarPage';
 import BanScreen from './components/BanScreen';
+import { useServerBan } from './hooks/useServerBan';
 import MatrixRain from './components/MatrixRain';
 import * as DB from './lib/storage';
 
@@ -22,12 +22,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const settings = DB.getAppSettings();
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
-  // Signed-out visitors go to sign-in (public mode). In internal mode users are
-  // always signed in, so this never fires — safe whichever mode is set.
-  useEffect(() => {
-    if (!isLoading && !user) loginWithRedirect();
-  }, [isLoading, user]);
-
+  const serverBan = useServerBan(!!user);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
       <MatrixRain color={mc} speed={settings.matrixSpeed} />
@@ -52,6 +47,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   const ban = DB.isUserBanned(user.email);
   if (ban) return <BanScreen ban={ban} />;
+  if (serverBan) return <BanScreen ban={{ email: user.email, bannedBy: serverBan.bannedBy, reason: serverBan.reason, timestamp: 0, banType: serverBan.banType }} />;
 
   return <>{children}</>;
 }

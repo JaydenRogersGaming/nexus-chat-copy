@@ -4,6 +4,7 @@ import { createCaller, createStreamingCaller } from 'zitejs/caller';
 
 import type { default as _AiBadgeEp } from '../src/api/aiBadge';
 import type { default as _AiTitleEp } from '../src/api/aiTitle';
+import type { default as _BansEp } from '../src/api/bans';
 import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _ChatBotEp } from '../src/api/chatBot';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
@@ -22,6 +23,11 @@ type _AiTitleCfg = typeof _AiTitleEp;
 export type AiTitleInputType = NonNullable<_AiTitleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiTitleCfg['execute']>[0]['input'];
 export type AiTitleOutputType = Awaited<ReturnType<_AiTitleCfg['execute']>>;
 export const aiTitle = createCaller<AiTitleInputType, AiTitleOutputType>('aiTitle');
+
+type _BansCfg = typeof _BansEp;
+export type BansInputType = NonNullable<_BansCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_BansCfg['execute']>[0]['input'];
+export type BansOutputType = Awaited<ReturnType<_BansCfg['execute']>>;
+export const bans = createCaller<BansInputType, BansOutputType>('bans');
 
 type _ChatCfg = typeof _ChatEp;
 export type ChatInputType = NonNullable<_ChatCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ChatCfg['execute']>[0]['input'];
@@ -67,6 +73,7 @@ export const typing = createCaller<TypingInputType, TypingOutputType>('typing');
 export const api = {
   aiBadge,
   aiTitle,
+  bans,
   chat,
   chatBot,
   generateArt,

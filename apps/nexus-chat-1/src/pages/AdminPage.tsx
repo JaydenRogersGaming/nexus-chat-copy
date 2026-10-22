@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ServerBanPanel from '../components/ServerBanPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
@@ -815,6 +816,8 @@ export default function AdminPage() {
         {/* Bans */}
         {isMod && (
           <TabsContent value="bans" className="space-y-4">
+            <ServerBanPanel staffName={profile?.name || 'Staff'} />
+            <h3 className="font-semibold text-sm pt-2 text-muted-foreground">Old device-only bans</h3>
             <div className="p-4 bg-card border border-border rounded-xl space-y-3">
               <div className="flex items-center gap-2">
                 <Ban className="w-5 h-5 text-red-500" />

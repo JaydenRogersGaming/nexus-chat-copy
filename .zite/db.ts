@@ -157,6 +157,48 @@ export type ChatMessagesRecordInput = {
   sentAt: string | Date | null;
 };
 
+/** A record in the "Bans" table, as it is read back. */
+export type BansRecordType = {
+  id: string;
+  /** Primary field. "Email" */
+  email?: string;
+  ipAddress?: string;
+  deviceId?: string;
+  banType?: "Ban" | "IP Ban" | "Hard Ban" | string;
+  reason?: string;
+  bannedBy?: string;
+  /** Read-only. "Banned At". Auto-set when record was created (ISO 8601) */
+  bannedAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Bans" table. */
+export type BansRecordInput = {
+  email: string | null;
+  ipAddress: string | null;
+  deviceId: string | null;
+  banType: "Ban" | "IP Ban" | "Hard Ban" | string | null;
+  reason: string | null;
+  bannedBy: string | null;
+};
+
+/** A record in the "User Sightings" table, as it is read back. */
+export type UserSightingsRecordType = {
+  id: string;
+  /** Primary field. "Email" */
+  email?: string;
+  ipAddress?: string;
+  deviceId?: string;
+  /** Read-only. "Last Seen". Auto-set when record was last modified (ISO 8601) */
+  lastSeen?: string;
+};
+
+/** What you may write when creating or updating a record in the "User Sightings" table. */
+export type UserSightingsRecordInput = {
+  email: string | null;
+  ipAddress: string | null;
+  deviceId: string | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -169,6 +211,8 @@ export interface ZiteAuthUser {
 export const zite = {
   presence: createTableClient<PresenceRecordType, PresenceRecordInput>('Presence'), // "Presence"
   chatMessages: createTableClient<ChatMessagesRecordType, ChatMessagesRecordInput>('ChatMessages'), // "Chat Messages"
+  bans: createTableClient<BansRecordType, BansRecordInput>('Bans'), // "Bans"
+  userSightings: createTableClient<UserSightingsRecordType, UserSightingsRecordInput>('UserSightings'), // "User Sightings"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

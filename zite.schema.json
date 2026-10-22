@@ -255,6 +255,150 @@
           }
         }
       ]
+    },
+    {
+      "id": "tkymx6kr4uQ",
+      "sdkName": "bans",
+      "name": "Bans",
+      "primaryFieldId": "faVVe6AbpWE",
+      "fields": [
+        {
+          "id": "faVVe6AbpWE",
+          "sdkName": "email",
+          "definition": {
+            "name": "Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "f4tnSRC8Ys4",
+          "sdkName": "ipAddress",
+          "definition": {
+            "name": "IP Address",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f1zduNnjoug",
+          "sdkName": "deviceId",
+          "definition": {
+            "name": "Device ID",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f32UCzWbGdP",
+          "sdkName": "banType",
+          "definition": {
+            "name": "Ban Type",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "euYw",
+                  "label": "Ban",
+                  "color": "orange"
+                },
+                {
+                  "value": "n2pW",
+                  "label": "IP Ban",
+                  "color": "red"
+                },
+                {
+                  "value": "8x6y",
+                  "label": "Hard Ban",
+                  "color": "purple"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "fbPL6ZNL3zr",
+          "sdkName": "reason",
+          "definition": {
+            "name": "Reason",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpEBt8tQ4XN",
+          "sdkName": "bannedBy",
+          "definition": {
+            "name": "Banned By",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "faZ7mhucQBJ",
+          "sdkName": "bannedAt",
+          "definition": {
+            "name": "Banned At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "t8PpfYpd7jA",
+      "sdkName": "userSightings",
+      "name": "User Sightings",
+      "primaryFieldId": "f8xu8zDrxhG",
+      "fields": [
+        {
+          "id": "f8xu8zDrxhG",
+          "sdkName": "email",
+          "definition": {
+            "name": "Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fehnpvn1ScR",
+          "sdkName": "ipAddress",
+          "definition": {
+            "name": "IP Address",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fuKMcr4tARW",
+          "sdkName": "deviceId",
+          "definition": {
+            "name": "Device ID",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f8ybp4VePUb",
+          "sdkName": "lastSeen",
+          "definition": {
+            "name": "Last Seen",
+            "type": "updated_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
     }
   ]
 }
