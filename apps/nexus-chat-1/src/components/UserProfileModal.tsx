@@ -2,9 +2,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/compo
 import { Crown, ShieldCheck, Shield, Star, MessageSquare, Gem, Trophy, Dices, MessageCircle } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
 import TitleBadge from './TitleBadge';
+import RoleChip from './RoleChip';
 import { BADGE_DEFS } from '../lib/badges';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
+import { useEffect, useState } from 'react';
+import { roles as rolesApi } from 'zitejs/api';
 
 type Props = { email: string | null; onClose: () => void; onStartDM?: (email: string) => void };
 
@@ -13,14 +16,44 @@ function getRoleBadge(role: string) {
     case 'owner':    return { label: 'Owner',    color: '#ffd700', icon: <Crown className="w-3 h-3" /> };
     case 'co-owner': return { label: 'Co-Owner', color: '#ff9900', icon: <Star className="w-3 h-3" /> };
     case 'admin':    return { label: 'Admin',    color: '#ff4444', icon: <ShieldCheck className="w-3 h-3" /> };
+    case 'senior-mod': return { label: 'Senior Mod', color: '#a855f7', icon: <Shield className="w-3 h-3" /> };
     case 'mod':      return { label: 'Mod',      color: '#44aaff', icon: <Shield className="w-3 h-3" /> };
+    case 'helper':   return { label: 'Helper',   color: '#22c55e', icon: <Shield className="w-3 h-3" /> };
+    case 'vip':      return { label: 'VIP',      color: '#ec4899', icon: <Star className="w-3 h-3" /> };
     default:         return null;
   }
 }
 
 export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
-  const user = email ? DB.getUser(email) : null;
-  if (!user) return null;
+  const local = email ? DB.getUser(email) : null;
+  const [remote, setRemote] = useState<DB.UserProfile | null>(null);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    setRemote(null);
+    if (!email) return;
+    setLoading(true);
+    rolesApi({ action: 'profile', email }).then(r => {
+      const p = r.profile;
+      if (!p) return;
+      const base = DB.getUser(email);
+      setRemote({
+        ...(base || { bio: '', nameColor2: '', gems: 0, badges: [], messageCount: 0, gambleWins: 0 } as unknown as DB.UserProfile),
+        email: p.email, name: p.name, profilePic: p.profilePic || base?.profilePic || '', nameColor: p.nameColor || base?.nameColor || '#e0e0ff',
+        activeTitle: p.activeTitle, activeTitleColor: p.activeTitleColor, activeTitleEffect: p.activeTitleEffect,
+        role: p.role as DB.UserProfile['role'], lastSeen: Math.max(p.lastSeen, base?.lastSeen || 0),
+      });
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, [email]);
+  const user = remote || local;
+  if (!email) return null;
+  if (!user) return (
+    <Dialog open onOpenChange={v => !v && onClose()}>
+      <DialogContent className="bg-card border-border max-w-sm">
+        <DialogHeader><DialogTitle>User Profile</DialogTitle></DialogHeader>
+        <p className="text-sm text-muted-foreground text-center py-6">{loading ? 'Loading profile…' : "This person hasn't set up a profile yet."}</p>
+      </DialogContent>
+    </Dialog>
+  );
 
   const roleBadge = getRoleBadge(user.role);
   const achievements = DB.getUserAchievements(user.email);
@@ -57,10 +90,7 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
                   </span>
                 )}
                 {user.customRole && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border"
-                    style={{ color: user.customRoleColor, borderColor: (user.customRoleColor || '#aaa') + '55', backgroundColor: (user.customRoleColor || '#aaa') + '18' }}>
-                    {user.customRole}
-                  </span>
+                  <RoleChip name={user.customRole} color={user.customRoleColor} color2={user.customRoleColor2 || undefined} className="text-[10px]" />
                 )}
                 {(() => { const tag = DB.getUserTagForUser(user.email); return tag ? (
                   <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"

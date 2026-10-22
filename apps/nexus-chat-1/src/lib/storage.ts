@@ -11,9 +11,10 @@ export type UserProfile = {
   activeTitle: string;
   activeTitleEffect: string;
   activeTitleColor: string;
-  role: 'owner' | 'co-owner' | 'admin' | 'mod' | 'user';
+  role: 'owner' | 'co-owner' | 'admin' | 'senior-mod' | 'mod' | 'helper' | 'vip' | 'user';
   customRole?: string;
   customRoleColor?: string;
+  customRoleColor2?: string;
   tag?: string;
   badges: string[];
   messageCount: number;
@@ -79,6 +80,7 @@ export type CustomRole = {
   id: string;
   name: string;
   color: string;
+  color2?: string;
   icon: string;
   canDelete: boolean;
   permissions?: RolePerm[];
@@ -283,10 +285,10 @@ export function deleteCustomRole(id: string) { s('customRoles', getCustomRoles()
 export function assignCustomRole(email: string, roleId: string | null) {
   const users = g<Record<string,UserProfile>>('users') || {};
   if (!users[email]) return;
-  if (roleId === null) { delete users[email].customRole; delete users[email].customRoleColor; }
+  if (roleId === null) { delete users[email].customRole; delete users[email].customRoleColor; delete users[email].customRoleColor2; }
   else {
     const r = getCustomRoles().find(r => r.id === roleId);
-    if (r) { users[email].customRole = r.name; users[email].customRoleColor = r.color; }
+    if (r) { users[email].customRole = r.name; users[email].customRoleColor = r.color; users[email].customRoleColor2 = r.color2 || ''; }
   }
   s('users', users);
 }

@@ -9,6 +9,7 @@ import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { OWNER_EMAIL, EFFECT_TO_CLASS, TITLE_FONTS } from '../lib/gameData';
 import TitleBadge from '../components/TitleBadge';
+import RoleChip from '../components/RoleChip';
 import { toast } from 'sonner';
 import { roles as rolesApi, RolesOutputType } from 'zitejs/api';
 
@@ -16,7 +17,10 @@ const ROLE_META: Record<string, { color: string; label: string }> = {
   owner:      { color: 'text-yellow-400',  label: 'Owner' },
   'co-owner': { color: 'text-orange-400',  label: 'Co-Owner' },
   admin:      { color: 'text-red-400',     label: 'Admin' },
+  'senior-mod': { color: 'text-purple-400', label: 'Senior Mod' },
   mod:        { color: 'text-blue-400',    label: 'Mod' },
+  helper:     { color: 'text-green-400',   label: 'Helper' },
+  vip:        { color: 'text-pink-400',    label: 'VIP' },
   user:       { color: 'text-muted-foreground', label: 'User' },
 };
 
@@ -48,6 +52,7 @@ export default function AdminPage() {
   // Custom role form
   const [crName, setCrName]   = useState('');
   const [crColor, setCrColor] = useState('#ffffff');
+  const [crColor2, setCrColor2] = useState('');
   const [crIcon, setCrIcon]   = useState('⚡');
   const [crCanDelete, setCrCanDelete] = useState(false);
   const [crPerms, setCrPerms] = useState<DB.RolePerm[]>([]);
@@ -101,14 +106,14 @@ export default function AdminPage() {
     return () => clearTimeout(timeout);
   }, [settingsName, settingsTagline, settingsWelcome, settingsUrl, matrixColor, matrixSpeed]);
 
-  if (!profile || !['owner','co-owner','admin','mod'].includes(profile.role)) return (
+  if (!profile || !['owner','co-owner','admin','senior-mod','mod'].includes(profile.role)) return (
     <div className="flex items-center justify-center h-full"><p className="text-muted-foreground">Access Denied 🚫</p></div>
   );
 
   const isOwner   = profile.email === OWNER_EMAIL || profile.role === 'owner';
   const isCoOwner = isOwner || profile.role === 'co-owner';
   const isAdmin   = isCoOwner || profile.role === 'admin';
-  const isMod     = isAdmin || profile.role === 'mod';
+  const isMod     = isAdmin || profile.role === 'mod' || profile.role === 'senior-mod';
 
   function giveGems() {
     const amount = parseInt(gemAmount); const email = targetEmail.trim();
@@ -153,9 +158,9 @@ export default function AdminPage() {
 
   function createCustomRole() {
     if (!crName.trim() || !profile) { toast.error('Enter a role name'); return; }
-    DB.addCustomRole({ id: crypto.randomUUID(), name: crName.trim(), color: crColor, icon: crIcon, canDelete: crCanDelete || crPerms.includes('delete'), permissions: crPerms, createdBy: profile.email });
+    DB.addCustomRole({ id: crypto.randomUUID(), name: crName.trim(), color: crColor, color2: crColor2 || undefined, icon: crIcon, canDelete: crCanDelete || crPerms.includes('delete'), permissions: crPerms, createdBy: profile.email });
     reload(); toast.success(`Role "${crName}" created!`);
-    setCrName(''); setCrColor('#ffffff'); setCrIcon('⚡'); setCrCanDelete(false); setCrPerms([]);
+    setCrName(''); setCrColor('#ffffff'); setCrColor2(''); setCrIcon('⚡'); setCrCanDelete(false); setCrPerms([]);
   }
 
   function assignCustomRole() {
@@ -182,7 +187,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <Tabs defaultValue={isMod && !isAdmin ? 'bans' : 'gems'}>
+      <Tabs defaultValue={isMod && !isAdmin ? 'cussreports' : 'gems'}>
         <TabsList className="mb-4 flex-wrap h-auto gap-1">
           {isAdmin && <TabsTrigger value="gems"><Gem className="w-3.5 h-3.5 mr-1" />Gems</TabsTrigger>}
           {isAdmin && <TabsTrigger value="roles"><Shield className="w-3.5 h-3.5 mr-1" />Roles</TabsTrigger>}
@@ -196,13 +201,13 @@ export default function AdminPage() {
               )}
             </TabsTrigger>
           )}
-          {isCoOwner && <TabsTrigger value="customroles">⚡ Custom Roles</TabsTrigger>}
+          {isOwner && <TabsTrigger value="customroles">⚡ Custom Roles</TabsTrigger>}
           {isOwner && <TabsTrigger value="casino"><Dices className="w-3.5 h-3.5 mr-1" />Casino Rig</TabsTrigger>}
           {isOwner && <TabsTrigger value="appsettings"><Settings className="w-3.5 h-3.5 mr-1" />Edit App</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="tags"><Tag className="w-3.5 h-3.5 mr-1" />User Tags</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="announcements"><Megaphone className="w-3.5 h-3.5 mr-1" />Announcements</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="bannednames"><UserX className="w-3.5 h-3.5 mr-1" />Name Filter</TabsTrigger>}
-          {isMod && <TabsTrigger value="bans"><Ban className="w-3.5 h-3.5 mr-1" />Bans</TabsTrigger>}
+          {isOwner && <TabsTrigger value="bans"><Ban className="w-3.5 h-3.5 mr-1" />Bans</TabsTrigger>}
           {isMod && (
             <TabsTrigger value="cussreports" className="relative">
               <AlertTriangle className="w-3.5 h-3.5 mr-1" />Reports
@@ -253,7 +258,10 @@ export default function AdminPage() {
               <p>🟡 <strong>Owner</strong> — Can do everything, assign any role, delete any message</p>
               <p>🟠 <strong>Co-Owner</strong> — Same as Owner except can't transfer ownership</p>
               <p>🔴 <strong>Admin</strong> — Can delete user/mod messages, give titles, manage bugs</p>
+              <p>🟣 <strong>Senior Mod</strong> — Lead moderator, same powers as Mod</p>
               <p>🔵 <strong>Mod</strong> — Can delete regular user messages only</p>
+              <p>🟢 <strong>Helper</strong> — Helps new people (badge only)</p>
+              <p>💖 <strong>VIP</strong> — Special supporter (badge only)</p>
             </div>
             <div>
               <Label>Pick a user ({signedUp.length} signed up)</Label>
@@ -274,7 +282,10 @@ export default function AdminPage() {
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">👤 User</SelectItem>
+                  <SelectItem value="vip">💖 VIP</SelectItem>
+                  <SelectItem value="helper">🟢 Helper</SelectItem>
                   <SelectItem value="mod">🔵 Mod</SelectItem>
+                  <SelectItem value="senior-mod">🟣 Senior Mod</SelectItem>
                   <SelectItem value="admin">🔴 Admin</SelectItem>
                   {isCoOwner && <SelectItem value="co-owner">🟠 Co-Owner</SelectItem>}
                   {isOwner   && <SelectItem value="owner">🟡 Owner</SelectItem>}
@@ -372,7 +383,15 @@ export default function AdminPage() {
                 <div><Label>Icon (emoji)</Label><Input value={crIcon} onChange={e => setCrIcon(e.target.value)} placeholder="⚡" className="mt-1" /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label>Badge Color</Label><Input type="color" value={crColor} onChange={e => setCrColor(e.target.value)} className="mt-1 h-9 cursor-pointer" /></div>
+                <div><Label>Color 1</Label><Input type="color" value={crColor} onChange={e => setCrColor(e.target.value)} className="mt-1 h-9 cursor-pointer" /></div>
+                <div><Label>Color 2 (optional gradient)</Label>
+                  <div className="flex gap-1 mt-1">
+                    <Input type="color" value={crColor2 || crColor} onChange={e => setCrColor2(e.target.value)} className="h-9 cursor-pointer flex-1" />
+                    {crColor2 && <Button type="button" variant="outline" size="sm" className="h-9" onClick={() => setCrColor2('')}>Clear</Button>}
+                  </div>
+                </div>
+              </div>
+              <div>
                 <div className="flex items-end pb-1"><label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={crCanDelete} onChange={e => setCrCanDelete(e.target.checked)} className="w-4 h-4 accent-primary" /><span className="text-sm">Can delete messages</span></label></div>
               </div>
               <div className="space-y-1.5">
@@ -388,10 +407,7 @@ export default function AdminPage() {
               </div>
               <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
                 <span className="text-xs text-muted-foreground">Preview:</span>
-                <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded border"
-                  style={{ color: crColor, borderColor: crColor + '55', backgroundColor: crColor + '18' }}>
-                  {crIcon} {crName || 'Role Name'}
-                </span>
+                <RoleChip name={crName || 'Role Name'} icon={crIcon} color={crColor} color2={crColor2 || undefined} className="text-xs" />
               </div>
               <Button onClick={createCustomRole} className="w-full">Create Custom Role</Button>
             </div>

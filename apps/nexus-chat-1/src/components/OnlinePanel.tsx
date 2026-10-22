@@ -10,7 +10,10 @@ const ROLE_COLOR: Record<string, string> = {
   owner: 'text-yellow-400',
   'co-owner': 'text-orange-400',
   admin: 'text-red-400',
+  'senior-mod': 'text-purple-400',
   mod: 'text-blue-400',
+  helper: 'text-green-400',
+  vip: 'text-pink-400',
   user: 'text-muted-foreground',
 };
 

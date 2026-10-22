@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, Globe, Flame, BadgeCheck } from 'lucide-react';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, LogOut, Globe, Flame, BadgeCheck } from 'lucide-react';
+import { logout } from 'zitejs/auth';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -62,10 +63,10 @@ export default function Sidebar({ onProfileClick }: Props) {
             )}
           </NavLink>
         ))}
-        {profile && ['owner','co-owner','admin','mod'].includes(profile.role) && (
+        {profile && ['owner','co-owner','admin','senior-mod','mod'].includes(profile.role) && (
           <NavLink to="/admin" className={({ isActive }) => cn('flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors', isActive ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-secondary hover:text-foreground')}>
             <Shield className="w-4 h-4" />
-            {profile.role === 'owner' ? 'Owner Panel' : profile.role === 'co-owner' ? 'Co-Owner Panel' : profile.role === 'admin' ? 'Admin Panel' : 'Mod Panel'}
+            {profile.role === 'owner' ? 'Owner Panel' : profile.role === 'co-owner' ? 'Co-Owner Panel' : profile.role === 'admin' ? 'Admin Panel' : profile.role === 'senior-mod' ? 'Senior Mod Panel' : 'Mod Panel'}
           </NavLink>
         )}
       </nav>
@@ -89,6 +90,9 @@ export default function Sidebar({ onProfileClick }: Props) {
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         </button>
       )}
+      <button onClick={() => logout()} className="p-2.5 border-t border-border hover:bg-destructive/10 transition-colors flex items-center gap-2 w-full text-left text-muted-foreground hover:text-destructive text-xs">
+        <LogOut className="w-3.5 h-3.5" /> Sign Out
+      </button>
     </aside>
   );
 }

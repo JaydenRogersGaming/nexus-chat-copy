@@ -2,9 +2,11 @@ import { z } from 'zod';
 import { createEndpoint, ZiteError } from 'zitejs/backend';
 import { zite } from 'zitejs/db';
 
+type RoleUser = { email: string; name: string; role: string };
+const NO_USERS: RoleUser[] = [];
 const OWNER_EMAIL = 'jaydenaltfirst@gmail.com';
-const ROLES = ['user', 'mod', 'admin', 'co-owner', 'owner'] as const;
-const RANK: Record<string, number> = { user: 0, mod: 1, admin: 2, 'co-owner': 3, owner: 4 };
+const ROLES = ['user', 'vip', 'helper', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'] as const;
+const RANK: Record<string, number> = { user: 0, vip: 1, helper: 2, mod: 3, 'senior-mod': 4, admin: 5, 'co-owner': 6, owner: 7 };
 
 async function roleOf(email: string): Promise<string> {
   if (email.toLowerCase() === OWNER_EMAIL) return 'owner';
@@ -17,25 +19,39 @@ export default createEndpoint({
   authenticated: true,
   description: 'Lists everyone who signed up with their role, and lets staff change roles',
   inputSchema: z.object({
-    action: z.enum(['list', 'set', 'mine']),
+    action: z.enum(['list', 'set', 'mine', 'profile']),
     email: z.string().optional(),
     role: z.enum(ROLES).optional(),
   }),
   outputSchema: z.object({
     myRole: z.string(),
     users: z.array(z.object({ email: z.string(), name: z.string(), role: z.string() })),
+    profile: z.object({ email: z.string(), name: z.string(), profilePic: z.string(), nameColor: z.string(), activeTitle: z.string(), activeTitleColor: z.string(), activeTitleEffect: z.string(), role: z.string(), lastSeen: z.number() }).nullable().optional(),
   }),
   execute: async ({ input, context }) => {
     const me = context.user;
     const myRole = await roleOf(me.email);
 
-    if (input.action === 'mine') return { myRole, users: [] };
+    if (input.action === 'mine') return { myRole, users: NO_USERS };
+
+    if (input.action === 'profile') {
+      const email = (input.email || '').toLowerCase();
+      const { rows } = await zite.sql({ query: `SELECT * FROM "Presence" WHERE lower("email") = $1 LIMIT 1`, params: [email] });
+      const r = rows[0];
+      if (!r) return { myRole, users: NO_USERS, profile: null };
+      return { myRole, users: NO_USERS, profile: {
+        email: String(r.email), name: String(r.displayName || email.split('@')[0]), profilePic: String(r.profilePic ?? ''),
+        nameColor: String(r.nameColor ?? ''), activeTitle: String(r.activeTitle ?? ''), activeTitleColor: String(r.activeTitleColor ?? ''),
+        activeTitleEffect: String(r.activeTitleEffect ?? ''), role: email === OWNER_EMAIL ? 'owner' : String(r.role || 'user'),
+        lastSeen: r.lastSeen ? new Date(String(r.lastSeen)).getTime() : 0,
+      } };
+    }
 
     if (input.action === 'set') {
       const email = (input.email || '').trim().toLowerCase();
       const role = input.role;
       if (!email || !role) throw new ZiteError({ code: 'BAD_REQUEST', message: 'Missing email or role', userFacingMessage: 'Pick a user and a role.' });
-      if (RANK[myRole] < 2) throw new ZiteError({ code: 'FORBIDDEN', message: 'forbidden', userFacingMessage: 'Only Admins and above can set roles.' });
+      if (RANK[myRole] < RANK.admin) throw new ZiteError({ code: 'FORBIDDEN', message: 'forbidden', userFacingMessage: 'Only Admins and above can set roles.' });
       if (email === OWNER_EMAIL) throw new ZiteError({ code: 'FORBIDDEN', message: 'owner', userFacingMessage: "The owner's role can't be changed." });
       const targetRole = await roleOf(email);
       const canAssign = myRole === 'owner' || RANK[role] < RANK[myRole];

@@ -1,3 +1,4 @@
+import RoleChip from './RoleChip';
 import { useState } from 'react';
 import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck } from 'lucide-react';
 import TitleBadge from './TitleBadge';
@@ -22,7 +23,10 @@ function getRoleInfo(role: string): RoleInfo | null {
     case 'owner':     return { label: 'Owner',     color: '#ffd700', icon: <Crown className="w-2.5 h-2.5" />,       rank: 4 };
     case 'co-owner':  return { label: 'Co-Owner',  color: '#ff9900', icon: <Star className="w-2.5 h-2.5" />,        rank: 3 };
     case 'admin':     return { label: 'Admin',     color: '#ff4444', icon: <ShieldCheck className="w-2.5 h-2.5" />, rank: 2 };
+    case 'senior-mod': return { label: 'Sr. Mod', color: '#a855f7', icon: <Shield className="w-2.5 h-2.5" />,      rank: 1 };
     case 'mod':       return { label: 'Mod',       color: '#44aaff', icon: <Shield className="w-2.5 h-2.5" />,      rank: 1 };
+    case 'helper':    return { label: 'Helper',    color: '#22c55e', icon: <Shield className="w-2.5 h-2.5" />,      rank: 0 };
+    case 'vip':       return { label: 'VIP',       color: '#ec4899', icon: <Star className="w-2.5 h-2.5" />,        rank: 0 };
     default:          return null;
   }
 }
@@ -32,7 +36,7 @@ function getDeleteStyle(deleterRole: string): string {
     case 'owner':    return 'text-yellow-400 hover:bg-yellow-400/20';
     case 'co-owner': return 'text-orange-400 hover:bg-orange-400/20';
     case 'admin':    return 'text-destructive hover:bg-destructive/20';
-    case 'mod':      return 'text-blue-400 hover:bg-blue-400/20';
+    case 'mod': case 'senior-mod': return 'text-blue-400 hover:bg-blue-400/20';
     default:         return 'text-muted-foreground hover:bg-muted/30';
   }
 }
@@ -110,10 +114,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             </span>
           )}
           {msg.senderEmail !== OWNER_EMAIL && senderCustomRole && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded border"
-              style={{ color: senderCustomRoleColor, borderColor: senderCustomRoleColor + '55', backgroundColor: senderCustomRoleColor + '18' }}>
-              {senderCustomRole}
-            </span>
+            <RoleChip name={senderCustomRole} color={senderCustomRoleColor} color2={senderUser?.customRoleColor2 || undefined} className="text-[9px]" />
           )}
           {(() => { const tag = DB.getUserTagForUser(msg.senderEmail); return tag ? (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full"

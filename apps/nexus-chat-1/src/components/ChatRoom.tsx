@@ -15,7 +15,10 @@ import { messages as messagesApi, chatBot, typing as typingApi, roles as rolesAp
 
 const ROLE_OPTIONS = [
   { id: 'user', label: '👤 User', desc: 'Regular member' },
-  { id: 'mod', label: '🔵 Mod', desc: 'Delete user messages, mute, ban' },
+  { id: 'vip', label: '💖 VIP', desc: 'Special supporter badge' },
+  { id: 'helper', label: '🟢 Helper', desc: 'Helps new people out' },
+  { id: 'mod', label: '🔵 Mod', desc: 'Delete user messages, mute' },
+  { id: 'senior-mod', label: '🟣 Senior Mod', desc: 'Lead moderator' },
   { id: 'admin', label: '🔴 Admin', desc: 'Titles, bugs, delete mod messages' },
   { id: 'co-owner', label: '🟠 Co-Owner', desc: 'Almost everything' },
   { id: 'owner', label: '🟡 Owner', desc: 'Full control' },
@@ -39,9 +42,9 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const cooldownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isOwner = profile?.email === OWNER_EMAIL || profile?.role === 'owner';
-  const isStaff = !!profile && (isOwner || ['owner', 'co-owner', 'admin', 'mod'].includes(profile.role));
+  const isStaff = !!profile && (isOwner || ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'].includes(profile.role));
   const canMute = isStaff || DB.hasPerm(profile, 'mute');
-  const canBan = isStaff || DB.hasPerm(profile, 'ban');
+  const canBan = isOwner; // banning is owner-only
   const canClear = isOwner || profile?.role === 'co-owner' || DB.hasPerm(profile, 'clearchat');
   const canGiveRole = isOwner || profile?.role === 'co-owner' || DB.hasPerm(profile, 'giverole');
   const [signedUp, setSignedUp] = useState<RolesOutputType['users']>([]);
@@ -368,7 +371,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       DB.addCustomRole(role);
       addGems(-250);
       DB.assignCustomRole(profile.email, role.id);
-      updateProfile({ customRole: role.name, customRoleColor: role.color });
+      updateProfile({ customRole: role.name, customRoleColor: role.color, customRoleColor2: role.color2 || '' });
       postBot(`🎉 Done! @${profile.name} now has the custom role ✨ ${name}. That'll be 💎 250 gems, pleasure doing business 😎`);
       return;
     }
