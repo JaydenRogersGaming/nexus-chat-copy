@@ -126,7 +126,7 @@ export default function AiChatPage() {
           <span className="text-xs text-muted-foreground">Chat + Image Gen</span>
         </div>
         <div className="flex gap-1.5">
-          <Button size="sm" variant="outline" onClick={() => setBadgeOpen(true)}><Award className="w-3.5 h-3.5 mr-1" />Badge Maker</Button>
+          {isOwner && <Button size="sm" variant="outline" onClick={() => setBadgeOpen(true)}><Award className="w-3.5 h-3.5 mr-1" />Badge Maker</Button>}
           <AiTitleMaker />
           <Button size="sm" variant="outline" onClick={newChat}>
             <Plus className="w-3.5 h-3.5 mr-1" /> New
@@ -214,7 +214,7 @@ export default function AiChatPage() {
           Press Enter to chat • 📎 upload a picture (homework, screenshots, anything){isOwner ? ' • Click 🖼️ to generate an image' : ''}
         </p>
       </div>
-      <BadgeMaker open={badgeOpen} onClose={() => setBadgeOpen(false)} />
+      {isOwner && <BadgeMaker open={badgeOpen} onClose={() => setBadgeOpen(false)} />}
     </div>
   );
 }
