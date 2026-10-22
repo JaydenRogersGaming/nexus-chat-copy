@@ -45,7 +45,7 @@
     --secondary: 222 28% 16%;
     --secondary-foreground: 0 0% 90%;
     --muted: 222 28% 16%;
-    --muted-foreground: 222 15% 55%;
+    --muted-foreground: 222 22% 78%;
     --accent: 270 75% 58%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 75% 55%;
@@ -69,6 +69,8 @@
   ::-webkit-scrollbar-track { @apply bg-background; }
   ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
   ::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground; }
+  /* Bright icons that stand out on any background/theme */
+  svg.lucide { filter: brightness(1.35) drop-shadow(0 0 1.5px rgba(0,0,0,0.9)); }
 }
 
 /* ── Title Effects ── */

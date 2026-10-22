@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useApp } from '../contexts/AppContext';
 import { OWNER_EMAIL } from '../lib/gameData';
 import * as P from '../lib/personalize';
+import CustomBackground from './CustomBackground';
 
 export default function PersonalizeSettings() {
   const { profile, addGems } = useApp();
@@ -49,6 +50,8 @@ export default function PersonalizeSettings() {
         </div>
         <div className="mt-2 px-3 py-2 rounded-lg bg-secondary text-sm" style={P.textStyleCss(style)}>Preview: hey everyone 👋</div>
       </div>
+
+      <CustomBackground />
 
       <div>
         <h3 className="text-sm font-semibold flex items-center gap-2 mb-1"><Code2 className="w-4 h-4" />Custom CSS</h3>

@@ -47,6 +47,12 @@ export function unlockCustomCss(email: string) { write('nexus_css_owners', [...r
 export function getCustomCss(email: string) { return read<string>(`nexus_css_${email}`, ''); }
 export function setCustomCss(email: string, css: string) { write(`nexus_css_${email}`, css); }
 
+export const CUSTOM_BG_PRICE = 300;
+export function hasCustomBg(email: string) { return read<string[]>('nexus_bg_owners', []).includes(email); }
+export function unlockCustomBg(email: string) { write('nexus_bg_owners', [...read<string[]>('nexus_bg_owners', []), email]); }
+export function getCustomBg(email: string) { return read<string>(`nexus_bgimg_${email}`, ''); }
+export function setCustomBg(email: string, url: string) { write(`nexus_bgimg_${email}`, url); }
+
 export type MusicPrefs = { url: string; volume: number; playing: boolean };
 export function getMusic(): MusicPrefs { return { url: SONGS[0].url, volume: 0.4, playing: false, ...read('nexus_music', {}) }; }
 export function setMusic(m: MusicPrefs) { write('nexus_music', m); }

@@ -215,9 +215,13 @@ export default function Layout() {
   }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
   const bgCss = BG_THEMES.find(b => b.id === bgId)?.css;
   const [myCss, setMyCss] = useState('');
+  const [myBg, setMyBg] = useState('');
   useEffect(() => {
     if (!profile) return;
-    const sync = () => setMyCss(P.hasCustomCss(profile.email) || profile.email === OWNER_EMAIL ? P.getCustomCss(profile.email) : '');
+    const sync = () => {
+      setMyCss(P.hasCustomCss(profile.email) || profile.email === OWNER_EMAIL ? P.getCustomCss(profile.email) : '');
+      setMyBg(P.hasCustomBg(profile.email) || profile.email === OWNER_EMAIL ? P.getCustomBg(profile.email) : '');
+    };
     sync();
     window.addEventListener(P.PERSONALIZE_EVENT, sync);
     return () => window.removeEventListener(P.PERSONALIZE_EVENT, sync);
@@ -233,7 +237,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background" style={bgCss ? { background: bgCss } : undefined}>
+    <div className="flex h-screen overflow-hidden bg-background" style={myBg ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : bgCss ? { background: bgCss } : undefined}>
       <Sidebar onProfileClick={() => setProfileOpen(true)} />
       <div className="flex-1 flex flex-col min-w-0">
         {impersonating && (
