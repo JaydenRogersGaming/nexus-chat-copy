@@ -180,7 +180,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Sync my role from the shared server (roles set by staff on any device)
   useEffect(() => {
     if (!user?.email) return;
-    const sync = () => rolesApi({ action: 'mine' }).then(({ myRole }) => {
+    const sync = () => rolesApi({ action: 'list' }).then(({ myRole, users }) => {
+      // Keep every locally-known user's role in line with the shared server copy
+      for (const su of users) {
+        const lu = DB.getUser(su.email);
+        if (lu && lu.role !== su.role && su.email !== OWNER_EMAIL) DB.saveUser({ ...lu, role: su.role as DB.UserProfile['role'] });
+      }
       const p = DB.getUser(user.email);
       if (p && p.role !== myRole && user.email !== OWNER_EMAIL) {
         DB.saveUser({ ...p, role: myRole as DB.UserProfile['role'] });
@@ -188,7 +193,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     }).catch(() => {});
     sync();
-    const t = setInterval(sync, 20000);
+    const t = setInterval(sync, 10000);
     return () => clearInterval(t);
   }, [user?.email]);
 
