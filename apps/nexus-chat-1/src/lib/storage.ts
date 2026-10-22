@@ -224,13 +224,14 @@ export function ensureBotUser(): UserProfile {
 }
 
 // ── Role permissions ──────────────────────────────────────────
-export type RolePerm = 'mute' | 'ban' | 'clearchat' | 'giverole' | 'delete';
+export type RolePerm = 'mute' | 'ban' | 'clearchat' | 'giverole' | 'delete' | 'editusers';
 export const ROLE_PERMS: { id: RolePerm; label: string }[] = [
   { id: 'mute', label: 'Mute / unmute users' },
   { id: 'ban', label: 'Ban / unban users' },
   { id: 'clearchat', label: 'Clear chat' },
   { id: 'giverole', label: 'Give custom roles' },
   { id: 'delete', label: 'Delete messages' },
+  { id: 'editusers', label: 'Edit user accounts' },
 ];
 export function hasPerm(p: UserProfile | null | undefined, perm: RolePerm): boolean {
   if (!p || !p.customRole) return false;
