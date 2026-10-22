@@ -103,6 +103,18 @@ export const TITLE_FONTS: Record<string, { label: string; family: string }> = {
   spooky:    { label: 'Spooky (Creepster)', family: "'Creepster', cursive" },
   marker:    { label: 'Marker', family: "'Permanent Marker', cursive" },
   royal:     { label: 'Royal (Cinzel)', family: "'Cinzel', serif" },
+  lobster:   { label: 'Lobster', family: "'Lobster', cursive" },
+  graffiti:  { label: 'Graffiti (Rubik Spray)', family: "'Rubik Spray Paint', cursive" },
+  glitch:    { label: 'Glitch (Rubik Glitch)', family: "'Rubik Glitch', cursive" },
+  bubble:    { label: 'Bubble (Bungee)', family: "'Bungee', cursive" },
+  neon:      { label: 'Neon (Monoton)', family: "'Monoton', cursive" },
+  western:   { label: 'Western (Rye)', family: "'Rye', serif" },
+  gothic:    { label: 'Gothic (UnifrakturMaguntia)', family: "'UnifrakturMaguntia', cursive" },
+  handwrite: { label: 'Handwritten (Caveat)', family: "'Caveat', cursive" },
+  arcade:    { label: 'Arcade (Silkscreen)', family: "'Silkscreen', monospace" },
+  bold:      { label: 'Chunky (Black Ops One)', family: "'Black Ops One', cursive" },
+  elegant:   { label: 'Elegant (Great Vibes)', family: "'Great Vibes', cursive" },
+  space:     { label: 'Space (Audiowide)', family: "'Audiowide', cursive" },
 };
 
 export const EFFECT_TO_CLASS: Record<string, string> = {
