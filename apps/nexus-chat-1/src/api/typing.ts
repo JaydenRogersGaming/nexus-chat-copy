@@ -9,8 +9,9 @@ export default createEndpoint({
     roomId: z.string(),
     email: z.string().optional(),
     name: z.string().optional(),
+    style: z.string().optional(),
   }),
-  outputSchema: z.object({ typing: z.array(z.object({ email: z.string(), name: z.string() })) }),
+  outputSchema: z.object({ typing: z.array(z.object({ email: z.string(), name: z.string(), style: z.string() })) }),
   execute: async ({ input }) => {
     if ((input.action === 'start' || input.action === 'stop') && input.email) {
       await zite.presence.bulkCreate({
@@ -18,6 +19,7 @@ export default createEndpoint({
         records: [{
           email: input.email,
           ...(input.name ? { displayName: input.name } : {}),
+          ...(input.style !== undefined ? { typingStyle: input.style } : {}),
           typingRoom: input.action === 'start' ? input.roomId : null,
           typingAt: input.action === 'start' ? new Date().toISOString() : null,
         } as never],
@@ -25,9 +27,9 @@ export default createEndpoint({
     }
     const cutoff = new Date(Date.now() - 6000).toISOString();
     const { rows } = await zite.sql({
-      query: `SELECT "email","displayName" FROM "Presence" WHERE "typingRoom" = $1 AND "typingAt" > $2`,
+      query: `SELECT "email","displayName","typingStyle" FROM "Presence" WHERE "typingRoom" = $1 AND "typingAt" > $2`,
       params: [input.roomId, cutoff],
     });
-    return { typing: rows.map(r => ({ email: String(r.email ?? ''), name: String(r.displayName ?? '') })) };
+    return { typing: rows.map(r => ({ email: String(r.email ?? ''), name: String(r.displayName ?? ''), style: String(r.typingStyle ?? '') })) };
   },
 });

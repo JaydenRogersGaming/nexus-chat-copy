@@ -4,6 +4,7 @@ import { ACHIEVEMENTS } from '../lib/gameData';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
+import ProBadge from '../components/ProBadge';
 
 export default function AchievementsPage() {
   const { profile } = useApp();
@@ -31,7 +32,7 @@ export default function AchievementsPage() {
           return (
             <div key={a.id} className={cn('p-4 rounded-xl border transition-all', isEarned ? 'border-yellow-500/40 bg-yellow-500/10 shadow-lg' : 'border-border bg-card/50 opacity-60 grayscale')}>
               <div className="flex items-start gap-3">
-                <span className="text-3xl">{a.icon}</span>
+                <ProBadge icon="Trophy" color={isEarned ? '#f6d365' : '#9ca3af'} color2={isEarned ? '#c8901a' : '#4b5563'} size={44} title={a.icon} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-sm truncate">{a.name}</h3>

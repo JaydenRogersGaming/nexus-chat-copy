@@ -9,6 +9,7 @@ import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
+import { TYPING_STYLES } from '../lib/cosmetics';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
 import { messages as messagesApi, chatBot, typing as typingApi, roles as rolesApi, RolesOutputType } from 'zitejs/api';
@@ -68,7 +69,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const load = useCallback(async () => {
     typingApi({ action: 'list', roomId: room.id }).then(({ typing: list }) => {
       const next = list.filter(t => t.email !== profile?.email).map(t => ({ ...t, lastActive: Date.now() }));
-      setTypingList(prev => prev.length === next.length && prev.every((p, i) => p.email === next[i].email) ? prev : next);
+      setTypingList(prev => prev.length === next.length && prev.every((p, i) => p.email === next[i].email && p.style === next[i].style) ? prev : next);
     }).catch(() => {});
     if (loadingRef.current) return;
     loadingRef.current = true;
@@ -98,7 +99,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     const now = Date.now();
     if (!isTypingRef.current || now - lastTypingPing.current > 1500) {
       DB.setTyping(room.id, profile.email, profile.name);
-      if (now - lastTypingPing.current > 2500) typingApi({ action: 'start', roomId: room.id, email: profile.email, name: profile.name }).catch(() => {});
+      if (now - lastTypingPing.current > 2500) typingApi({ action: 'start', roomId: room.id, email: profile.email, name: profile.name, style: DB.getEquipped(profile.email).typing }).catch(() => {});
       isTypingRef.current = true; lastTypingPing.current = now;
     }
     stopTyping();
@@ -284,9 +285,16 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     }
 
     const isGif = text.startsWith('[gif]');
-    const { censored, hadProfanity } = isGif ? { censored: text, hadProfanity: false } : censorMessage(text);
+    const base = isGif ? { censored: text, hadProfanity: false } : censorMessage(text);
+    const customHit = !isGif && DB.hasCustomBadWord(base.censored);
+    const censored = customHit ? DB.censorCustom(base.censored) : base.censored;
+    const hadProfanity = base.hadProfanity || customHit;
+    const immune = DB.isMuteImmune(profile.email);
 
-    if (hadProfanity && !isOwner) {
+    if (hadProfanity && !isOwner && immune) {
+      DB.addCussReport({ id: crypto.randomUUID(), email: profile.email, name: profile.name, originalMessage: text, censoredMessage: censored, chatRoomId: room.id, timestamp: Date.now(), resolved: false });
+    }
+    if (hadProfanity && !isOwner && !immune) {
       DB.muteUser(profile.email, 10 * 60 * 1000, 'Profanity');
       DB.addCussReport({ id: crypto.randomUUID(), email: profile.email, name: profile.name, originalMessage: text, censoredMessage: censored, chatRoomId: room.id, timestamp: Date.now(), resolved: false });
       toast.error('🔇 Profanity detected. Muted for 10 minutes.');
@@ -437,9 +445,13 @@ export default function ChatRoom({ room, onStartDM }: Props) {
               <span key={i} className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
             ))}
           </span>
-          <span className="text-xs text-muted-foreground italic">
-            <span className="text-foreground/70 font-medium">{typing.map(t => t.name).join(', ')}</span>
-            {' '}{typing.length === 1 ? 'is' : 'are'} typing…
+          <span className="text-xs text-muted-foreground italic flex flex-wrap gap-x-3">
+            {typing.map(t => {
+              const st = TYPING_STYLES.find(x => x.id === t.style);
+              return st
+                ? <span key={t.email} className={st.className} style={{ color: st.color }}><span className="font-semibold not-italic">{t.name}</span> {st.text}</span>
+                : <span key={t.email}><span className="text-foreground/70 font-medium">{t.name}</span> is typing…</span>;
+            })}
           </span>
         </div>
       )}

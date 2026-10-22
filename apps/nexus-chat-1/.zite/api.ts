@@ -2,6 +2,7 @@
 
 import { createCaller, createStreamingCaller } from 'zitejs/caller';
 
+import type { default as _AiBadgeEp } from '../src/api/aiBadge';
 import type { default as _AiTitleEp } from '../src/api/aiTitle';
 import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _ChatBotEp } from '../src/api/chatBot';
@@ -11,6 +12,11 @@ import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
 import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _TypingEp } from '../src/api/typing';
+
+type _AiBadgeCfg = typeof _AiBadgeEp;
+export type AiBadgeInputType = NonNullable<_AiBadgeCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiBadgeCfg['execute']>[0]['input'];
+export type AiBadgeOutputType = Awaited<ReturnType<_AiBadgeCfg['execute']>>;
+export const aiBadge = createCaller<AiBadgeInputType, AiBadgeOutputType>('aiBadge');
 
 type _AiTitleCfg = typeof _AiTitleEp;
 export type AiTitleInputType = NonNullable<_AiTitleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiTitleCfg['execute']>[0]['input'];
@@ -59,6 +65,7 @@ export const typing = createCaller<TypingInputType, TypingOutputType>('typing');
 
 
 export const api = {
+  aiBadge,
   aiTitle,
   chat,
   chatBot,

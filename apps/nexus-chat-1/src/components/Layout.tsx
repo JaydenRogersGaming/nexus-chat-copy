@@ -11,6 +11,9 @@ import { Button } from '@project/components/ui/button';
 import { Bug, EyeOff, Megaphone, X, Settings, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import * as DB from '../lib/storage';
+import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
+import { BG_THEMES } from '../lib/cosmetics';
+import { useApp } from '../contexts/AppContext';
 
 const CLOAK_PRESETS = [
   { label: 'Google Docs', title: 'Untitled document - Google Docs', favicon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
@@ -116,6 +119,7 @@ function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }
           <button onClick={onClose} className="ml-auto text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          <SettingsExtras />
           {/* Cloak Presets */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2"><EyeOff className="w-4 h-4" /> Tab Cloak</h3>
@@ -176,6 +180,17 @@ export default function Layout() {
     return () => clearInterval(t);
   }, [dismissedIds]);
 
+  const { profile } = useApp();
+  const [bgId, setBgId] = useState('');
+  useEffect(() => {
+    if (!profile) return;
+    const sync = () => setBgId(DB.getEquipped(profile.email).bg);
+    sync();
+    window.addEventListener(COSMETICS_EVENT, sync);
+    return () => window.removeEventListener(COSMETICS_EVENT, sync);
+  }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
+  const bgCss = BG_THEMES.find(b => b.id === bgId)?.css;
+
   function dismissAnnouncement() {
     if (!announcement) return;
     const next = new Set(dismissedIds);
@@ -186,7 +201,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-background" style={bgCss ? { background: bgCss } : undefined}>
       <Sidebar onProfileClick={() => setProfileOpen(true)} />
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}

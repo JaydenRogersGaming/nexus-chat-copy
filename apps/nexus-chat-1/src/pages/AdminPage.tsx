@@ -89,6 +89,26 @@ export default function AdminPage() {
   // Banned names
   const [bannedNames, setBannedNames] = useState<string[]>(DB.getBannedNames());
   const [newBannedName, setNewBannedName] = useState('');
+  const [chatWordsText, setChatWordsText] = useState(() => DB.getChatWords().join('\n'));
+  const [wordsSaved, setWordsSaved] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [immuneSearch, setImmuneSearch] = useState('');
+  const [immune, setImmune] = useState<string[]>(() => DB.getMuteImmune());
+  useEffect(() => {
+    if (chatWordsText === DB.getChatWords().join('\n')) return;
+    setWordsSaved('saving');
+    const t = setTimeout(() => { DB.setChatWords(chatWordsText.split(/[\n,]/)); setWordsSaved('saved'); }, 700);
+    return () => clearTimeout(t);
+  }, [chatWordsText]);
+  // Name filter: auto-add after you stop typing
+  useEffect(() => {
+    const w = newBannedName.trim();
+    if (!w) return;
+    const t = setTimeout(() => {
+      if (!DB.getBannedNames().includes(w)) { DB.addBannedName(w); setBannedNames(DB.getBannedNames()); toast.success(`Auto-saved "${w}"`); }
+      setNewBannedName('');
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [newBannedName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const reload = () => { setUsers(DB.getAllUsers()); setBugs(DB.getBugs()); setCustomRoles(DB.getCustomRoles()); setBans(DB.getBans()); setCussReports(DB.getCussReports()); setAnnouncements(DB.getAnnouncements()); setUserTags(DB.getUserTags()); };
   useEffect(reload, []);
@@ -206,7 +226,7 @@ export default function AdminPage() {
           {isOwner && <TabsTrigger value="appsettings"><Settings className="w-3.5 h-3.5 mr-1" />Edit App</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="tags"><Tag className="w-3.5 h-3.5 mr-1" />User Tags</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="announcements"><Megaphone className="w-3.5 h-3.5 mr-1" />Announcements</TabsTrigger>}
-          {isCoOwner && <TabsTrigger value="bannednames"><UserX className="w-3.5 h-3.5 mr-1" />Name Filter</TabsTrigger>}
+          {isCoOwner && <TabsTrigger value="bannednames"><UserX className="w-3.5 h-3.5 mr-1" />Word Filter</TabsTrigger>}
           {isOwner && <TabsTrigger value="bans"><Ban className="w-3.5 h-3.5 mr-1" />Bans</TabsTrigger>}
           {isMod && (
             <TabsTrigger value="cussreports" className="relative">
@@ -711,12 +731,41 @@ export default function AdminPage() {
         {/* Banned Names */}
         {isCoOwner && (
           <TabsContent value="bannednames" className="space-y-4">
+            <div className="p-4 bg-card border border-border rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">💬 Chat Word Filter</h3>
+                <span className="text-[10px] text-muted-foreground">{wordsSaved === 'saving' ? 'Saving…' : wordsSaved === 'saved' ? '✓ Auto-saved' : 'Auto-saves as you type'}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Extra words blocked in chat (one per line or comma-separated). Saying one censors it and auto-mutes for 10 min.</p>
+              <textarea value={chatWordsText} onChange={e => setChatWordsText(e.target.value)} rows={4} placeholder={'word1\nword2'}
+                className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            {isOwner && (
+              <div className="p-4 bg-card border border-border rounded-xl space-y-2">
+                <h3 className="font-semibold">🛡️ Auto-Mute Immunity</h3>
+                <p className="text-xs text-muted-foreground">Immune people still get bad words censored, but won't be auto-muted.</p>
+                <Input value={immuneSearch} onChange={e => setImmuneSearch(e.target.value)} placeholder="Search name or email…" />
+                <div className="max-h-56 overflow-y-auto border border-border rounded-lg divide-y divide-border">
+                  {signedUp.filter(u => { const q = immuneSearch.toLowerCase(); return !q || u.email.toLowerCase().includes(q) || u.name.toLowerCase().includes(q); }).map(u => {
+                    const on = immune.includes(u.email);
+                    return (
+                      <button key={u.email} type="button" onClick={() => { const now = DB.toggleMuteImmune(u.email); setImmune(DB.getMuteImmune()); toast.success(now ? `🛡️ ${u.name} is now immune` : `${u.name} is no longer immune`); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-left text-xs hover:bg-secondary/50 ${on ? 'bg-primary/10' : ''}`}>
+                        <span><span className="font-semibold">{u.name}</span> <span className="text-muted-foreground">{u.email}</span></span>
+                        <span className={on ? 'text-primary font-bold' : 'text-muted-foreground'}>{on ? '🛡️ Immune' : 'Not immune'}</span>
+                      </button>
+                    );
+                  })}
+                  {signedUp.length === 0 && <p className="px-3 py-3 text-xs text-muted-foreground">Loading users…</p>}
+                </div>
+              </div>
+            )}
             <div className="p-4 bg-card border border-border rounded-xl space-y-3">
               <div className="flex items-center gap-2">
                 <UserX className="w-5 h-5 text-orange-400" />
                 <h3 className="font-semibold">Inappropriate Name Filter</h3>
               </div>
-              <p className="text-xs text-muted-foreground">Add words/names that are not allowed as display names. Users with these words in their name will be flagged.</p>
+              <p className="text-xs text-muted-foreground">Add words/names that are not allowed as display names. Type a word and it auto-saves after a second.</p>
               <div className="flex gap-2">
                 <Input value={newBannedName} onChange={e => setNewBannedName(e.target.value)} placeholder="Enter word or name to ban..." className="flex-1"
                   onKeyDown={e => { if (e.key === 'Enter') { if (newBannedName.trim()) { DB.addBannedName(newBannedName.trim()); setBannedNames(DB.getBannedNames()); setNewBannedName(''); toast.success('Added to filter!'); } } }} />

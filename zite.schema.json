@@ -114,6 +114,15 @@
               "displayTimeZone": false
             }
           }
+        },
+        {
+          "id": "f2V65rENnDY",
+          "sdkName": "typingStyle",
+          "definition": {
+            "name": "Typing Style",
+            "type": "single_line_text",
+            "template": {}
+          }
         }
       ]
     },

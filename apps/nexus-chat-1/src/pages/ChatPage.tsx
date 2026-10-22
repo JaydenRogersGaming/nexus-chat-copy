@@ -10,6 +10,7 @@ import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
 import { toast } from 'sonner';
+import { roleRoomsFor } from '../lib/roleRooms';
 
 export default function ChatPage() {
   const { profile, unreadCount, setUnreadCount, setActiveRoomId } = useApp();
@@ -30,7 +31,7 @@ export default function ChatPage() {
   const loadRooms = useCallback(() => {
     if (!profile) return;
     const all = DB.getChatRooms();
-    const accessible = all.filter(r => r.type === 'global' || r.members.includes(profile.email));
+    const accessible = [...all.filter(r => r.type === 'global' || r.members.includes(profile.email)), ...roleRoomsFor(profile)];
     setRooms(accessible);
 
     const currentId = activeRoomRef.current?.id;
@@ -49,7 +50,7 @@ export default function ChatPage() {
       const global = accessible.find(r => r.id === 'global');
       if (global) { setActiveRoom(global); setActiveRoomId('global'); }
     }
-  }, [profile?.email, setActiveRoomId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profile?.email, profile?.role, setActiveRoomId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     loadRooms();
@@ -88,7 +89,8 @@ export default function ChatPage() {
   }
 
   const globalRoom = rooms.find(r => r.id === 'global');
-  const groupRooms = rooms.filter(r => r.type === 'group');
+  const roleRooms = rooms.filter(r => r.id.startsWith('role-'));
+  const groupRooms = rooms.filter(r => r.type === 'group' && !r.id.startsWith('role-'));
   const dmRooms = rooms.filter(r => r.type === 'dm');
 
   return (
@@ -99,6 +101,12 @@ export default function ChatPage() {
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2 mb-1">Global</p>
           {globalRoom && <RoomItem room={globalRoom} active={activeRoom?.id === globalRoom.id} onClick={() => selectRoom(globalRoom)} />}
         </div>
+        {roleRooms.length > 0 && (
+          <div className="p-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2 mb-1">Role Rooms</p>
+            {roleRooms.map(r => <RoomItem key={r.id} room={r} active={activeRoom?.id === r.id} onClick={() => selectRoom(r)} />)}
+          </div>
+        )}
         <div className="p-2">
           <div className="flex items-center justify-between px-2 mb-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Groups</p>

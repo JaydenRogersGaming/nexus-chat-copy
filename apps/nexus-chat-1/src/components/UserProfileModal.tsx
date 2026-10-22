@@ -3,7 +3,7 @@ import { Crown, ShieldCheck, Shield, Star, MessageSquare, Gem, Trophy, Dices, Me
 import { Button } from '@project/components/ui/button';
 import TitleBadge from './TitleBadge';
 import RoleChip from './RoleChip';
-import { BADGE_DEFS } from '../lib/badges';
+import ProBadge, { badgeLook } from './ProBadge';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
 import { useEffect, useState } from 'react';
@@ -140,11 +140,11 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {userBadges.map(bId => {
-                  const badge = BADGE_DEFS.find(b => b.id === bId);
+                  const badge = badgeLook(bId);
                   if (!badge) return null;
                   return (
-                    <span key={bId} className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg border border-border bg-secondary/30" title={badge.description}>
-                      <span>{badge.icon}</span>{badge.name}
+                    <span key={bId} className="inline-flex items-center gap-1.5 text-[10px] font-bold pl-1 pr-2 py-1 rounded-lg border border-border bg-secondary/30" title={badge.description}>
+                      <ProBadge icon={badge.icon} color={badge.color} color2={badge.color2} size={22} />{badge.name}
                     </span>
                   );
                 })}

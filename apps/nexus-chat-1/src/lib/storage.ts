@@ -150,7 +150,7 @@ export type Suggestion = {
   timestamp: number;
 };
 
-export type TypingUser = { email: string; name: string; lastActive: number };
+export type TypingUser = { email: string; name: string; lastActive: number; style?: string };
 
 export type Notification = {
   id: string;
@@ -578,4 +578,80 @@ export function initBroadcast(): () => void {
 }
 export function onBroadcast(fn: Listener): () => void {
   _listeners.push(fn); return () => { const i = _listeners.indexOf(fn); if (i !== -1) _listeners.splice(i, 1); };
+}
+
+// ── Calendar Events ───────────────────────────────────────────
+export type CalendarEvent = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  title: string;
+  type: 'holiday' | 'event' | 'birthday';
+  emoji: string;
+  color: string;
+  roleName: string;
+  targetEmail?: string;
+  yearly: boolean;
+  createdBy: string;
+};
+export function getEvents(): CalendarEvent[] { return g<CalendarEvent[]>('calendarEvents') || []; }
+export function addEvent(e: CalendarEvent) { const l = getEvents(); l.push(e); s('calendarEvents', l); }
+export function deleteEvent(id: string) { s('calendarEvents', getEvents().filter(e => e.id !== id)); }
+export function toDateKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+export function eventsOn(dateKey: string): CalendarEvent[] {
+  return getEvents().filter(e => e.date === dateKey || (e.yearly && e.date.slice(5) === dateKey.slice(5) && e.date <= dateKey));
+}
+export function getDailyRolesFor(email: string): CalendarEvent[] {
+  return eventsOn(toDateKey(new Date())).filter(e => e.roleName && (!e.targetEmail || e.targetEmail === email));
+}
+
+// ── Auto-mute immunity ────────────────────────────────────────
+export function getMuteImmune(): string[] { return g<string[]>('muteImmune') || []; }
+export function isMuteImmune(email: string) { return getMuteImmune().includes(email); }
+export function toggleMuteImmune(email: string): boolean {
+  const l = getMuteImmune(); const on = !l.includes(email);
+  s('muteImmune', on ? [...l, email] : l.filter(e => e !== email)); return on;
+}
+
+// ── Chat word filter (custom words, auto-saved) ───────────────
+export function getChatWords(): string[] { return g<string[]>('chatWords') || []; }
+export function setChatWords(words: string[]) { s('chatWords', [...new Set(words.map(w => w.trim().toLowerCase()).filter(Boolean))]); }
+export function hasCustomBadWord(text: string): boolean {
+  const t = text.toLowerCase();
+  return getChatWords().some(w => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(t));
+}
+export function censorCustom(text: string): string {
+  let out = text;
+  for (const w of getChatWords()) out = out.replace(new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), m => '#'.repeat(m.length));
+  return out;
+}
+
+// ── Cosmetics (backgrounds + typing styles) ───────────────────
+export function getUserItems(email: string): string[] { return (g<Record<string, string[]>>('userItems') || {})[email] || []; }
+export function addUserItem(email: string, id: string) {
+  const all = g<Record<string, string[]>>('userItems') || {};
+  all[email] = [...new Set([...(all[email] || []), id])]; s('userItems', all);
+}
+export function getEquipped(email: string): { bg: string; typing: string } {
+  return (g<Record<string, { bg: string; typing: string }>>('equipped') || {})[email] || { bg: '', typing: '' };
+}
+export function setEquipped(email: string, patch: Partial<{ bg: string; typing: string }>) {
+  const all = g<Record<string, { bg: string; typing: string }>>('equipped') || {};
+  all[email] = { ...{ bg: '', typing: '' }, ...all[email], ...patch }; s('equipped', all);
+}
+
+// ── Personal matrix color (sign-in / loading screen) ──────────
+export function getMyMatrixColor(): string { return localStorage.getItem('hub:myMatrixColor') || ''; }
+export function setMyMatrixColor(c: string) { if (c) localStorage.setItem('hub:myMatrixColor', c); else localStorage.removeItem('hub:myMatrixColor'); }
+
+// ── Custom badges (Badge Maker) ───────────────────────────────
+export type CustomBadge = { id: string; name: string; description: string; icon: string; color: string; color2: string; createdBy: string };
+export function getCustomBadges(): CustomBadge[] { return g<CustomBadge[]>('customBadges') || []; }
+export function addCustomBadge(b: CustomBadge) { s('customBadges', [...getCustomBadges(), b]); }
+export function deleteCustomBadge(id: string) { s('customBadges', getCustomBadges().filter(b => b.id !== id)); }
+export function awardBadge(email: string, badgeId: string): boolean {
+  const u = getUser(email); if (!u) return false;
+  if (!u.badges.includes(badgeId)) saveUser({ ...u, badges: [...u.badges, badgeId] });
+  return true;
 }

@@ -7,6 +7,8 @@ import { SHOP_TITLES } from '../lib/gameData';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
+import CosmeticShop from './CosmeticShop';
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -39,12 +41,21 @@ export default function ShopModal({ open, onClose }: Props) {
       <DialogContent className="bg-card border-border max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Gem className="w-5 h-5 text-purple-400" /> Title Shop
+            <Gem className="w-5 h-5 text-purple-400" /> Shop
             <span className="ml-auto text-sm font-normal text-purple-300 flex items-center gap-1">
               <Gem className="w-3.5 h-3.5" />{(profile.gems ?? 0) >= 999999999 ? '∞' : (profile.gems ?? 0).toLocaleString()} gems
             </span>
           </DialogTitle>
         </DialogHeader>
+        <Tabs defaultValue="titles" className="mt-2">
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="titles">Titles</TabsTrigger>
+            <TabsTrigger value="bg">Backgrounds</TabsTrigger>
+            <TabsTrigger value="typing">Typing</TabsTrigger>
+          </TabsList>
+          <TabsContent value="bg"><CosmeticShop kind="bg" /></TabsContent>
+          <TabsContent value="typing"><CosmeticShop kind="typing" /></TabsContent>
+          <TabsContent value="titles">
         <div className="space-y-3 mt-2">
           {allShopItems.map(item => {
             const isOwned = owned.includes(item.name);
@@ -68,6 +79,8 @@ export default function ShopModal({ open, onClose }: Props) {
             );
           })}
         </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

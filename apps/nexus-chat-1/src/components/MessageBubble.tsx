@@ -116,6 +116,9 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
           {msg.senderEmail !== OWNER_EMAIL && senderCustomRole && (
             <RoleChip name={senderCustomRole} color={senderCustomRoleColor} color2={senderUser?.customRoleColor2 || undefined} className="text-[9px]" />
           )}
+          {DB.getDailyRolesFor(msg.senderEmail).map(e => (
+            <RoleChip key={e.id} name={e.roleName} icon={e.emoji} color={e.color} className="text-[9px] animate-pulse" />
+          ))}
           {(() => { const tag = DB.getUserTagForUser(msg.senderEmail); return tag ? (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
               style={{ color: tag.color, backgroundColor: tag.color + '18', border: `1px solid ${tag.color}55` }}>

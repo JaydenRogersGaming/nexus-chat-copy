@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, Loader2, Trash2, Plus, ImageIcon } from 'lucide-react';
+import { Bot, Send, Loader2, Trash2, Plus, ImageIcon, Paperclip, X, Award } from 'lucide-react';
+import { useUpload } from 'zitejs/upload';
+import BadgeMaker from '../components/BadgeMaker';
 import { Button } from '@project/components/ui/button';
 import { Markdown } from '@project/components/markdown';
 import { toast } from 'sonner';
@@ -8,7 +10,7 @@ import { useAuth } from 'zitejs/auth';
 import { OWNER_EMAIL } from '../lib/gameData';
 import AiTitleMaker from '../components/AiTitleMaker';
 
-type Message = { role: 'user' | 'assistant'; content: string; imageUrl?: string };
+type Message = { role: 'user' | 'assistant'; content: string; imageUrl?: string; attachUrl?: string };
 
 export default function AiChatPage() {
   const { user } = useAuth();
@@ -19,6 +21,10 @@ export default function AiChatPage() {
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [attach, setAttach] = useState<string | null>(null);
+  const [badgeOpen, setBadgeOpen] = useState(false);
+  const { upload, isUploading } = useUpload();
+  const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,9 +39,10 @@ export default function AiChatPage() {
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || streaming || generatingImage) return;
+    if ((!text && !attach) || streaming || generatingImage || isUploading) return;
 
-    const userMsg: Message = { role: 'user', content: text };
+    const userMsg: Message = { role: 'user', content: text, attachUrl: attach || undefined };
+    setAttach(null);
     const updated = [...messages, userMsg];
     setConversations(prev => prev.map((c, i) => i === activeIdx ? updated : c));
     setInput('');
@@ -43,7 +50,7 @@ export default function AiChatPage() {
     setStreamText('');
 
     try {
-      const stream = chat({ messages: updated.map(m => ({ role: m.role, content: m.content })) });
+      const stream = chat({ messages: updated.map(m => ({ role: m.role, content: m.content, ...(m.attachUrl ? { imageUrl: m.attachUrl } : {}) })) });
       let full = '';
       for await (const chunk of stream) {
         full += chunk;
@@ -119,6 +126,7 @@ export default function AiChatPage() {
           <span className="text-xs text-muted-foreground">Chat + Image Gen</span>
         </div>
         <div className="flex gap-1.5">
+          <Button size="sm" variant="outline" onClick={() => setBadgeOpen(true)}><Award className="w-3.5 h-3.5 mr-1" />Badge Maker</Button>
           <AiTitleMaker />
           <Button size="sm" variant="outline" onClick={newChat}>
             <Plus className="w-3.5 h-3.5 mr-1" /> New
@@ -160,7 +168,24 @@ export default function AiChatPage() {
 
       {/* Input */}
       <div className="border-t border-border p-4 shrink-0">
+        {attach && (
+          <div className="max-w-3xl mx-auto mb-2 flex items-center gap-2">
+            <div className="relative">
+              <img src={attach} alt="attachment" className="h-16 w-16 object-cover rounded-lg border border-border" />
+              <button onClick={() => setAttach(null)} className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5"><X className="w-3 h-3" /></button>
+            </div>
+            <span className="text-xs text-muted-foreground">Picture attached — ask anything about it</span>
+          </div>
+        )}
         <div className="max-w-3xl mx-auto flex gap-2">
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async e => {
+            const f = e.target.files?.[0]; e.target.value = '';
+            if (!f) return;
+            try { const { url } = await upload(f); setAttach(url); } catch { toast.error('Upload failed'); }
+          }} />
+          <Button onClick={() => fileRef.current?.click()} disabled={isBusy || isUploading} size="icon" variant="outline" className="rounded-xl h-11 w-11 shrink-0" title="Upload a picture">
+            {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+          </Button>
           <textarea
             ref={inputRef}
             value={input}
@@ -181,14 +206,15 @@ export default function AiChatPage() {
               <ImageIcon className="w-4 h-4" />
             </Button>
           )}
-          <Button onClick={handleSend} disabled={!input.trim() || isBusy} size="icon" className="rounded-xl h-11 w-11 shrink-0" title="Send Message">
+          <Button onClick={handleSend} disabled={(!input.trim() && !attach) || isBusy || isUploading} size="icon" className="rounded-xl h-11 w-11 shrink-0" title="Send Message">
             <Send className="w-4 h-4" />
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground text-center mt-1.5 max-w-3xl mx-auto">
-          Press Enter to chat{isOwner ? ' • Click 🖼️ to generate an image' : ''}
+          Press Enter to chat • 📎 upload a picture (homework, screenshots, anything){isOwner ? ' • Click 🖼️ to generate an image' : ''}
         </p>
       </div>
+      <BadgeMaker open={badgeOpen} onClose={() => setBadgeOpen(false)} />
     </div>
   );
 }
@@ -226,7 +252,10 @@ function MessageBubble({ message, isStreaming }: { message: Message; isStreaming
           : 'bg-card border border-border'
       }`}>
         {isUser ? (
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          <div className="space-y-2">
+            {message.attachUrl && <img src={message.attachUrl} alt="uploaded" className="max-h-56 rounded-lg" />}
+            {message.content && <p className="whitespace-pre-wrap">{message.content}</p>}
+          </div>
         ) : (
           <div className="space-y-3">
             <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
 import ChatPage from './pages/ChatPage';
@@ -11,6 +11,7 @@ import HpClickerPage from './pages/HpClickerPage';
 import AiArtPage from './pages/AiArtPage';
 import AiChatPage from './pages/AiChatPage';
 import BrowserPage from './pages/BrowserPage';
+import CalendarPage from './pages/CalendarPage';
 import BanScreen from './components/BanScreen';
 import MatrixRain from './components/MatrixRain';
 import * as DB from './lib/storage';
@@ -18,12 +19,13 @@ import * as DB from './lib/storage';
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const settings = DB.getAppSettings();
+  const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
-      <MatrixRain color={settings.matrixColor} speed={settings.matrixSpeed} />
+      <MatrixRain color={mc} speed={settings.matrixSpeed} />
       <div className="relative z-10 flex flex-col items-center justify-center h-full">
-        <h1 className="text-4xl font-black text-white mb-2" style={{ textShadow: `0 0 20px ${settings.matrixColor}` }}>
+        <h1 className="text-4xl font-black text-white mb-2" style={{ textShadow: `0 0 20px ${mc}` }}>
           {settings.appName}
         </h1>
         {isLoading ? (
@@ -31,18 +33,12 @@ function AuthGate({ children }: { children: React.ReactNode }) {
             <div className="flex gap-1 mt-4">
               {[0,1,2].map(i => (
                 <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
-                  style={{ backgroundColor: settings.matrixColor, animationDelay: `${i * 0.15}s` }} />
+                  style={{ backgroundColor: mc, animationDelay: `${i * 0.15}s` }} />
               ))}
             </div>
-            <p className="text-xs mt-4" style={{ color: settings.matrixColor + '88' }}>Loading...</p>
+            <p className="text-xs mt-4" style={{ color: mc + '88' }}>Loading...</p>
           </>
-        ) : (
-          <button onClick={() => loginWithRedirect()}
-            className="mt-6 px-8 py-3 rounded-xl font-bold text-sm text-white border border-white/20 hover:scale-105 transition-all"
-            style={{ backgroundColor: settings.matrixColor + '33', borderColor: settings.matrixColor + '66' }}>
-            🔑 Sign In / Sign Up
-          </button>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -69,6 +65,7 @@ export default function App() {
               <Route path="aiart"         element={<AiArtPage />} />
               <Route path="aichat"        element={<AiChatPage />} />
               <Route path="browser"       element={<BrowserPage />} />
+              <Route path="calendar"      element={<CalendarPage />} />
               <Route path="admin"        element={<AdminPage />} />
             </Route>
           </Routes>
