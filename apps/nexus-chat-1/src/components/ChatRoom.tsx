@@ -87,7 +87,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   }, [room.id, profile?.email, profile?.role]);
 
   useEffect(() => { load(); const t = setInterval(load, 2000); return () => clearInterval(t); }, [load]);
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages.length]);
+  const lastId = messages[messages.length - 1]?.id;
+  useEffect(() => {
+    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
+  }, [lastId, messages.length]);
 
   const stopTyping = useDebouncedCallback(() => {
     if (profile) { DB.clearTyping(room.id, profile.email); isTypingRef.current = false; lastTypingPing.current = 0; typingApi({ action: 'stop', roomId: room.id, email: profile.email }).catch(() => {}); }
@@ -312,6 +315,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     };
     pendingRef.current.set(msg.id, msg);
     setMessages(prev => [...prev, msg]);
+    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
     messagesApi({ action: 'send', message: msg })
       .then(() => load())
       .catch(() => {
