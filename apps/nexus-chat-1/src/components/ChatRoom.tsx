@@ -384,7 +384,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   function postBot(content: string) {
     const bot = DB.ensureBotUser();
     const m: DB.Message = { id: crypto.randomUUID(), chatRoomId: room.id, senderEmail: bot.email, senderName: bot.name, content, reactions: {}, deleted: false, senderTitle: bot.activeTitle, senderTitleEffect: '', senderTitleColor: bot.activeTitleColor, senderNameColor: bot.nameColor, timestamp: Date.now() };
-    return lastSendRef.current.catch(() => {}).then(() => messagesApi({ action: 'send', message: m })).then(load);
+    return lastSendRef.current.catch(() => {}).then(() => new Promise(r => setTimeout(r, 500))).then(() => messagesApi({ action: 'send', message: { ...m, timestamp: Date.now() } })).then(load);
   }
 
   async function handleBot(text: string, censored: string) {
