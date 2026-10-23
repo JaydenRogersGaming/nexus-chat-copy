@@ -300,11 +300,12 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     }
 
     const isGif = text.startsWith('[gif]');
-    const base = isGif ? { censored: text, hadProfanity: false } : censorMessage(text);
-    const customHit = !isGif && DB.hasCustomBadWord(base.censored);
+    // Owner is always immune; immune people skip the word filter entirely
+    const immune = isOwner || DB.isMuteImmune(profile.email);
+    const base = (isGif || immune) ? { censored: text, hadProfanity: false } : censorMessage(text);
+    const customHit = !isGif && !immune && DB.hasCustomBadWord(base.censored);
     const censored = customHit ? DB.censorCustom(base.censored) : base.censored;
     const hadProfanity = base.hadProfanity || customHit;
-    const immune = DB.isMuteImmune(profile.email);
 
     if (hadProfanity && !isOwner && immune) {
       DB.addCussReport({ id: crypto.randomUUID(), email: profile.email, name: profile.name, originalMessage: text, censoredMessage: censored, chatRoomId: room.id, timestamp: Date.now(), resolved: false });
@@ -318,7 +319,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     const msg: DB.Message = {
       id: crypto.randomUUID(), chatRoomId: room.id,
       senderEmail: profile.email, senderName: profile.name,
-      content: censored, reactions: {}, deleted: false,
+      content: censored, reactions: {}, deleted: false, uncensored: immune,
       senderTitle: profile.activeTitle, senderTitleEffect: profile.activeTitleEffect,
       senderTitleColor: profile.activeTitleColor, senderNameColor: profile.nameColor,
       replyTo: replyingTo ? { id: replyingTo.id, senderName: replyingTo.senderName, content: replyingTo.content.slice(0, 80) } : undefined,

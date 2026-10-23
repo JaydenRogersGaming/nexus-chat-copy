@@ -68,7 +68,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
     if (!text || text === msg.content) { setEditing(false); return; }
     setSaving(true);
     try {
-      await messagesApi({ action: 'edit', messageId: msg.id, content: text });
+      await messagesApi({ action: 'edit', messageId: msg.id, content: text, uncensored: !!msg.uncensored });
       setEditing(false);
       onDeleted(); // reloads the room
     } catch (e) {
@@ -175,7 +175,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             </div>
           ) : isGif
             ? <img src={msg.content.slice(5)} alt="GIF" className="rounded-lg max-w-[240px] max-h-60 object-contain" loading="lazy" />
-            : <span style={textStyleCss(getRoleTextStyle(senderRole))}>{censorMessage(msg.content).censored}</span>}
+            : <span style={textStyleCss(getRoleTextStyle(senderRole))}>{msg.uncensored ? msg.content : censorMessage(msg.content).censored}</span>}
           {/* Action buttons */}
           {!editing && <div className="absolute -top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
             {isOwn && !isGif && (

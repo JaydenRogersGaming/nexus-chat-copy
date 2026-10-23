@@ -18,6 +18,7 @@ const messageSchema = z.object({
   replyTo: z.object({ id: z.string(), senderName: z.string(), content: z.string() }).optional(),
   timestamp: z.number(),
   edited: z.boolean().optional(),
+  uncensored: z.boolean().optional(),
 });
 
 export default createEndpoint({
@@ -30,6 +31,7 @@ export default createEndpoint({
     message: messageSchema.optional(),
     messageId: z.string().optional(),
     reactions: z.record(z.array(z.string())).optional(),
+    uncensored: z.boolean().optional(),
   }),
   outputSchema: z.object({ messages: z.array(messageSchema) }),
   execute: async ({ input, context }) => {
@@ -41,17 +43,17 @@ export default createEndpoint({
       if ((rec.senderEmail || '').toLowerCase() !== (context.user?.email || '').toLowerCase()) {
         throw new Error('You can only edit your own messages');
       }
-      await zite.chatMessages.update({ id: rec.id, record: { content: censorMessage(text).censored, edited: true } });
+      await zite.chatMessages.update({ id: rec.id, record: { content: input.uncensored ? text : censorMessage(text).censored, edited: true, uncensored: !!input.uncensored } });
       return { messages: [] };
     }
     if (input.action === 'send' && input.message) {
       const m = input.message;
       await zite.chatMessages.create({ record: {
         messageId: m.id, roomId: m.chatRoomId, senderEmail: m.senderEmail, senderName: m.senderName,
-        content: m.content.startsWith('[gif]') ? m.content : censorMessage(m.content).censored, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
+        content: (m.content.startsWith('[gif]') || m.uncensored) ? m.content : censorMessage(m.content).censored, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
         senderTitleEffect: m.senderTitleEffect, senderNameColor: m.senderNameColor,
         reactionsJson: JSON.stringify(m.reactions || {}), replyToJson: m.replyTo ? JSON.stringify(m.replyTo) : null,
-        deleted: false, sentAt: new Date(m.timestamp).toISOString(),
+        deleted: false, uncensored: !!m.uncensored, sentAt: new Date(m.timestamp).toISOString(),
       } });
       return { messages: [] };
     }
@@ -76,7 +78,7 @@ export default createEndpoint({
 
     const limit = Math.min(input.limit ?? 200, 500);
     const { rows } = await zite.sql({
-      query: `SELECT * FROM (SELECT "messageId","roomId","senderEmail","senderName","content","senderTitle","senderTitleColor","senderTitleEffect","senderNameColor","reactionsJson","replyToJson","deleted","edited","sentAt" FROM "ChatMessages" WHERE "roomId" = $1 ORDER BY "sentAt" DESC LIMIT ${limit}) t ORDER BY "sentAt" ASC`,
+      query: `SELECT * FROM (SELECT "messageId","roomId","senderEmail","senderName","content","senderTitle","senderTitleColor","senderTitleEffect","senderNameColor","reactionsJson","replyToJson","deleted","edited","uncensored","sentAt" FROM "ChatMessages" WHERE "roomId" = $1 ORDER BY "sentAt" DESC LIMIT ${limit}) t ORDER BY "sentAt" ASC`,
       params: [input.roomId ?? 'global'],
     });
     const parse = <T,>(v: unknown, fb: T): T => { try { return v ? JSON.parse(String(v)) : fb; } catch { return fb; } };
@@ -91,6 +93,7 @@ export default createEndpoint({
         replyTo: parse<{ id: string; senderName: string; content: string } | undefined>(r.replyToJson, undefined),
         timestamp: r.sentAt ? new Date(String(r.sentAt)).getTime() : 0,
         edited: Boolean(r.edited),
+        uncensored: Boolean(r.uncensored),
       })),
     };
   },

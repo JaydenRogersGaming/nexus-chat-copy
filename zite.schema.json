@@ -262,6 +262,15 @@
             "type": "checkbox",
             "template": {}
           }
+        },
+        {
+          "id": "fu4FkPCYNcy",
+          "sdkName": "uncensored",
+          "definition": {
+            "name": "Uncensored",
+            "type": "checkbox",
+            "template": {}
+          }
         }
       ]
     },

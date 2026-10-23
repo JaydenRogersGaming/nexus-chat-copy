@@ -752,7 +752,7 @@ export default function AdminPage() {
             {isOwner && (
               <div className="p-4 bg-card border border-border rounded-xl space-y-2">
                 <h3 className="font-semibold">🛡️ Auto-Mute Immunity</h3>
-                <p className="text-xs text-muted-foreground">Immune people still get bad words censored, but won't be auto-muted.</p>
+                <p className="text-xs text-muted-foreground">Immune people skip the word filter completely — no censoring and no auto-mute. The owner is always immune.</p>
                 <Input value={immuneSearch} onChange={e => setImmuneSearch(e.target.value)} placeholder="Search name or email…" />
                 <div className="max-h-56 overflow-y-auto border border-border rounded-lg divide-y divide-border">
                   {signedUp.filter(u => { const q = immuneSearch.toLowerCase(); return !q || u.email.toLowerCase().includes(q) || u.name.toLowerCase().includes(q); }).map(u => {

@@ -67,6 +67,7 @@ export type Message = {
   replyTo?: { id: string; senderName: string; content: string };
   timestamp: number;
   edited?: boolean;
+  uncensored?: boolean;
 };
 
 export type ChatRoom = {
