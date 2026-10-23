@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Palette, Trash2, Gift, Store } from 'lucide-react';
+import { Palette, Trash2, Gift, Store, Sparkles, Loader2 } from 'lucide-react';
+import { aiTheme } from 'zitejs/api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
@@ -27,6 +28,18 @@ export default function ThemeMaker({ open, onClose }: { open: boolean; onClose: 
   const [list, setList] = useState<CustomTheme[]>(getCustomThemes);
   const [giveTo, setGiveTo] = useState<Record<string, string>>({});
   const css = buildCss(style, colors, angle);
+  const [idea, setIdea] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
+  async function runAi() {
+    if (!idea.trim()) return;
+    setAiBusy(true);
+    try {
+      const t = await aiTheme({ idea: idea.trim() });
+      setName(t.name); setColors(t.colors); setStyle(t.style); setAngle(t.angle); setCost(t.cost);
+      toast.success('✨ Theme designed — tweak it or save it!');
+    } catch { toast.error("AI couldn't make a theme, try again"); }
+    finally { setAiBusy(false); }
+  }
 
   const save = (next: CustomTheme[]) => { setList(next); saveCustomThemes(next); };
   function create() {
@@ -49,6 +62,14 @@ export default function ThemeMaker({ open, onClose }: { open: boolean; onClose: 
     <Dialog open={open} onOpenChange={o => !o && onClose()}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="flex items-center gap-2"><Palette className="w-5 h-5" />Theme Maker</DialogTitle></DialogHeader>
+        <div className="rounded-xl border border-primary/40 bg-primary/5 p-3 space-y-2">
+          <Label className="flex items-center gap-1"><Sparkles className="w-3.5 h-3.5" />AI Theme Maker</Label>
+          <div className="flex gap-2">
+            <Input value={idea} onChange={e => setIdea(e.target.value)} placeholder="e.g. spooky halloween night, cozy sunset beach…"
+              onKeyDown={e => { if (e.key === 'Enter') runAi(); }} />
+            <Button onClick={runAi} disabled={aiBusy || !idea.trim()}>{aiBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Generate'}</Button>
+          </div>
+        </div>
         <div className="h-28 rounded-xl border border-border flex items-center justify-center text-white font-bold text-lg" style={{ background: css }}>
           {name || 'Your theme'}
         </div>
