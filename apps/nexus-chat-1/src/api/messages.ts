@@ -78,7 +78,7 @@ export default createEndpoint({
 
     const limit = Math.min(input.limit ?? 200, 500);
     const { rows } = await zite.sql({
-      query: `SELECT * FROM (SELECT "messageId","roomId","senderEmail","senderName","content","senderTitle","senderTitleColor","senderTitleEffect","senderNameColor","reactionsJson","replyToJson","deleted","edited","uncensored","sentAt" FROM "ChatMessages" WHERE "roomId" = $1 ORDER BY "sentAt" DESC LIMIT ${limit}) t ORDER BY "sentAt" ASC`,
+      query: `SELECT * FROM (SELECT "messageId","roomId","senderEmail","senderName","content","senderTitle","senderTitleColor","senderTitleEffect","senderNameColor","reactionsJson","replyToJson","deleted","edited","uncensored","sentAt" FROM "ChatMessages" WHERE "roomId" = $1 ORDER BY "sentAt" DESC, "messageId" DESC LIMIT ${limit}) t ORDER BY "sentAt" ASC, "messageId" ASC`,
       params: [input.roomId ?? 'global'],
     });
     const parse = <T,>(v: unknown, fb: T): T => { try { return v ? JSON.parse(String(v)) : fb; } catch { return fb; } };

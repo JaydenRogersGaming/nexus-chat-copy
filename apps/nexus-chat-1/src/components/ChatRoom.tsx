@@ -80,10 +80,11 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const canSeeDeleted = profile?.role && ['owner','admin','mod'].includes(profile.role);
       const ids = new Set(remote.map(m => m.id));
       pendingRef.current.forEach((_, id) => { if (ids.has(id)) pendingRef.current.delete(id); });
-      const merged = [...remote.filter(m => !m.deleted || canSeeDeleted), ...pendingRef.current.values()]
-        .map((m, i) => ({ m, i }))
-        .sort((a, b) => (a.m.timestamp - b.m.timestamp) || (a.i - b.i))
-        .map(x => x.m);
+      // Server returns rows in saved (server-clock) order; unsaved messages are always newest, so they go last.
+      const merged = [
+        ...remote.filter(m => !m.deleted || canSeeDeleted),
+        ...[...pendingRef.current.values()].sort((a, b) => a.timestamp - b.timestamp),
+      ];
       const sig = merged.map(m => `${m.id}:${m.deleted ? 1 : 0}:${m.edited ? 1 : 0}:${m.content}:${JSON.stringify(m.reactions)}`).join('|');
       if (sig !== sigRef.current) { sigRef.current = sig; setMessages(merged); }
     } catch { /* keep current messages on a failed poll */ }
