@@ -7,6 +7,15 @@ export const BG_THEMES: BgTheme[] = [
   { id: 'bg-lava', name: '🌋 Lava', cost: 800, css: 'linear-gradient(180deg, #120202 0%, #4a0b0b 55%, #c2410c 100%)' },
   { id: 'bg-candy', name: '🍬 Candy', cost: 600, css: 'linear-gradient(135deg, #3b0a45 0%, #a21caf 50%, #f472b6 100%)' },
   { id: 'bg-gold', name: '👑 Royal Gold', cost: 2000, css: 'linear-gradient(135deg, #1a1203 0%, #5c4306 50%, #b8860b 100%)' },
+  { id: 'bg-aurora', name: '🌠 Aurora', cost: 900, css: 'linear-gradient(160deg, #020617 0%, #064e3b 40%, #0e7490 70%, #7c3aed 100%)' },
+  { id: 'bg-midnight', name: '🌙 Midnight', cost: 250, css: 'linear-gradient(180deg, #000000 0%, #0f172a 60%, #1e293b 100%)' },
+  { id: 'bg-cherry', name: '🌸 Cherry Blossom', cost: 500, css: 'linear-gradient(135deg, #3f0d1f 0%, #9d174d 55%, #fbcfe8 100%)' },
+  { id: 'bg-ice', name: '❄️ Frostbite', cost: 500, css: 'linear-gradient(160deg, #0c1a2b 0%, #1e40af 50%, #a5f3fc 100%)' },
+  { id: 'bg-toxic', name: '☢️ Toxic', cost: 700, css: 'radial-gradient(circle at 50% 100%, #65a30d 0%, transparent 55%), #0a0f02' },
+  { id: 'bg-neon', name: '💜 Neon City', cost: 1000, css: 'radial-gradient(circle at 15% 85%, #db2777 0%, transparent 40%), radial-gradient(circle at 85% 15%, #06b6d4 0%, transparent 40%), #0b0217' },
+  { id: 'bg-desert', name: '🏜️ Desert Dusk', cost: 400, css: 'linear-gradient(180deg, #1c0f05 0%, #78350f 55%, #f59e0b 100%)' },
+  { id: 'bg-void', name: '🕳️ The Void', cost: 1500, css: 'radial-gradient(circle at 50% 50%, #1e1b4b 0%, #000000 70%)' },
+  { id: 'bg-rainbow', name: '🌈 Rainbow', cost: 2500, css: 'linear-gradient(135deg, #7f1d1d, #9a3412, #854d0e, #166534, #1e3a8a, #581c87)' },
 ];
 export type CustomTheme = BgTheme & { inShop: boolean };
 export const THEMES_EVENT = 'nexus-themes';

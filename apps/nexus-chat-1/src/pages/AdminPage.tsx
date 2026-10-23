@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ServerBanPanel from '../components/ServerBanPanel';
+import OwnerThemesTab from '../components/OwnerThemesTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
@@ -223,6 +224,7 @@ export default function AdminPage() {
             </TabsTrigger>
           )}
           {isOwner && <TabsTrigger value="customroles">⚡ Custom Roles</TabsTrigger>}
+          {isOwner && <TabsTrigger value="themes">🎨 Themes</TabsTrigger>}
           {isOwner && <TabsTrigger value="casino"><Dices className="w-3.5 h-3.5 mr-1" />Casino Rig</TabsTrigger>}
           {isOwner && <TabsTrigger value="appsettings"><Settings className="w-3.5 h-3.5 mr-1" />Edit App</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="tags"><Tag className="w-3.5 h-3.5 mr-1" />User Tags</TabsTrigger>}
@@ -468,6 +470,12 @@ export default function AdminPage() {
         )}
 
         {/* Casino Rig (owner only) */}
+        {isOwner && (
+          <TabsContent value="themes" className="space-y-4">
+            <OwnerThemesTab />
+          </TabsContent>
+        )}
+
         {isOwner && (
           <TabsContent value="casino" className="space-y-4">
             <div className="p-4 bg-card border border-border rounded-xl space-y-4">
