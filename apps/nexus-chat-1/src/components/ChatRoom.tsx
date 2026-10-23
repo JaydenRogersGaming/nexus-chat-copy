@@ -63,6 +63,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
   // Messages sent locally that the server hasn't returned yet — kept visible so they never flicker away
   const pendingRef = useRef<Map<string, DB.Message>>(new Map());
+  const lastSendRef = useRef<Promise<void>>(Promise.resolve());
   const loadingRef = useRef(false);
   const sigRef = useRef('');
   const lastTypingPing = useRef(0);
@@ -79,7 +80,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const canSeeDeleted = profile?.role && ['owner','admin','mod'].includes(profile.role);
       const ids = new Set(remote.map(m => m.id));
       pendingRef.current.forEach((_, id) => { if (ids.has(id)) pendingRef.current.delete(id); });
-      const merged = [...remote.filter(m => !m.deleted || canSeeDeleted), ...pendingRef.current.values()];
+      const merged = [...remote.filter(m => !m.deleted || canSeeDeleted), ...pendingRef.current.values()]
+        .map((m, i) => ({ m, i }))
+        .sort((a, b) => (a.m.timestamp - b.m.timestamp) || (a.i - b.i))
+        .map(x => x.m);
       const sig = merged.map(m => `${m.id}:${m.deleted ? 1 : 0}:${m.edited ? 1 : 0}:${m.content}:${JSON.stringify(m.reactions)}`).join('|');
       if (sig !== sigRef.current) { sigRef.current = sig; setMessages(merged); }
     } catch { /* keep current messages on a failed poll */ }
@@ -328,7 +332,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     pendingRef.current.set(msg.id, msg);
     setMessages(prev => [...prev, msg]);
     requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
-    messagesApi({ action: 'send', message: msg })
+    lastSendRef.current = messagesApi({ action: 'send', message: msg }).then(() => undefined);
+    lastSendRef.current
       .then(() => load())
       .catch(() => {
         pendingRef.current.delete(msg.id);
@@ -379,7 +384,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   function postBot(content: string) {
     const bot = DB.ensureBotUser();
     const m: DB.Message = { id: crypto.randomUUID(), chatRoomId: room.id, senderEmail: bot.email, senderName: bot.name, content, reactions: {}, deleted: false, senderTitle: bot.activeTitle, senderTitleEffect: '', senderTitleColor: bot.activeTitleColor, senderNameColor: bot.nameColor, timestamp: Date.now() };
-    return messagesApi({ action: 'send', message: m }).then(load);
+    return lastSendRef.current.catch(() => {}).then(() => messagesApi({ action: 'send', message: m })).then(load);
   }
 
   async function handleBot(text: string, censored: string) {
