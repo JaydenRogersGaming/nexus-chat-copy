@@ -53,7 +53,7 @@ export default createEndpoint({
         content: (m.content.startsWith('[gif]') || m.uncensored) ? m.content : censorMessage(m.content).censored, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
         senderTitleEffect: m.senderTitleEffect, senderNameColor: m.senderNameColor,
         reactionsJson: JSON.stringify(m.reactions || {}), replyToJson: m.replyTo ? JSON.stringify(m.replyTo) : null,
-        deleted: false, uncensored: !!m.uncensored, sentAt: new Date(m.timestamp).toISOString(),
+        deleted: false, uncensored: !!m.uncensored, sentAt: new Date().toISOString(),
       } });
       return { messages: [] };
     }
