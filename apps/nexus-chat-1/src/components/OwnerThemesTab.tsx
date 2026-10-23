@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@project/components/ui/button';
-import { Palette, Store, Lock, Trash2 } from 'lucide-react';
+import { Palette, Store, Lock, Trash2, Award } from 'lucide-react';
 import ThemeMaker from './ThemeMaker';
+import BadgeMaker from './BadgeMaker';
 import { BG_THEMES, getCustomThemes, saveCustomThemes, THEMES_EVENT, CustomTheme } from '../lib/cosmetics';
 
 export default function OwnerThemesTab() {
   const [open, setOpen] = useState(false);
+  const [badgeOpen, setBadgeOpen] = useState(false);
   const [custom, setCustom] = useState<CustomTheme[]>(getCustomThemes());
 
   useEffect(() => {
@@ -25,7 +27,10 @@ export default function OwnerThemesTab() {
           <h2 className="font-bold">Theme Maker</h2>
           <p className="text-xs text-muted-foreground">Create themes, sell them in the shop, or keep them owner-only to give away.</p>
         </div>
-        <Button onClick={() => setOpen(true)}><Palette className="w-4 h-4 mr-1" />New theme</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setBadgeOpen(true)}><Award className="w-4 h-4 mr-1" />Badge Maker</Button>
+          <Button onClick={() => setOpen(true)}><Palette className="w-4 h-4 mr-1" />New theme</Button>
+        </div>
       </div>
 
       <div>
@@ -60,6 +65,7 @@ export default function OwnerThemesTab() {
         </div>
       </div>
 
+      <BadgeMaker open={badgeOpen} onClose={() => setBadgeOpen(false)} />
       <ThemeMaker open={open} onClose={() => { setOpen(false); setCustom(getCustomThemes()); }} />
     </div>
   );

@@ -224,7 +224,7 @@ export default function AdminPage() {
             </TabsTrigger>
           )}
           {isOwner && <TabsTrigger value="customroles">⚡ Custom Roles</TabsTrigger>}
-          {isOwner && <TabsTrigger value="themes">🎨 Themes</TabsTrigger>}
+          {isOwner && <TabsTrigger value="themes">🎨 Badges & Themes</TabsTrigger>}
           {isOwner && <TabsTrigger value="casino"><Dices className="w-3.5 h-3.5 mr-1" />Casino Rig</TabsTrigger>}
           {isOwner && <TabsTrigger value="appsettings"><Settings className="w-3.5 h-3.5 mr-1" />Edit App</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="tags"><Tag className="w-3.5 h-3.5 mr-1" />User Tags</TabsTrigger>}
