@@ -121,7 +121,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Infinite gems (999999999+) can never be reduced
       if (prev.gems >= 999999999 && amount < 0) return prev;
       const base = DB.getUser(prev.email) || prev;
-      const updated = { ...base, gems: Math.max(0, base.gems + amount) };
+      // ∞ gems can only be granted by the owner — earned gems cap just below it
+      const INF = 999999999;
+      const next = base.gems >= INF ? base.gems : Math.min(INF - 1, Math.max(0, base.gems + amount));
+      const updated = { ...base, gems: next };
       DB.saveUser(updated);
       return updated;
     });
