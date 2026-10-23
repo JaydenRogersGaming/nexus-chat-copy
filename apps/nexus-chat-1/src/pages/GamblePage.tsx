@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
+import { DiceGame, RouletteGame, HigherLowerGame, WheelGame, Settle } from '../components/CasinoGames';
 
 const SLOTS = ['💎','🎰','🍒','🍋','⭐','💀','🎲','👑','🌙','🔥'];
 
@@ -116,6 +117,26 @@ export default function GamblePage() {
     }, 1200);
   }
 
+  const settle: Settle = {
+    bet: betNum,
+    disabled: betNum <= 0 || (profile.gems < 999999999 && betNum > profile.gems),
+    start: () => {
+      if (betNum <= 0 || (profile!.gems < 999999999 && betNum > profile!.gems)) { toast.error(betNum <= 0 ? 'Enter a valid bet' : 'Not enough gems!'); return false; }
+      if (profile!.gems < 999999999) addGems(-betNum);
+      return true;
+    },
+    finish: (game, payout) => {
+      if (payout > 0) addGems(payout);
+      const didWin = payout > betNum;
+      const p = DB.getUser(profile!.email)!;
+      const up = { ...p, gambleCount: p.gambleCount + 1, gambleWins: p.gambleWins + (didWin ? 1 : 0), gambleLoseStreak: didWin ? 0 : p.gambleLoseStreak + 1 };
+      DB.saveUser(up); updateProfile(up);
+      addHistory({ type: game, bet: betNum, result: payout - betNum, win: didWin, timestamp: Date.now() });
+      DB.incrementQuestProgress(profile!.email, 'gamble_3');
+      setTimeout(checkAchievements, 300);
+    },
+  };
+
   const winRate = profile.gambleCount > 0 ? Math.round((profile.gambleWins / profile.gambleCount) * 100) : 0;
 
   const RIG_LABELS: Record<DB.GambleRig, string> = {
@@ -171,11 +192,19 @@ export default function GamblePage() {
       </div>
 
       <Tabs defaultValue="slots">
-        <TabsList className="w-full mb-4">
+        <TabsList className="w-full mb-4 flex-wrap h-auto">
           <TabsTrigger value="slots" className="flex-1">🎰 Slots</TabsTrigger>
-          <TabsTrigger value="coin" className="flex-1">🪙 Coin Flip</TabsTrigger>
+          <TabsTrigger value="coin" className="flex-1">🪙 Coin</TabsTrigger>
+          <TabsTrigger value="dice" className="flex-1">🎲 Dice</TabsTrigger>
+          <TabsTrigger value="roulette" className="flex-1">🔴 Roulette</TabsTrigger>
+          <TabsTrigger value="hilo" className="flex-1">🃏 Hi-Lo</TabsTrigger>
+          <TabsTrigger value="wheel" className="flex-1">🎡 Wheel</TabsTrigger>
           <TabsTrigger value="history" className="flex-1">📜 History</TabsTrigger>
         </TabsList>
+        <TabsContent value="dice"><DiceGame s={settle} /></TabsContent>
+        <TabsContent value="roulette"><RouletteGame s={settle} /></TabsContent>
+        <TabsContent value="hilo"><HigherLowerGame s={settle} /></TabsContent>
+        <TabsContent value="wheel"><WheelGame s={settle} /></TabsContent>
 
         <TabsContent value="slots">
           <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
@@ -234,7 +263,7 @@ export default function GamblePage() {
             {history.length === 0 && <p className="text-center text-muted-foreground py-6">No gambles yet. Start playing!</p>}
             {history.map((h, i) => (
               <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-secondary/30 border border-border">
-                <span className="text-lg">{h.type === 'Slots' ? '🎰' : '🪙'}</span>
+                <span className="text-lg">{({ Slots: '🎰', 'Coin Flip': '🪙', Dice: '🎲', Roulette: '🔴', 'Higher/Lower': '🃏', Wheel: '🎡' } as Record<string, string>)[h.type] ?? '🎲'}</span>
                 <div className="flex-1"><p className="text-xs font-semibold">{h.type}</p><p className="text-[10px] text-muted-foreground">Bet: {h.bet.toLocaleString()} gems</p></div>
                 <div className={`flex items-center gap-1 font-bold text-sm ${h.win ? 'text-green-400' : 'text-destructive'}`}>
                   {h.win ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
