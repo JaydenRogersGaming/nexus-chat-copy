@@ -8,7 +8,7 @@ import { useApp } from '../contexts/AppContext';
 import { useUpload } from 'zitejs/upload';
 import TitleBadge from './TitleBadge';
 import * as DB from '../lib/storage';
-import { Camera, ShoppingBag, Globe, Trash2 } from 'lucide-react';
+import { Camera, Trophy, Globe, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const LANGUAGES = [
@@ -190,7 +190,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
           {/* Actions */}
           <div className="flex gap-2">
             <Button onClick={save} className="flex-1">{isUploading ? 'Uploading…' : 'Save'}</Button>
-            <Button variant="outline" onClick={onOpenShop} className="flex items-center gap-1"><ShoppingBag className="w-4 h-4" />Shop</Button>
+            <Button variant="outline" onClick={onOpenShop} className="flex items-center gap-1"><Trophy className="w-4 h-4" />Achievements</Button>
           </div>
 
           {/* Delete Account */}

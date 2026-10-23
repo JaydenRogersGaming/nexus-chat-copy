@@ -16,7 +16,6 @@ const NAV = [
   { to: '/chat',         icon: MessageSquare, label: 'Chat' },
   { to: '/gamble',       icon: Dices,         label: 'Casino' },
   { to: '/leaderboard',  icon: Trophy,        label: 'Leaderboard' },
-  { to: '/achievements', icon: Star,          label: 'Achievements' },
   { to: '/hpclicker',    icon: Heart,         label: 'HP Clicker' },
   { to: '/aiart',         icon: Wand2,         label: 'AI Art' },
   { to: '/aichat',        icon: Bot,           label: 'AI Assistant' },

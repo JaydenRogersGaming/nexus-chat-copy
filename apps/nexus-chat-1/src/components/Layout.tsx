@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Toaster } from '@project/components/ui/sonner';
 import Sidebar from './Sidebar';
 import GemDisplay from './GemDisplay';
@@ -183,6 +183,7 @@ function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }
 export default function Layout() {
   useAutoCloak();
   const [profileOpen, setProfileOpen] = useState(false);
+  const navigate = useNavigate();
   const [shopOpen,    setShopOpen]    = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -296,7 +297,7 @@ export default function Layout() {
       {announcement && <AnnouncementPopup announcement={announcement} onDismiss={dismissAnnouncement} />}
 
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} onOpenShop={() => { setProfileOpen(false); setShopOpen(true); }} />
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} onOpenShop={() => { setProfileOpen(false); navigate('/achievements'); }} />
       <ShopModal    open={shopOpen}    onClose={() => setShopOpen(false)} />
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
       <DailyQuestsModal open={questsOpen} onClose={() => setQuestsOpen(false)} />
