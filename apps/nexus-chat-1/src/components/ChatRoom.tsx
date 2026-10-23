@@ -88,9 +88,20 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
   useEffect(() => { load(); const t = setInterval(load, 2000); return () => clearInterval(t); }, [load]);
   const lastId = messages[messages.length - 1]?.id;
+  const firstScrollRef = useRef<string | null>(null);
   useEffect(() => {
+    if (!lastId) return;
+    // First load of a room (e.g. right after signing in): jump to the bottom instantly,
+    // and keep re-snapping briefly while images/GIFs finish loading.
+    if (firstScrollRef.current !== room.id) {
+      firstScrollRef.current = room.id;
+      const snap = () => bottomRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+      snap();
+      const timers = [100, 400, 1000, 2000].map(t => setTimeout(snap, t));
+      return () => timers.forEach(clearTimeout);
+    }
     requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
-  }, [lastId, messages.length]);
+  }, [lastId, messages.length, room.id]);
 
   const stopTyping = useDebouncedCallback(() => {
     if (profile) { DB.clearTyping(room.id, profile.email); isTypingRef.current = false; lastTypingPing.current = 0; typingApi({ action: 'stop', roomId: room.id, email: profile.email }).catch(() => {}); }
