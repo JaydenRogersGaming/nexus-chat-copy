@@ -80,7 +80,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const ids = new Set(remote.map(m => m.id));
       pendingRef.current.forEach((_, id) => { if (ids.has(id)) pendingRef.current.delete(id); });
       const merged = [...remote.filter(m => !m.deleted || canSeeDeleted), ...pendingRef.current.values()];
-      const sig = merged.map(m => `${m.id}:${m.deleted ? 1 : 0}:${JSON.stringify(m.reactions)}`).join('|');
+      const sig = merged.map(m => `${m.id}:${m.deleted ? 1 : 0}:${m.edited ? 1 : 0}:${m.content}:${JSON.stringify(m.reactions)}`).join('|');
       if (sig !== sigRef.current) { sigRef.current = sig; setMessages(merged); }
     } catch { /* keep current messages on a failed poll */ }
     finally { loadingRef.current = false; }
