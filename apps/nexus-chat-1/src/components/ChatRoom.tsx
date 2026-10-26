@@ -8,6 +8,7 @@ import PhotoUploadButton from './PhotoUploadButton';
 import UserProfileModal from './UserProfileModal';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
+import { mergeMessages } from '../lib/messageOrder';
 import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { TYPING_STYLES } from '../lib/cosmetics';
@@ -81,11 +82,8 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const canSeeDeleted = profile?.role && ['owner','admin','mod'].includes(profile.role);
       const ids = new Set(remote.map(m => m.id));
       pendingRef.current.forEach((_, id) => { if (ids.has(id)) pendingRef.current.delete(id); });
-      // Server returns rows in saved (server-clock) order; unsaved messages are always newest, so they go last.
-      const merged = [
-        ...remote.filter(m => !m.deleted || canSeeDeleted),
-        ...[...pendingRef.current.values()].sort((a, b) => a.timestamp - b.timestamp),
-      ];
+      const visibleRemote = remote.filter(m => !m.deleted || canSeeDeleted);
+      const merged = mergeMessages(messagesRef.current, visibleRemote, [...pendingRef.current.values()]);
       const sig = merged.map(m => `${m.id}:${m.deleted ? 1 : 0}:${m.edited ? 1 : 0}:${m.content}:${JSON.stringify(m.reactions)}`).join('|');
       if (sig !== sigRef.current) { sigRef.current = sig; setMessages(merged); }
     } catch { /* keep current messages on a failed poll */ }
@@ -95,18 +93,29 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   useEffect(() => { load(); const t = setInterval(load, 2000); return () => clearInterval(t); }, [load]);
   const lastId = messages[messages.length - 1]?.id;
   const firstScrollRef = useRef<string | null>(null);
+  const scrollBoxRef = useRef<HTMLDivElement>(null);
+  const atBottomRef = useRef(true);
+  const forceScrollRef = useRef(false);
+  const messagesRef = useRef<DB.Message[]>([]);
+  messagesRef.current = messages;
+  useEffect(() => { messagesRef.current = []; }, [room.id]);
   useEffect(() => {
     if (!lastId) return;
     // First load of a room (e.g. right after signing in): jump to the bottom instantly,
     // and keep re-snapping briefly while images/GIFs finish loading.
     if (firstScrollRef.current !== room.id) {
       firstScrollRef.current = room.id;
-      const snap = () => bottomRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+      atBottomRef.current = true;
+      const snap = () => { if (atBottomRef.current) bottomRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' }); };
       snap();
       const timers = [100, 400, 1000, 2000].map(t => setTimeout(snap, t));
       return () => timers.forEach(clearTimeout);
     }
-    requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
+    // Only follow new messages if the reader is already at the bottom (or just sent one).
+    if (atBottomRef.current || forceScrollRef.current) {
+      forceScrollRef.current = false;
+      requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
+    }
   }, [lastId, messages.length, room.id]);
 
   const stopTyping = useDebouncedCallback(() => {
@@ -333,6 +342,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     };
     pendingRef.current.set(msg.id, msg);
     setMessages(prev => [...prev, msg]);
+    forceScrollRef.current = true;
     requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
     lastSendRef.current = messagesApi({ action: 'send', message: msg }).then(() => undefined);
     lastSendRef.current
@@ -448,7 +458,11 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3.5 h-3.5" />{room.type === 'global' ? DB.getAllUsers().length : room.members.length}</div>
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1">
+      <div
+        ref={scrollBoxRef}
+        onScroll={e => { const el = e.currentTarget; atBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-1"
+      >
         {messages.length === 0 && <p className="text-center text-muted-foreground text-sm mt-8">No messages yet. Say something! 👋</p>}
         {messages.map(m => (
           <MessageBubble
