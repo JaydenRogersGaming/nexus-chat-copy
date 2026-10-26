@@ -15,8 +15,6 @@ import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
 import { getAllBgThemes } from '../lib/cosmetics';
 import { useApp } from '../contexts/AppContext';
 import MusicPlayer from './MusicPlayer';
-import { Link } from 'react-router-dom';
-import { Store } from 'lucide-react';
 import * as P from '../lib/personalize';
 import { OWNER_EMAIL } from '../lib/gameData';
 
@@ -274,13 +272,6 @@ export default function Layout() {
           </div>
           <div className="ml-auto flex items-center gap-1">
             <MusicPlayer />
-            <Link
-              to="/market"
-              title="Marketplace"
-              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors flex items-center gap-1"
-            >
-              <Store className="w-3.5 h-3.5 text-emerald-400" /> Marketplace
-            </Link>
             <button
               onClick={() => setSettingsOpen(true)}
               title="Settings"
