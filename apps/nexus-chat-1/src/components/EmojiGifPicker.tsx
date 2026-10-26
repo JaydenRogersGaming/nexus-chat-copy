@@ -6,6 +6,8 @@ import { Input } from '@project/components/ui/input';
 import { Button } from '@project/components/ui/button';
 import { useDebounce } from 'use-debounce';
 import { gifs as gifsApi, GifsOutputType } from 'zitejs/api';
+import { Link } from 'react-router-dom';
+import { getMyEmojis, MY_EMOJIS_EVENT } from '../lib/emojiParts';
 
 const EMOJIS = '😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 😉 😍 🥰 😘 😋 😛 😜 🤪 😎 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤯 😳 🥵 🥶 😱 😨 🤔 🤭 🤫 🙄 😬 😴 🤤 😷 🤒 🤠 🤡 👻 💀 👽 🤖 🎃 😺 👍 👎 👏 🙌 🙏 🤝 💪 👀 ✌️ 🤞 👋 ❤️ 🧡 💛 💚 💙 💜 🖤 💔 💯 🔥 ✨ ⭐ 🎉 🎊 💎 👑 🏆 🎮 🍕 🍔 🍟 🍩 ☕ 🚀 💤 💬'.split(' ');
 
@@ -18,6 +20,8 @@ export default function EmojiGifPicker({ onEmoji, onGif }: Props) {
   const [results, setResults] = useState<GifsOutputType['gifs']>([]);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState('emoji');
+  const [mine, setMine] = useState(getMyEmojis);
+  useEffect(() => { const s = () => setMine(getMyEmojis()); s(); window.addEventListener(MY_EMOJIS_EVENT, s); return () => window.removeEventListener(MY_EMOJIS_EVENT, s); }, [open]);
 
   useEffect(() => {
     if (!open || tab !== 'gif') return;
@@ -37,10 +41,28 @@ export default function EmojiGifPicker({ onEmoji, onGif }: Props) {
             <TabsTrigger value="gif">GIFs</TabsTrigger>
           </TabsList>
           <TabsContent value="emoji" className="mt-0">
-            <div className="grid grid-cols-8 gap-1 max-h-60 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto space-y-2">
+            <div>
+              <div className="flex items-center justify-between px-1 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Your emoji collection</p>
+                <Link to="/emoji-maker" onClick={() => setOpen(false)} className="text-[10px] font-semibold text-primary hover:underline">+ Make one</Link>
+              </div>
+              {mine.length === 0 ? <p className="text-[11px] text-muted-foreground italic px-1">No custom emojis yet.</p> : (
+                <div className="grid grid-cols-6 gap-1">
+                  {mine.map(m => (
+                    <button key={m.id} onClick={() => { onGif(m.url); setOpen(false); }} className="p-0.5 rounded hover:bg-secondary transition-transform hover:scale-110">
+                      <img src={m.url} alt="custom emoji" className="w-full aspect-square object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1">Emojis</p>
+            <div className="grid grid-cols-8 gap-1">
               {EMOJIS.map(e => (
                 <button key={e} onClick={() => onEmoji(e)} className="text-xl p-1 rounded hover:bg-secondary transition-transform hover:scale-110">{e}</button>
               ))}
+            </div>
             </div>
           </TabsContent>
           <TabsContent value="gif" className="mt-0 space-y-2">
