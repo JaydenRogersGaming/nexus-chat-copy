@@ -195,11 +195,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Sync my role from the shared server (roles set by staff on any device)
   useEffect(() => {
     if (!email) return;
-    const sync = () => rolesApi({ action: 'list' }).then(({ myRole, users }) => {
+    const sync = () => rolesApi({ action: 'list' }).then(({ myRole, users: rawUsers }) => {
+      const users = rawUsers as Array<{ email: string; name: string; role: string; customRole: string; customRoleColor: string; customRoleColor2: string }>;
       // Keep every locally-known user's role in line with the shared server copy
       for (const su of users) {
         const lu = DB.getUser(su.email);
         if (lu && lu.role !== su.role && su.email !== OWNER_EMAIL) DB.saveUser({ ...lu, role: su.role as DB.UserProfile['role'] });
+        const lu2 = DB.getUser(su.email);
+        if (lu2 && (lu2.customRole || '') !== su.customRole) {
+          DB.applyCustomRoleLocally(su.email, su.customRole ? { name: su.customRole, color: su.customRoleColor, color2: su.customRoleColor2 } : null);
+        }
+      }
+      const me = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (me && email === realEmail) {
+        setProfile(prev => prev && (prev.customRole || '') !== me.customRole
+          ? { ...prev, customRole: me.customRole || undefined, customRoleColor: me.customRoleColor || undefined, customRoleColor2: me.customRoleColor2 || undefined }
+          : prev);
       }
       const p = DB.getUser(email);
       if (p && p.role !== myRole && email !== OWNER_EMAIL && email === realEmail) {

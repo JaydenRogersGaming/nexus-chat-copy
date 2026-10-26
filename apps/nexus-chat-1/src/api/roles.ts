@@ -19,13 +19,14 @@ export default createEndpoint({
   authenticated: true,
   description: 'Lists everyone who signed up with their role, and lets staff change roles',
   inputSchema: z.object({
-    action: z.enum(['list', 'set', 'mine', 'profile']),
+    action: z.enum(['list', 'set', 'mine', 'profile', 'setCustom']),
     email: z.string().optional(),
     role: z.enum(ROLES).optional(),
+    customRole: z.object({ name: z.string(), color: z.string(), color2: z.string() }).nullable().optional(),
   }),
   outputSchema: z.object({
     myRole: z.string(),
-    users: z.array(z.object({ email: z.string(), name: z.string(), role: z.string() })),
+    users: z.array(z.object({ email: z.string(), name: z.string(), role: z.string(), customRole: z.string(), customRoleColor: z.string(), customRoleColor2: z.string() })),
     profile: z.object({ email: z.string(), name: z.string(), profilePic: z.string(), nameColor: z.string(), activeTitle: z.string(), activeTitleColor: z.string(), activeTitleEffect: z.string(), role: z.string(), lastSeen: z.number() }).nullable().optional(),
   }),
   execute: async ({ input, context }) => {
@@ -63,15 +64,33 @@ export default createEndpoint({
       await zite.presence.bulkCreate({ matchOn: ['email'], records: [{ email: u.email, role, displayName: u.name || u.email.split('@')[0] }] });
     }
 
+    if (input.action === 'setCustom') {
+      const email = (input.email || '').trim().toLowerCase();
+      if (!email) throw new ZiteError({ code: 'BAD_REQUEST', message: 'Missing email', userFacingMessage: 'Pick a user.' });
+      if (RANK[myRole] < RANK.admin && email !== me.email.toLowerCase()) throw new ZiteError({ code: 'FORBIDDEN', message: 'forbidden', userFacingMessage: 'Only Admins and above can give custom roles.' });
+      const { records } = await zite.auth.findAllUsers({ filters: { email }, limit: 1 });
+      const realEmail = records[0]?.email ?? email;
+      const cr = input.customRole;
+      await zite.presence.bulkCreate({ matchOn: ['email'], records: [{
+        email: realEmail,
+        customRole: cr ? cr.name.slice(0, 32) : '',
+        customRoleColor: cr ? cr.color : '',
+        customRoleColor2: cr ? cr.color2 : '',
+      }] });
+    }
+
     const [{ records: all }, { rows }] = await Promise.all([
       zite.auth.findAllUsers({ appIds: ['1vc4gaurvx'], sort: [{ field: 'email', direction: 'asc' }], limit: 1000 }),
-      zite.sql({ query: `SELECT "email","role","displayName" FROM "Presence"` }),
+      zite.sql({ query: `SELECT "email","role","displayName","customRole","customRoleColor","customRoleColor2" FROM "Presence"` }),
     ]);
     const byEmail = new Map(rows.map(r => [String(r.email).toLowerCase(), r]));
     const users = all.map(u => {
       const p = byEmail.get(u.email.toLowerCase());
       const role = u.email.toLowerCase() === OWNER_EMAIL ? 'owner' : String(p?.role ?? 'user');
-      return { email: u.email, name: String(p?.displayName || u.name || u.email.split('@')[0]), role: role in RANK ? role : 'user' };
+      return {
+        email: u.email, name: String(p?.displayName || u.name || u.email.split('@')[0]), role: role in RANK ? role : 'user',
+        customRole: String(p?.customRole ?? ''), customRoleColor: String(p?.customRoleColor ?? ''), customRoleColor2: String(p?.customRoleColor2 ?? ''),
+      };
     });
     return { myRole, users };
   },

@@ -102,6 +102,9 @@ export type PresenceRecordType = {
   /** "Typing At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
   typingAt?: string;
   typingStyle?: string;
+  customRole?: string;
+  customRoleColor?: string;
+  customRoleColor2?: string;
 };
 
 /** What you may write when creating or updating a record in the "Presence" table. */
@@ -118,6 +121,9 @@ export type PresenceRecordInput = {
   typingRoom: string | null;
   typingAt: string | Date | null;
   typingStyle: string | null;
+  customRole: string | null;
+  customRoleColor: string | null;
+  customRoleColor2: string | null;
 };
 
 /** A record in the "Chat Messages" table, as it is read back. */

@@ -185,10 +185,16 @@ export default function AdminPage() {
     setCrName(''); setCrColor('#ffffff'); setCrColor2(''); setCrIcon('⚡'); setCrCanDelete(false); setCrPerms([]);
   }
 
-  function assignCustomRole() {
+  async function assignCustomRole() {
     if (!crAssignEmail.trim()) { toast.error('Enter an email'); return; }
-    DB.assignCustomRole(crAssignEmail.trim(), crAssignId === '__none__' ? null : crAssignId);
-    reload(); toast.success(crAssignId ? 'Custom role assigned!' : 'Custom role removed!');
+    const removing = crAssignId === '__none__';
+    try {
+      await DB.assignCustomRole(crAssignEmail.trim(), removing ? null : crAssignId);
+      reload(); toast.success(removing ? 'Custom role removed!' : 'Custom role assigned!');
+    } catch (e) {
+      const err = e as { userFacingMessage?: string; message?: string };
+      toast.error(err.userFacingMessage || err.message || 'Could not save custom role');
+    }
   }
 
   function deleteCustomRole(id: string) {

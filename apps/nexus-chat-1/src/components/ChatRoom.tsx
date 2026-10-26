@@ -204,11 +204,10 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const [target, ...rest] = text.slice(10).trim().split(' ');
       const roleName = rest.join(' ').trim();
       if (!target || !roleName) { toast.error('Usage: /giverole email RoleName (or "none")'); return true; }
-      if (!DB.getUser(target)) { toast.error('User not found'); return true; }
-      if (roleName.toLowerCase() === 'none') { DB.assignCustomRole(target, null); toast.success('Custom role removed'); return true; }
+      if (roleName.toLowerCase() === 'none') { DB.assignCustomRole(target, null).then(() => toast.success('Custom role removed')).catch(() => toast.error("Couldn't save — try again")); return true; }
       const r = DB.getCustomRoles().find(r => r.name.toLowerCase() === roleName.toLowerCase());
       if (!r) { toast.error(`No role named "${roleName}"`); return true; }
-      DB.assignCustomRole(target, r.id); toast.success(`Gave ${r.icon} ${r.name} to ${target}`); return true;
+      DB.assignCustomRole(target, r.id).then(() => toast.success(`Gave ${r.icon} ${r.name} to ${target}`)).catch(() => toast.error("Couldn't save — try again")); return true;
     }
 
     if (text === '/clearchat') {
@@ -412,7 +411,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const role: DB.CustomRole = { id: crypto.randomUUID(), name, color: colors[Math.floor(Math.random() * colors.length)], icon: '✨', canDelete: false, permissions: [], createdBy: profile.email };
       DB.addCustomRole(role);
       addGems(-250);
-      DB.assignCustomRole(profile.email, role.id);
+      DB.assignCustomRole(profile.email, role.id).catch(() => {});
       updateProfile({ customRole: role.name, customRoleColor: role.color, customRoleColor2: role.color2 || '' });
       postBot(`🎉 Done! @${profile.name} now has the custom role ✨ ${name}. That'll be 💎 250 gems, pleasure doing business 😎`);
       return;

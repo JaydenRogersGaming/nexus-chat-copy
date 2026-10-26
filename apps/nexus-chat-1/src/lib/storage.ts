@@ -285,15 +285,20 @@ export function addCustomTitle(t: CustomTitle) { const c = getCustomTitles(); c.
 export function getCustomRoles(): CustomRole[] { return g<CustomRole[]>('customRoles') || []; }
 export function addCustomRole(r: CustomRole) { const c = getCustomRoles(); c.push(r); s('customRoles', c); }
 export function deleteCustomRole(id: string) { s('customRoles', getCustomRoles().filter(r => r.id !== id)); }
-export function assignCustomRole(email: string, roleId: string | null) {
+export function applyCustomRoleLocally(email: string, cr: { name: string; color: string; color2: string } | null) {
   const users = g<Record<string,UserProfile>>('users') || {};
   if (!users[email]) return;
-  if (roleId === null) { delete users[email].customRole; delete users[email].customRoleColor; delete users[email].customRoleColor2; }
-  else {
-    const r = getCustomRoles().find(r => r.id === roleId);
-    if (r) { users[email].customRole = r.name; users[email].customRoleColor = r.color; users[email].customRoleColor2 = r.color2 || ''; }
-  }
+  if (!cr || !cr.name) { delete users[email].customRole; delete users[email].customRoleColor; delete users[email].customRoleColor2; }
+  else { users[email].customRole = cr.name; users[email].customRoleColor = cr.color; users[email].customRoleColor2 = cr.color2; }
   s('users', users);
+}
+
+/** Gives (or removes) a custom role. Saved on the shared server so it sticks for everyone. */
+export function assignCustomRole(email: string, roleId: string | null): Promise<void> {
+  const r = roleId === null ? null : getCustomRoles().find(r => r.id === roleId);
+  const cr = r ? { name: r.name, color: r.color, color2: r.color2 || '' } : null;
+  applyCustomRoleLocally(email, cr);
+  return import('zitejs/api').then(({ roles }) => roles({ action: 'setCustom', email, customRole: cr })).then(() => undefined);
 }
 
 // ── Bugs ──────────────────────────────────────────────────────

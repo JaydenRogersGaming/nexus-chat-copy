@@ -123,6 +123,33 @@
             "type": "single_line_text",
             "template": {}
           }
+        },
+        {
+          "id": "fqonS4vG3pP",
+          "sdkName": "customRole",
+          "definition": {
+            "name": "Custom Role",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fePWNEkjjGa",
+          "sdkName": "customRoleColor",
+          "definition": {
+            "name": "Custom Role Color",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fcbhN7hPGQg",
+          "sdkName": "customRoleColor2",
+          "definition": {
+            "name": "Custom Role Color 2",
+            "type": "single_line_text",
+            "template": {}
+          }
         }
       ]
     },
