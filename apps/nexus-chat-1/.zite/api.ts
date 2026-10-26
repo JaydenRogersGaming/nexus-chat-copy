@@ -13,6 +13,7 @@ import type { default as _ChatBotEp } from '../src/api/chatBot';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
 import type { default as _IpBansEp } from '../src/api/ipBans';
+import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
 import type { default as _ReportsEp } from '../src/api/reports';
@@ -74,6 +75,11 @@ export type IpBansInputType = NonNullable<_IpBansCfg['inputSchema']> extends { _
 export type IpBansOutputType = Awaited<ReturnType<_IpBansCfg['execute']>>;
 export const ipBans = createCaller<IpBansInputType, IpBansOutputType>('ipBans');
 
+type _ListingsCfg = typeof _ListingsEp;
+export type ListingsInputType = NonNullable<_ListingsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ListingsCfg['execute']>[0]['input'];
+export type ListingsOutputType = Awaited<ReturnType<_ListingsCfg['execute']>>;
+export const listings = createCaller<ListingsInputType, ListingsOutputType>('listings');
+
 type _MessagesCfg = typeof _MessagesEp;
 export type MessagesInputType = NonNullable<_MessagesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_MessagesCfg['execute']>[0]['input'];
 export type MessagesOutputType = Awaited<ReturnType<_MessagesCfg['execute']>>;
@@ -112,6 +118,7 @@ export const api = {
   generateArt,
   gifs,
   ipBans,
+  listings,
   messages,
   presence,
   reports,

@@ -4,7 +4,7 @@ import { Skeleton } from '@project/components/ui/skeleton';
 import UsersTab from '../components/admin/UsersTab';
 import IpBansTab from '../components/admin/IpBansTab';
 import ReportsTab from '../components/admin/ReportsTab';
-import { AuditTab } from '../components/admin/ModerationTabs';
+import { ListingsModTab, AuditTab } from '../components/admin/ModerationTabs';
 import { usePermissions } from '../hooks/usePermissions';
 
 export default function AdminDashboardPage() {
@@ -27,11 +27,13 @@ export default function AdminDashboardPage() {
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="listings">Listings</TabsTrigger>
           <TabsTrigger value="ips">IP bans</TabsTrigger>
           {has('audit.view') && <TabsTrigger value="audit">Audit log</TabsTrigger>}
         </TabsList>
         <TabsContent value="users"><UsersTab canAssign={has('roles.assign')} /></TabsContent>
         <TabsContent value="reports"><ReportsTab /></TabsContent>
+        <TabsContent value="listings"><ListingsModTab /></TabsContent>
         <TabsContent value="ips"><IpBansTab /></TabsContent>
         {has('audit.view') && <TabsContent value="audit"><AuditTab /></TabsContent>}
       </Tabs>
