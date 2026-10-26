@@ -1,3 +1,4 @@
+import { bans as bansApi } from 'zitejs/api';
 import { OWNER_EMAIL } from './gameData';
 
 export type UserProfile = {
@@ -384,8 +385,12 @@ export function getBans(): BanRecord[] { return g<BanRecord[]>('bans') || []; }
 export function banUser(email: string, bannedBy: string, reason: string) {
   const bans = getBans();
   if (!bans.find(b => b.email === email)) { bans.push({ email, bannedBy, reason, timestamp: Date.now() }); s('bans', bans); }
+  bansApi({ action: 'ban', email, reason }).catch(() => {});
 }
-export function unbanUser(email: string) { s('bans', getBans().filter(b => b.email !== email)); }
+export function unbanUser(email: string) {
+  s('bans', getBans().filter(b => b.email !== email));
+  bansApi({ action: 'unban', email }).catch(() => {});
+}
 export function isUserBanned(email: string): BanRecord | null { return getBans().find(b => b.email === email) || null; }
 
 // ── Mutes ─────────────────────────────────────────────────────
