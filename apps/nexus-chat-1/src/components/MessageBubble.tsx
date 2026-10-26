@@ -107,7 +107,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
   const reactionEntries = Object.entries(msg.reactions).filter(([, u]) => u.length > 0);
 
   return (
-    <div className={cn('flex mb-3 group', isOwn ? 'justify-end' : 'justify-start')}>
+    <div id={`msg-${msg.id}`} className={cn('flex mb-3 group transition-shadow', isOwn ? 'justify-end' : 'justify-start')}>
       {!isOwn && (
         <button onClick={() => onViewProfile?.(msg.senderEmail)}
           className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm mr-2 flex-shrink-0 mt-1 overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all cursor-pointer">
@@ -150,10 +150,21 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
 
         {/* Reply reference */}
         {msg.replyTo && (
-          <div className={cn('text-[10px] px-2.5 py-1.5 rounded-lg border-l-2 max-w-full', isOwn ? 'bg-primary/10 border-primary/50' : 'bg-secondary/50 border-muted-foreground/30')}>
-            <span className="font-semibold text-muted-foreground">{msg.replyTo.senderName}</span>
-            <p className="text-muted-foreground truncate">{msg.replyTo.content}</p>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById(`msg-${msg.replyTo!.id}`);
+              if (!el) return;
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.classList.add('ring-2', 'ring-primary', 'rounded-xl');
+              setTimeout(() => el.classList.remove('ring-2', 'ring-primary', 'rounded-xl'), 1500);
+            }}
+            className={cn('text-left text-[10px] px-2.5 py-1.5 rounded-lg border-l-2 max-w-full hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring', isOwn ? 'bg-primary/10 border-primary/50' : 'bg-secondary/50 border-muted-foreground/30')}
+            title="Jump to original message"
+          >
+            <span className="font-semibold text-muted-foreground">↩ {msg.replyTo.senderName}</span>
+            <p className="text-muted-foreground truncate">{msg.replyTo.content.startsWith('[gif]') ? '🎞️ GIF' : msg.replyTo.content}</p>
+          </button>
         )}
 
         {/* Bubble */}
@@ -177,7 +188,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             ? <img src={msg.content.slice(5)} alt="GIF" className="rounded-lg max-w-[240px] max-h-60 object-contain" loading="lazy" />
             : <span style={textStyleCss(getRoleTextStyle(senderRole))}>{msg.uncensored ? msg.content : censorMessage(msg.content).censored}</span>}
           {/* Action buttons */}
-          {!editing && <div className="absolute -top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
+          {!editing && <div className="absolute -top-1 right-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
             {isOwn && !isGif && (
               <button onClick={() => { setDraft(msg.content); setEditing(true); }} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Edit">
                 <Pencil className="w-3.5 h-3.5" />

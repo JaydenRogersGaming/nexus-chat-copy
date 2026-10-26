@@ -36,6 +36,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const [suggestions, setSuggestions] = useState<DB.UserProfile[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [replyingTo, setReplyingTo] = useState<DB.Message | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [viewProfileEmail, setViewProfileEmail] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const isTypingRef = useRef(false);
@@ -455,7 +456,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
             msg={m}
             onDeleted={load}
             onReactionUpdate={load}
-            onReply={(msg) => setReplyingTo(msg)}
+            onReply={(msg) => { setReplyingTo(msg); requestAnimationFrame(() => inputRef.current?.focus()); }}
             onViewProfile={(email) => setViewProfileEmail(email)}
           />
         ))}
@@ -492,7 +493,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         <div className="px-4 py-2 bg-secondary/30 border-t border-border flex items-center gap-2">
           <div className="flex-1 min-w-0">
             <p className="text-[10px] text-primary font-semibold">Replying to {replyingTo.senderName}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{replyingTo.content}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{replyingTo.content.startsWith('[gif]') ? '🎞️ GIF' : replyingTo.content}</p>
           </div>
           <button onClick={() => setReplyingTo(null)} className="p-1 rounded hover:bg-secondary"><X className="w-3.5 h-3.5 text-muted-foreground" /></button>
         </div>
@@ -569,7 +570,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         <div className="flex gap-2 items-center">
           <EmojiGifPicker onEmoji={e => setInput(prev => prev + e)} onGif={url => send(`[gif]${url}`)} />
           <PhotoUploadButton onUploaded={url => send(`[gif]${url}`)} />
-          <Input value={input} onChange={e => handleInputChange(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={replyingTo ? `Reply to ${replyingTo.senderName}…` : `Message ${room.name}…`} className="flex-1 bg-secondary border-border" />
+          <Input ref={inputRef} value={input} onChange={e => handleInputChange(e.target.value)} onKeyDown={e => { if (e.key === 'Escape' && replyingTo) { setReplyingTo(null); return; } if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={replyingTo ? `Reply to ${replyingTo.senderName}…` : `Message ${room.name}…`} className="flex-1 bg-secondary border-border" />
           <Button onClick={() => send()} size="icon" disabled={!input.trim() || (!isOwner && cooldown > 0)}>
             {cooldown > 0 && !isOwner ? <span className="text-xs font-bold">{cooldown}</span> : <Send className="w-4 h-4" />}
           </Button>
