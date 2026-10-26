@@ -17,7 +17,7 @@ import { checkBadges } from '../lib/badges';
 import { getAllTypingStyles } from '../lib/cosmetics';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
-import { messages as messagesApi, chatBot, typing as typingApi, roles as rolesApi, RolesOutputType } from 'zitejs/api';
+import { bans as bansApi, messages as messagesApi, chatBot, typing as typingApi, roles as rolesApi, RolesOutputType } from 'zitejs/api';
 
 const ROLE_OPTIONS = [
   { id: 'user', label: '👤 User', desc: 'Regular member' },
@@ -189,6 +189,15 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       toast.success(`🔨 Banned ${targetUser.name}`);
       const sysMsg: DB.Message = { id: crypto.randomUUID(), chatRoomId: room.id, senderEmail: 'system', senderName: '⚠️ System', content: `${targetUser.name} has been banned by ${profile.name}.`, reactions: {}, deleted: false, senderTitle: '', senderTitleEffect: '', senderTitleColor: '', senderNameColor: '#ff4444', timestamp: Date.now() };
       messagesApi({ action: 'send', message: sysMsg }).then(load); return true;
+    }
+
+    if (text === '/unbanall' && canBan) {
+      const n = DB.getBans().length;
+      DB.getBans().forEach(b => DB.unbanUser(b.email));
+      bansApi({ action: 'unbanall' })
+        .then(() => toast.success(`🕊️ Unbanned everyone${n ? ` (${n} local)` : ''}`))
+        .catch(e => toast.error(e instanceof Error ? e.message : 'Could not unban everyone'));
+      return true;
     }
 
     if (text.startsWith('/unban ') && canBan) {
@@ -439,6 +448,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const ALL_COMMANDS: { cmd: string; desc: string; level: 'all' | 'staff' | 'owner' }[] = [
     { cmd: '/ban', desc: 'Ban a user', level: 'staff' },
     { cmd: '/unban', desc: 'Unban a user', level: 'staff' },
+    { cmd: '/unbanall', desc: 'Unban every user', level: 'staff' },
     { cmd: '/mute', desc: 'Mute user [email] [mins]', level: 'staff' },
     { cmd: '/unmute', desc: 'Unmute a user', level: 'staff' },
     { cmd: '/clearchat', desc: 'Clear chat', level: 'staff' },
@@ -453,7 +463,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
 
   const visibleCommands = ALL_COMMANDS.filter(c => {
     if (c.level === 'owner') return isOwner;
-    if (c.cmd === '/ban' || c.cmd === '/unban') return canBan;
+    if (c.cmd === '/ban' || c.cmd === '/unban' || c.cmd === '/unbanall') return canBan;
     if (c.cmd === '/mute' || c.cmd === '/unmute') return canMute;
     if (c.cmd === '/clearchat') return canClear;
     if (c.cmd === '/giverole') return canGiveRole;

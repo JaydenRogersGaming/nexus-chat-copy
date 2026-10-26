@@ -12,7 +12,7 @@ const banSchema = z.object({
 export default createEndpoint({
   description: 'Checks, lists, creates and removes bans (normal, IP and hard bans)',
   inputSchema: z.object({
-    action: z.enum(['check', 'list', 'ban', 'unban']),
+    action: z.enum(['check', 'list', 'ban', 'unban', 'unbanall']),
     ip: z.string().max(45).optional(),
     deviceId: z.string().max(100).optional(),
     email: z.string().max(200).optional(),
@@ -83,6 +83,16 @@ export default createEndpoint({
       if (records.some(r => r.banType !== 'Ban') && !can(actor, 'ip.ban')) deny('Only Admins can lift IP or hard bans.');
       for (const r of records) await zite.bans.delete({ id: r.id });
       await audit(actor.email, 'user.unban', email);
+    }
+
+    if (input.action === 'unbanall') {
+      if (!can(actor, 'ip.ban')) deny('Only Admins and above can unban everyone.');
+      for (;;) {
+        const { records } = await zite.bans.findAll({ limit: 500 });
+        if (!records.length) break;
+        await Promise.all(records.map(r => zite.bans.delete({ id: r.id })));
+      }
+      await audit(actor.email, 'user.unbanall', 'everyone');
     }
 
     const { records } = await zite.bans.findAll({ limit: 2000 });
