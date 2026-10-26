@@ -15,6 +15,7 @@ import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
 import { getAllBgThemes } from '../lib/cosmetics';
 import { useApp } from '../contexts/AppContext';
 import MusicPlayer from './MusicPlayer';
+import NotificationBell from './NotificationBell';
 import { Link } from 'react-router-dom';
 import { Store } from 'lucide-react';
 import * as P from '../lib/personalize';
@@ -274,6 +275,7 @@ export default function Layout() {
           </div>
           <div className="ml-auto flex items-center gap-1">
             <MusicPlayer />
+            <NotificationBell />
             <Link
               to="/market"
               title="Marketplace"
