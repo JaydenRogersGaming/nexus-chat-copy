@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import VideoRoomsPage from './pages/VideoRoomsPage';
 import EmojiMixerPage from './pages/EmojiMixerPage';
 import ArtPage from './pages/ArtPage';
+import IdeasPage from './pages/IdeasPage';
 import MarketplacePage from './pages/MarketplacePage';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
@@ -28,9 +28,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
   const serverBan = useServerBan(!!user);
-  useEffect(() => {
-    if (!isLoading && !user) loginWithRedirect();
-  }, [isLoading, user]);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
       <MatrixRain color={mc} speed={settings.matrixSpeed} />
@@ -83,6 +80,7 @@ export default function App() {
               <Route path="video/:code"  element={<VideoRoomsPage />} />
               <Route path="emoji-maker"  element={<EmojiMixerPage />} />
               <Route path="art"          element={<ArtPage />} />
+              <Route path="ideas"        element={<IdeasPage />} />
               <Route path="draw"         element={<Navigate to="/art" replace />} />
             </Route>
           </Routes>

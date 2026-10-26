@@ -14,6 +14,7 @@ import type { default as _FriendsEp } from '../src/api/friends';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
 import type { default as _GroupsEp } from '../src/api/groups';
+import type { default as _IdeasEp } from '../src/api/ideas';
 import type { default as _IpBansEp } from '../src/api/ipBans';
 import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
@@ -83,6 +84,11 @@ export type GroupsInputType = NonNullable<_GroupsCfg['inputSchema']> extends { _
 export type GroupsOutputType = Awaited<ReturnType<_GroupsCfg['execute']>>;
 export const groups = createCaller<GroupsInputType, GroupsOutputType>('groups');
 
+type _IdeasCfg = typeof _IdeasEp;
+export type IdeasInputType = NonNullable<_IdeasCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_IdeasCfg['execute']>[0]['input'];
+export type IdeasOutputType = Awaited<ReturnType<_IdeasCfg['execute']>>;
+export const ideas = createCaller<IdeasInputType, IdeasOutputType>('ideas');
+
 type _IpBansCfg = typeof _IpBansEp;
 export type IpBansInputType = NonNullable<_IpBansCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_IpBansCfg['execute']>[0]['input'];
 export type IpBansOutputType = Awaited<ReturnType<_IpBansCfg['execute']>>;
@@ -137,6 +143,7 @@ export const api = {
   generateArt,
   gifs,
   groups,
+  ideas,
   ipBans,
   listings,
   messages,

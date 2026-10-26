@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
 import * as DB from '../lib/storage';
+import { OWNER_EMAIL } from '../lib/gameData';
 import TitleBadge from './TitleBadge';
 import UserProfileModal from './UserProfileModal';
 import { cn } from '@project/components/lib/utils';
@@ -19,6 +20,8 @@ const ROLE_COLOR: Record<string, string> = {
 
 const STAFF = ['owner', 'co-owner', 'admin', 'senior-mod', 'mod', 'helper'];
 
+const rank = (r: string) => { const i = STAFF.indexOf(r); return i < 0 ? STAFF.length : i; };
+
 type Props = { roomId: string; currentUserEmail?: string };
 
 export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
@@ -26,8 +29,8 @@ export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
   const [typing, setTyping] = useState<DB.TypingUser[]>([]);
   const [viewEmail, setViewEmail] = useState<string | null>(null);
   const onlineSet = new Set(onlineUsers.map(u => u.email));
-  const merged = [...onlineUsers, ...everyone.filter(u => !onlineSet.has(u.email))]
-    .sort((a, b) => Number(onlineSet.has(b.email)) - Number(onlineSet.has(a.email)) || a.name.localeCompare(b.name));
+  const merged = [...onlineUsers, ...everyone.filter(u => !onlineSet.has(u.email))].map(u => u.email === OWNER_EMAIL ? { ...u, role: 'owner' } : u)
+    .sort((a, b) => rank(a.role) - rank(b.role) || Number(onlineSet.has(b.email)) - Number(onlineSet.has(a.email)) || a.name.localeCompare(b.name));
   const groups = [
     { label: 'Staff', users: merged.filter(u => STAFF.includes(u.role)) },
     { label: 'Users', users: merged.filter(u => !STAFF.includes(u.role)) },
