@@ -1,3 +1,4 @@
+import { formatGems } from '../lib/formatGems';
 import { useState } from 'react';
 import { Sparkles, Loader2, Gem } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -73,7 +74,7 @@ export default function AiTitleMaker() {
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>✨ AI Custom Title Maker</DialogTitle></DialogHeader>
-        <div className="flex items-center gap-1 text-xs font-semibold"><Gem className="w-3.5 h-3.5 text-purple-400" />Costs {COST.toLocaleString()} gems · You have {profile.gems.toLocaleString()} · Needs owner approval</div>
+        <div className="flex items-center gap-1 text-xs font-semibold"><Gem className="w-3.5 h-3.5 text-purple-400" />Costs {COST.toLocaleString()} gems · You have {formatGems(profile.gems)} · Needs owner approval</div>
 
         <div className="p-4 rounded-xl border border-border bg-secondary/30 flex justify-center">
           <TitleBadge title={sent ? sent.name : options[picked] ? withEmoji(options[picked].name) : previewText} effect={sent ? sent.effect : options[picked]?.effect ?? (effect === AUTO ? 'none' : effect)} color={sent ? sent.color : options[picked]?.color ?? (useColor ? color : '#a78bfa')} font={sent ? sent.font : font} size="md" />

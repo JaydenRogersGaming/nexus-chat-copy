@@ -1,3 +1,4 @@
+import { formatGems } from '../lib/formatGems';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { Crown, ShieldCheck, Shield, Star, MessageSquare, Gem, Trophy, Dices, MessageCircle } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -121,7 +122,7 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
           <div className="grid grid-cols-4 gap-2">
             {[
               { icon: <MessageSquare className="w-3.5 h-3.5" />, val: user.messageCount, label: 'Messages' },
-              { icon: <Gem className="w-3.5 h-3.5" />, val: user.gems, label: 'Gems' },
+              { icon: <Gem className="w-3.5 h-3.5" />, val: formatGems(user.gems), label: 'Gems' },
               { icon: <Trophy className="w-3.5 h-3.5" />, val: achievements.length, label: 'Achievements' },
               { icon: <Dices className="w-3.5 h-3.5" />, val: user.gambleWins, label: 'Gamble Wins' },
             ].map((s, i) => (

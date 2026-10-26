@@ -1,3 +1,4 @@
+import { formatGems } from '../lib/formatGems';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Heart, Gem, Zap, Trophy, ArrowUp, ChevronDown, ChevronUp, Crown, Infinity, RotateCcw, Star, Timer } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -425,7 +426,7 @@ export default function HpClickerPage() {
         <StatBox icon={<ArrowUp className="w-4 h-4 text-primary" />} value={totalUpgradeLevels.toLocaleString()} label="Levels" />
         <StatBox icon={<RotateCcw className="w-4 h-4 text-cyan-400" />} value={prestige >= 999999999 ? '∞' : String(prestige)} label="Prestige" />
         <StatBox icon={<Star className="w-4 h-4 text-yellow-400" />} value={godPrestige >= 999999999 ? '∞' : String(godPrestige)} label="God P." />
-        <StatBox icon={<Gem className="w-4 h-4 text-purple-400" />} value={(profile?.gems || 0).toLocaleString()} label="Gems" />
+        <StatBox icon={<Gem className="w-4 h-4 text-purple-400" />} value={formatGems(profile?.gems)} label="Gems" />
       </div>
 
       {/* Active Boosts with countdown */}

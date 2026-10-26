@@ -1,3 +1,4 @@
+import { formatGems } from '../lib/formatGems';
 import { useState, useEffect } from 'react';
 import { Trophy, Gem } from 'lucide-react';
 import TitleBadge from '../components/TitleBadge';
@@ -62,7 +63,7 @@ export default function LeaderboardPage() {
                 <p className="text-xs font-semibold text-center max-w-16 truncate" style={{ color: u.nameColor }}>{u.name}</p>
                 {isOwner(u) && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">👑 Owner</span>}
                 <div className={cn('w-16 rounded-t-lg flex flex-col items-center justify-end pb-2', heights[i])} style={{ background: ['#c0c0c020','#ffd70020','#cd7f3220'][i], border: `1px solid ${['#c0c0c040','#ffd70040','#cd7f3240'][i]}` }}>
-                  <span className="text-xs font-bold flex items-center gap-0.5"><Gem className="w-3 h-3 text-purple-400" />{u.gems >= 1000 ? `${(u.gems/1000).toFixed(1)}k` : u.gems}</span>
+                  <span className="text-xs font-bold flex items-center gap-0.5"><Gem className="w-3 h-3 text-purple-400" />{formatGems(u.gems)}</span>
                 </div>
               </div>
             );
@@ -92,7 +93,7 @@ export default function LeaderboardPage() {
                 <p className="text-[10px] text-muted-foreground">{u.messageCount} messages</p>
               </div>
               <div className="flex items-center gap-1 font-bold text-sm text-purple-300 flex-shrink-0">
-                <Gem className="w-4 h-4 text-purple-400" />{(u.gems ?? 0).toLocaleString()}
+                <Gem className="w-4 h-4 text-purple-400" />{formatGems(u.gems)}
               </div>
               {isMe && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary/20 text-primary flex-shrink-0">YOU</span>}
             </div>

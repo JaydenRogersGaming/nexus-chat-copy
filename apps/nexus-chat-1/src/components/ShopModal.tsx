@@ -1,3 +1,4 @@
+import { formatGems } from '../lib/formatGems';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { Button } from '@project/components/ui/button';
@@ -43,7 +44,7 @@ export default function ShopModal({ open, onClose }: Props) {
           <DialogTitle className="flex items-center gap-2">
             <Gem className="w-5 h-5 text-purple-400" /> Shop
             <span className="ml-auto text-sm font-normal text-purple-300 flex items-center gap-1">
-              <Gem className="w-3.5 h-3.5" />{(profile.gems ?? 0).toLocaleString()} gems
+              <Gem className="w-3.5 h-3.5" />{formatGems(profile.gems)} gems
             </span>
           </DialogTitle>
         </DialogHeader>

@@ -1,3 +1,4 @@
+import { formatGems } from '../lib/formatGems';
 import { useState, useEffect } from 'react';
 import ServerBanPanel from '../components/ServerBanPanel';
 import OwnerThemesTab from '../components/OwnerThemesTab';
@@ -964,7 +965,7 @@ export default function AdminPage() {
                     ? { backgroundImage: `linear-gradient(90deg, ${u.nameColor}, ${u.nameColor2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
                     : { color: u.nameColor }
                 }>{u.name}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{u.email} • {(u.gems ?? 0).toLocaleString()} gems</p>
+                <p className="text-[10px] text-muted-foreground truncate">{u.email} • {formatGems(u.gems)} gems</p>
               </div>
               <div className="flex flex-col items-end gap-1">
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary ${ROLE_META[u.role]?.color || 'text-muted-foreground'}`}>{ROLE_META[u.role]?.label || u.role}</span>

@@ -1,3 +1,4 @@
+import { formatGems } from '../lib/formatGems';
 import { useState, useEffect } from 'react';
 import { Gem, TrendingUp, TrendingDown, RotateCcw } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -163,7 +164,7 @@ export default function GamblePage() {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-card border border-border rounded-xl p-3 text-center">
           <Gem className="w-5 h-5 text-purple-400 mx-auto mb-1" />
-          <p className="text-lg font-black text-purple-300">{(profile.gems ?? 0).toLocaleString()}</p>
+          <p className="text-lg font-black text-purple-300">{formatGems(profile.gems)}</p>
           <p className="text-[10px] text-muted-foreground">Gems</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-3 text-center">
@@ -188,7 +189,7 @@ export default function GamblePage() {
           <Button variant="outline" size="sm" onClick={() => setBet(String(Math.floor(profile.gems / 2)))}>½</Button>
           <Button variant="outline" size="sm" onClick={() => setBet(String(profile.gems))}>Max</Button>
         </div>
-        {betNum > profile.gems && <p className="text-destructive text-xs mt-1">Not enough gems! You have {profile.gems.toLocaleString()}</p>}
+        {betNum > profile.gems && <p className="text-destructive text-xs mt-1">Not enough gems! You have {formatGems(profile.gems)}</p>}
       </div>
 
       <Tabs defaultValue="slots">
