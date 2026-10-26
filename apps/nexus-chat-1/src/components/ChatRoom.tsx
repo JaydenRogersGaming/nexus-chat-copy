@@ -387,7 +387,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     DB.incrementQuestProgress(profile.email, 'send_20');
     DB.incrementQuestProgress(profile.email, 'send_50');
 
-    if (/@(jaydenchatbot|nexusbot)\b/i.test(text)) handleBot(text, censored);
+    if (/@(jaydenchatbot|jayden|nexusbot)\b/i.test(text)) handleBot(text, censored);
 
     setTimeout(() => { checkAchievements(); checkBadges(profile.email); }, 100);
   }
@@ -418,7 +418,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     }
     try {
       const history = messages.slice(-15).map(m => ({ name: m.senderName, content: m.content }));
-      const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/@(jaydenchatbot|nexusbot)/ig, '').trim() || 'hi', history });
+      const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/@(jaydenchatbot|jayden|nexusbot)/ig, '').trim() || 'hi', history });
       postBot(censorMessage(reply).censored);
     } catch { postBot("Beep boop… my brain lagged 🤖 try again in a sec!"); }
   }

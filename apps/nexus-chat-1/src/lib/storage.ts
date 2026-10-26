@@ -216,12 +216,12 @@ export function getOrCreateUser(email: string): UserProfile {
 
 // ── JaydenChatBot ─────────────────────────────────────────────
 export const BOT_EMAIL = 'jaydenchatbot@nexus.bot';
-export const BOT_NAME = 'JaydenChatBot';
+export const BOT_NAME = 'Jayden';
 export function ensureBotUser(): UserProfile {
   const existing = getUser(BOT_EMAIL);
   if (existing) return existing;
   const p = getOrCreateUser(BOT_EMAIL);
-  const bot: UserProfile = { ...p, name: BOT_NAME, nameColor: '#38bdf8', bio: '🤖 Your AI assistant & friend. Mention @jaydenchatbot to chat!', activeTitle: '🤖 Bot', activeTitleColor: '#38bdf8', verified: true };
+  const bot: UserProfile = { ...p, name: BOT_NAME, nameColor: '#38bdf8', bio: '🤖 Your AI assistant & friend. Mention @jayden for jokes, answers & more!', activeTitle: '🤖 Bot', activeTitleColor: '#38bdf8', verified: true };
   saveUser(bot); return bot;
 }
 
