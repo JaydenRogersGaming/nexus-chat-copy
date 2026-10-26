@@ -1089,6 +1089,148 @@
           }
         }
       ]
+    },
+    {
+      "id": "tne4vy3QmEj",
+      "sdkName": "videoRooms",
+      "name": "Video Rooms",
+      "primaryFieldId": "fwCDR9vCe67",
+      "fields": [
+        {
+          "id": "fwCDR9vCe67",
+          "sdkName": "code",
+          "definition": {
+            "name": "Code",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fsu9Q9jGgjQ",
+          "sdkName": "hostName",
+          "definition": {
+            "name": "Host Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fj1PqX4to16",
+          "sdkName": "expiresAt",
+          "definition": {
+            "name": "Expires At",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "t5Phx2FJ8Sm",
+      "sdkName": "videoParticipants",
+      "name": "Video Participants",
+      "primaryFieldId": "fuwDbXh9VSC",
+      "fields": [
+        {
+          "id": "fuwDbXh9VSC",
+          "sdkName": "peerId",
+          "definition": {
+            "name": "Peer Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fwmDkscHNXx",
+          "sdkName": "roomCode",
+          "definition": {
+            "name": "Room Code",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpaRJNBDL7L",
+          "sdkName": "displayName",
+          "definition": {
+            "name": "Display Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f1hVtBPTmmT",
+          "sdkName": "lastSeen",
+          "definition": {
+            "name": "Last Seen",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "teVgN5PCJhp",
+      "sdkName": "videoSignals",
+      "name": "Video Signals",
+      "primaryFieldId": "fgJhNrDgAjc",
+      "fields": [
+        {
+          "id": "fgJhNrDgAjc",
+          "sdkName": "roomCode",
+          "definition": {
+            "name": "Room Code",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fj1tYs36c5k",
+          "sdkName": "fromPeer",
+          "definition": {
+            "name": "From Peer",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "foHrSKQcCF3",
+          "sdkName": "toPeer",
+          "definition": {
+            "name": "To Peer",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f6T5NV5Tkki",
+          "sdkName": "kind",
+          "definition": {
+            "name": "Kind",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpr6dyvuD4p",
+          "sdkName": "payload",
+          "definition": {
+            "name": "Payload",
+            "type": "long_text",
+            "template": {}
+          }
+        }
+      ]
     }
   ]
 }

@@ -21,6 +21,7 @@ import type { default as _PresenceEp } from '../src/api/presence';
 import type { default as _ReportsEp } from '../src/api/reports';
 import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _TypingEp } from '../src/api/typing';
+import type { default as _VideoRoomsEp } from '../src/api/videoRooms';
 
 type _AdminUsersCfg = typeof _AdminUsersEp;
 export type AdminUsersInputType = NonNullable<_AdminUsersCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AdminUsersCfg['execute']>[0]['input'];
@@ -117,6 +118,11 @@ export type TypingInputType = NonNullable<_TypingCfg['inputSchema']> extends { _
 export type TypingOutputType = Awaited<ReturnType<_TypingCfg['execute']>>;
 export const typing = createCaller<TypingInputType, TypingOutputType>('typing');
 
+type _VideoRoomsCfg = typeof _VideoRoomsEp;
+export type VideoRoomsInputType = NonNullable<_VideoRoomsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_VideoRoomsCfg['execute']>[0]['input'];
+export type VideoRoomsOutputType = Awaited<ReturnType<_VideoRoomsCfg['execute']>>;
+export const videoRooms = createCaller<VideoRoomsInputType, VideoRoomsOutputType>('videoRooms');
+
 
 export const api = {
   adminUsers,
@@ -138,4 +144,5 @@ export const api = {
   reports,
   roles,
   typing,
+  videoRooms,
 };

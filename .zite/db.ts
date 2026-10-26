@@ -366,6 +366,62 @@ export type ChatGroupsRecordInput = {
   visibility: "Public" | "Private" | string | null;
 };
 
+/** A record in the "Video Rooms" table, as it is read back. */
+export type VideoRoomsRecordType = {
+  id: string;
+  /** Primary field. "Code" */
+  code?: string;
+  hostName?: string;
+  /** "Expires At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  expiresAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Video Rooms" table. */
+export type VideoRoomsRecordInput = {
+  code: string | null;
+  hostName: string | null;
+  expiresAt: string | Date | null;
+};
+
+/** A record in the "Video Participants" table, as it is read back. */
+export type VideoParticipantsRecordType = {
+  id: string;
+  /** Primary field. "Peer Id" */
+  peerId?: string;
+  roomCode?: string;
+  displayName?: string;
+  /** "Last Seen". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  lastSeen?: string;
+};
+
+/** What you may write when creating or updating a record in the "Video Participants" table. */
+export type VideoParticipantsRecordInput = {
+  peerId: string | null;
+  roomCode: string | null;
+  displayName: string | null;
+  lastSeen: string | Date | null;
+};
+
+/** A record in the "Video Signals" table, as it is read back. */
+export type VideoSignalsRecordType = {
+  id: string;
+  /** Primary field. "Room Code" */
+  roomCode?: string;
+  fromPeer?: string;
+  toPeer?: string;
+  kind?: string;
+  payload?: string;
+};
+
+/** What you may write when creating or updating a record in the "Video Signals" table. */
+export type VideoSignalsRecordInput = {
+  roomCode: string | null;
+  fromPeer: string | null;
+  toPeer: string | null;
+  kind: string | null;
+  payload: string | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -386,6 +442,9 @@ export const zite = {
   reports: createTableClient<ReportsRecordType, ReportsRecordInput>('Reports'), // "Reports"
   friendships: createTableClient<FriendshipsRecordType, FriendshipsRecordInput>('Friendships'), // "Friendships"
   chatGroups: createTableClient<ChatGroupsRecordType, ChatGroupsRecordInput>('ChatGroups'), // "Chat Groups"
+  videoRooms: createTableClient<VideoRoomsRecordType, VideoRoomsRecordInput>('VideoRooms'), // "Video Rooms"
+  videoParticipants: createTableClient<VideoParticipantsRecordType, VideoParticipantsRecordInput>('VideoParticipants'), // "Video Participants"
+  videoSignals: createTableClient<VideoSignalsRecordType, VideoSignalsRecordInput>('VideoSignals'), // "Video Signals"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };
