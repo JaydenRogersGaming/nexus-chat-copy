@@ -879,6 +879,11 @@
                   "value": "cGd4",
                   "label": "Listing",
                   "color": "orange"
+                },
+                {
+                  "value": "dChP",
+                  "label": "Ban Appeal",
+                  "color": "blue"
                 }
               ],
               "disableColors": false

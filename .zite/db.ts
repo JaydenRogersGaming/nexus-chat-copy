@@ -307,7 +307,7 @@ export type ReportsRecordType = {
   id: string;
   /** Primary field. "Subject" */
   subject?: string;
-  targetType?: "User" | "Listing" | string;
+  targetType?: "User" | "Listing" | "Ban Appeal" | string;
   targetId?: string;
   reason?: string;
   reporterEmail?: string;
@@ -321,7 +321,7 @@ export type ReportsRecordType = {
 /** What you may write when creating or updating a record in the "Reports" table. */
 export type ReportsRecordInput = {
   subject: string | null;
-  targetType: "User" | "Listing" | string | null;
+  targetType: "User" | "Listing" | "Ban Appeal" | string | null;
   targetId: string | null;
   reason: string | null;
   reporterEmail: string | null;
