@@ -330,6 +330,42 @@ export type ReportsRecordInput = {
   reviewedBy: string | null;
 };
 
+/** A record in the "Friendships" table, as it is read back. */
+export type FriendshipsRecordType = {
+  id: string;
+  /** Primary field. "Pair Key" */
+  pairKey?: string;
+  requesterEmail?: string;
+  addresseeEmail?: string;
+  status?: "Pending" | "Accepted" | string;
+};
+
+/** What you may write when creating or updating a record in the "Friendships" table. */
+export type FriendshipsRecordInput = {
+  pairKey: string | null;
+  requesterEmail: string | null;
+  addresseeEmail: string | null;
+  status: "Pending" | "Accepted" | string | null;
+};
+
+/** A record in the "Chat Groups" table, as it is read back. */
+export type ChatGroupsRecordType = {
+  id: string;
+  /** Primary field. "Name" */
+  name?: string;
+  ownerEmail?: string;
+  memberEmails?: string;
+  visibility?: "Public" | "Private" | string;
+};
+
+/** What you may write when creating or updating a record in the "Chat Groups" table. */
+export type ChatGroupsRecordInput = {
+  name: string | null;
+  ownerEmail: string | null;
+  memberEmails: string | null;
+  visibility: "Public" | "Private" | string | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -348,6 +384,8 @@ export const zite = {
   listings: createTableClient<ListingsRecordType, ListingsRecordInput>('Listings'), // "Listings"
   orders: createTableClient<OrdersRecordType, OrdersRecordInput>('Orders'), // "Orders"
   reports: createTableClient<ReportsRecordType, ReportsRecordInput>('Reports'), // "Reports"
+  friendships: createTableClient<FriendshipsRecordType, FriendshipsRecordInput>('Friendships'), // "Friendships"
+  chatGroups: createTableClient<ChatGroupsRecordType, ChatGroupsRecordInput>('ChatGroups'), // "Chat Groups"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

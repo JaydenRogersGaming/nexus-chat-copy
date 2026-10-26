@@ -973,6 +973,122 @@
           }
         }
       ]
+    },
+    {
+      "id": "t7h9bYLnutd",
+      "sdkName": "friendships",
+      "name": "Friendships",
+      "primaryFieldId": "fteyoBRrpSf",
+      "fields": [
+        {
+          "id": "fteyoBRrpSf",
+          "sdkName": "pairKey",
+          "definition": {
+            "name": "Pair Key",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f7G32dhBBm2",
+          "sdkName": "requesterEmail",
+          "definition": {
+            "name": "Requester Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "ffM3cFSa7FA",
+          "sdkName": "addresseeEmail",
+          "definition": {
+            "name": "Addressee Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fv8Wkyif4wd",
+          "sdkName": "status",
+          "definition": {
+            "name": "Status",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "mNEM",
+                  "label": "Pending",
+                  "color": "purple"
+                },
+                {
+                  "value": "xjJC",
+                  "label": "Accepted",
+                  "color": "orange"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ticPSTtP57x",
+      "sdkName": "chatGroups",
+      "name": "Chat Groups",
+      "primaryFieldId": "ftArr57UFST",
+      "fields": [
+        {
+          "id": "ftArr57UFST",
+          "sdkName": "name",
+          "definition": {
+            "name": "Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fmW1RAcM2aC",
+          "sdkName": "ownerEmail",
+          "definition": {
+            "name": "Owner Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fdSLQadCw5E",
+          "sdkName": "memberEmails",
+          "definition": {
+            "name": "Member Emails",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fgtoztidAJa",
+          "sdkName": "visibility",
+          "definition": {
+            "name": "Visibility",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "2EVc",
+                  "label": "Public",
+                  "color": "purple"
+                },
+                {
+                  "value": "hJ7D",
+                  "label": "Private",
+                  "color": "orange"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        }
+      ]
     }
   ]
 }

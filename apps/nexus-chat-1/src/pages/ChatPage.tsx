@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Plus, Hash, MessageCircle } from 'lucide-react';
+import { Plus, Hash, MessageCircle, Users, Settings2, Globe, Lock } from 'lucide-react';
+import { groups as groupsApi } from 'zitejs/api';
+import FriendsDialog from '../components/FriendsDialog';
+import GroupSettingsDialog, { Group } from '../components/GroupSettingsDialog';
+import { Switch } from '@project/components/ui/switch';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
@@ -21,6 +25,13 @@ export default function ChatPage() {
   const [showNewDM, setShowNewDM] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [dmEmail, setDmEmail] = useState('');
+  const [groupPublic, setGroupPublic] = useState(false);
+  const [serverGroups, _setServerGroups] = useState<Group[]>([]);
+  const serverGroupsRef = useRef<Group[]>([]);
+  const [friendsOpen, setFriendsOpen] = useState(false);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
+  const toRoom = (g: Group): DB.ChatRoom => ({ id: `grp_${g.id}`, name: `${g.visibility === 'Public' ? '🌐' : '🔒'} ${g.name}`, type: 'group', members: g.members, createdBy: g.ownerEmail });
+  function setServerGroups(g: Group[]) { serverGroupsRef.current = g; _setServerGroups(g); }
 
   // Keep ref in sync with state so interval callbacks always see latest room
   function setActiveRoom(room: DB.ChatRoom | null) {
@@ -31,7 +42,7 @@ export default function ChatPage() {
   const loadRooms = useCallback(() => {
     if (!profile) return;
     const all = DB.getChatRooms();
-    const accessible = [...all.filter(r => r.type === 'global' || r.members.includes(profile.email)), ...roleRoomsFor(profile)];
+    const accessible = [...all.filter(r => r.type === 'global' || r.members.includes(profile.email)), ...roleRoomsFor(profile), ...serverGroupsRef.current.filter(g => g.isMember).map(toRoom)];
     setRooms(accessible);
 
     const currentId = activeRoomRef.current?.id;
@@ -53,6 +64,15 @@ export default function ChatPage() {
   }, [profile?.email, profile?.role, setActiveRoomId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!profile) return;
+    const pull = () => groupsApi({ action: 'list' }).then(r => { setServerGroups(r.groups); loadRooms(); }).catch(() => {});
+    pull(); const t = setInterval(pull, 10000);
+    return () => clearInterval(t);
+  }, [profile?.email, loadRooms]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function onGroupsChanged(g: Group[]) { setServerGroups(g); loadRooms(); }
+
+  useEffect(() => {
     loadRooms();
     const t = setInterval(loadRooms, 3000);
     return () => clearInterval(t);
@@ -63,12 +83,19 @@ export default function ChatPage() {
     if (room.type === 'dm') { DB.markNotificationsRead(profile!.email); setUnreadCount(0); }
   }
 
-  function createGroup() {
+  async function createGroup() {
     if (!profile || !groupName.trim()) { toast.error('Enter a group name'); return; }
-    const room: DB.ChatRoom = { id: crypto.randomUUID(), name: `# ${groupName.trim()}`, type: 'group', members: [profile.email], createdBy: profile.email };
-    DB.addChatRoom(room);
-    const up = { ...profile, groupCount: profile.groupCount + 1 }; DB.saveUser(up);
-    setGroupName(''); setShowNewGroup(false); loadRooms(); toast.success('Group created!');
+    try {
+      const r = await groupsApi({ action: 'create', name: groupName.trim(), visibility: groupPublic ? 'Public' : 'Private' });
+      onGroupsChanged(r.groups);
+      DB.saveUser({ ...profile, groupCount: profile.groupCount + 1 });
+      setGroupName(''); setGroupPublic(false); setShowNewGroup(false); toast.success('Group created!');
+    } catch (e) { toast.error((e as Error).message || 'Could not create group'); }
+  }
+
+  async function joinGroup(g: Group) {
+    try { const r = await groupsApi({ action: 'join', id: g.id }); onGroupsChanged(r.groups); toast.success(`Joined ${g.name}`); selectRoom(toRoom({ ...g, isMember: true })); }
+    catch (e) { toast.error((e as Error).message || 'Could not join'); }
   }
 
   function createDM() {
@@ -92,12 +119,15 @@ export default function ChatPage() {
   const roleRooms = rooms.filter(r => r.id.startsWith('role-'));
   const groupRooms = rooms.filter(r => r.type === 'group' && !r.id.startsWith('role-'));
   const dmRooms = rooms.filter(r => r.type === 'dm');
+  const discover = serverGroups.filter(g => !g.isMember && g.visibility === 'Public');
+  const settingsGroup = serverGroups.find(g => g.id === settingsId && g.isMember) || null;
 
   return (
     <div className="flex h-full">
       {/* Room List */}
       <div className="w-52 flex-shrink-0 bg-card/50 border-r border-border flex flex-col overflow-y-auto">
         <div className="p-2 pt-3">
+          <Button size="sm" variant="outline" className="w-full mb-2 h-8 text-xs" onClick={() => setFriendsOpen(true)}><Users className="w-3.5 h-3.5 mr-1.5" />Friends</Button>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2 mb-1">Global</p>
           {globalRoom && <RoomItem room={globalRoom} active={activeRoom?.id === globalRoom.id} onClick={() => selectRoom(globalRoom)} />}
         </div>
@@ -112,8 +142,24 @@ export default function ChatPage() {
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Groups</p>
             <button onClick={() => setShowNewGroup(true)} className="text-muted-foreground hover:text-foreground"><Plus className="w-3.5 h-3.5" /></button>
           </div>
-          {groupRooms.map(r => <RoomItem key={r.id} room={r} active={activeRoom?.id === r.id} onClick={() => selectRoom(r)} />)}
+          {groupRooms.map(r => (
+            <div key={r.id} className="group/room relative">
+              <RoomItem room={r} active={activeRoom?.id === r.id} onClick={() => selectRoom(r)} />
+              {r.id.startsWith('grp_') && <button title="Group settings" onClick={() => setSettingsId(r.id.slice(4))} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground opacity-0 group-hover/room:opacity-100"><Settings2 className="w-3 h-3" /></button>}
+            </div>
+          ))}
         </div>
+        {discover.length > 0 && (
+          <div className="p-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2 mb-1">Public Groups</p>
+            {discover.map(g => (
+              <div key={g.id} className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
+                <Globe className="w-3.5 h-3.5 flex-shrink-0" /><span className="truncate flex-1">{g.name}</span>
+                <button onClick={() => joinGroup(g)} className="text-primary hover:underline font-medium">Join</button>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="p-2 flex-1">
           <div className="flex items-center justify-between px-2 mb-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Direct Messages</p>
@@ -136,9 +182,16 @@ export default function ChatPage() {
       <Dialog open={showNewGroup} onOpenChange={setShowNewGroup}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader><DialogTitle>Create Group Chat</DialogTitle></DialogHeader>
-          <div className="space-y-3"><Label>Group Name</Label><Input value={groupName} onChange={e => setGroupName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createGroup()} placeholder="My Group" /><Button onClick={createGroup} className="w-full">Create</Button></div>
+          <div className="space-y-3"><Label>Group Name</Label><Input value={groupName} onChange={e => setGroupName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createGroup()} placeholder="My Group" />
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div className="flex items-center gap-2 text-sm">{groupPublic ? <Globe className="w-4 h-4 text-emerald-400" /> : <Lock className="w-4 h-4" />}{groupPublic ? 'Public — anyone can join' : 'Private — invite only'}</div>
+              <Switch checked={groupPublic} onCheckedChange={setGroupPublic} />
+            </div><Button onClick={createGroup} className="w-full">Create</Button></div>
         </DialogContent>
       </Dialog>
+
+      <FriendsDialog open={friendsOpen} onOpenChange={setFriendsOpen} onMessage={startDMWith} />
+      {profile && <GroupSettingsDialog group={settingsGroup} me={profile.email} onClose={() => setSettingsId(null)} onChanged={onGroupsChanged} />}
 
       <Dialog open={showNewDM} onOpenChange={setShowNewDM}>
         <DialogContent className="bg-card border-border max-w-sm">

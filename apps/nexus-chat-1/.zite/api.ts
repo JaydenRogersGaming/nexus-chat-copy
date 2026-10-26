@@ -10,8 +10,10 @@ import type { default as _AuditLogEp } from '../src/api/auditLog';
 import type { default as _BansEp } from '../src/api/bans';
 import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _ChatBotEp } from '../src/api/chatBot';
+import type { default as _FriendsEp } from '../src/api/friends';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
+import type { default as _GroupsEp } from '../src/api/groups';
 import type { default as _IpBansEp } from '../src/api/ipBans';
 import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
@@ -60,6 +62,11 @@ export type ChatBotInputType = NonNullable<_ChatBotCfg['inputSchema']> extends {
 export type ChatBotOutputType = Awaited<ReturnType<_ChatBotCfg['execute']>>;
 export const chatBot = createCaller<ChatBotInputType, ChatBotOutputType>('chatBot');
 
+type _FriendsCfg = typeof _FriendsEp;
+export type FriendsInputType = NonNullable<_FriendsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_FriendsCfg['execute']>[0]['input'];
+export type FriendsOutputType = Awaited<ReturnType<_FriendsCfg['execute']>>;
+export const friends = createCaller<FriendsInputType, FriendsOutputType>('friends');
+
 type _GenerateArtCfg = typeof _GenerateArtEp;
 export type GenerateArtInputType = NonNullable<_GenerateArtCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_GenerateArtCfg['execute']>[0]['input'];
 export type GenerateArtOutputType = Awaited<ReturnType<_GenerateArtCfg['execute']>>;
@@ -69,6 +76,11 @@ type _GifsCfg = typeof _GifsEp;
 export type GifsInputType = NonNullable<_GifsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_GifsCfg['execute']>[0]['input'];
 export type GifsOutputType = Awaited<ReturnType<_GifsCfg['execute']>>;
 export const gifs = createCaller<GifsInputType, GifsOutputType>('gifs');
+
+type _GroupsCfg = typeof _GroupsEp;
+export type GroupsInputType = NonNullable<_GroupsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_GroupsCfg['execute']>[0]['input'];
+export type GroupsOutputType = Awaited<ReturnType<_GroupsCfg['execute']>>;
+export const groups = createCaller<GroupsInputType, GroupsOutputType>('groups');
 
 type _IpBansCfg = typeof _IpBansEp;
 export type IpBansInputType = NonNullable<_IpBansCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_IpBansCfg['execute']>[0]['input'];
@@ -115,8 +127,10 @@ export const api = {
   bans,
   chat,
   chatBot,
+  friends,
   generateArt,
   gifs,
+  groups,
   ipBans,
   listings,
   messages,
