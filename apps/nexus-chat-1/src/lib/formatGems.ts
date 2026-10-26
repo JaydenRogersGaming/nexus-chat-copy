@@ -1,31 +1,33 @@
-// Official SI prefixes, kilo (10^3) through quetta (10^30).
-const SI = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'R', 'Q'];
+// Short-scale suffixes: k = thousand, m = million, b = billion, t = trillion, …
+const NAMES = ['', 'k', 'm', 'b', 't', 'qa', 'qi', 'sx', 'sp', 'oc', 'no', 'dc', 'ud', 'dd', 'td', 'qad', 'qid', 'sxd', 'spd', 'ocd', 'nod', 'vg', 'uvg', 'dvg', 'tvg', 'qavg', 'qivg', 'sxvg', 'spvg', 'ocvg', 'novg', 'tg', 'utg', 'dtg'];
+const GOOGOL = 100; // 10^100 → "g"
 
-/**
- * Symbol for the n-th power of 1,000 (tier 1 = 10^3).
- * Tiers 1–10 use official SI symbols. Beyond quetta (10^30) the app uses an
- * invented, non-standard sequence of two-plus lowercase letters:
- * aa, ab, … az, ba, … zz, aaa, … — it never runs out.
- */
+/** Suffix for the n-th power of 1,000 (tier 1 = thousand). */
 export function tierSymbol(tier: number): string {
-  if (tier < SI.length) return SI[tier];
-  let n = tier - SI.length; // 0 → "aa"
-  let len = 2;
-  let block = 26 ** len;
-  while (n >= block) { n -= block; len++; block = 26 ** len; }
-  let s = '';
-  for (let i = 0; i < len; i++) { s = String.fromCharCode(97 + (n % 26)) + s; n = Math.floor(n / 26); }
-  return s;
+  return NAMES[tier] ?? `e${tier * 3}`;
+}
+
+function trim(scaled: number) {
+  const a = Math.abs(scaled);
+  return parseFloat(a >= 100 ? scaled.toFixed(0) : a >= 10 ? scaled.toFixed(1) : scaled.toFixed(2));
 }
 
 export function formatGems(value: number | undefined | null): string {
   const num = Number(value);
+  if (num === Infinity) return '∞';
+  if (num === -Infinity) return '-∞';
   if (!Number.isFinite(num)) return '0';
   const n = Math.floor(num);
   if (Math.abs(n) < 1000) return String(n);
-  let tier = Math.floor(Math.log10(Math.abs(n)) / 3);
+  const exp = Math.log10(Math.abs(n));
+  // Googol and up: show as "g" (1g = 10^100)
+  if (exp >= GOOGOL) {
+    const g = n / 10 ** GOOGOL;
+    return Math.abs(g) < 1000 ? `${trim(g)}g` : `${formatGems(g)}g`;
+  }
+  let tier = Math.floor(exp / 3);
   let scaled = n / 10 ** (tier * 3);
   if (Math.abs(scaled) >= 999.95) { tier++; scaled = n / 10 ** (tier * 3); }
-  const text = Math.abs(scaled) >= 100 ? scaled.toFixed(0) : Math.abs(scaled) >= 10 ? scaled.toFixed(1) : scaled.toFixed(2);
-  return `${parseFloat(text)}${tierSymbol(tier)}`;
+  if (tier * 3 >= GOOGOL) return `${trim(n / 10 ** GOOGOL)}g`;
+  return `${trim(scaled)}${tierSymbol(tier)}`;
 }
