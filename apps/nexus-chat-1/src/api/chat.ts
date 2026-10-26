@@ -27,14 +27,16 @@ export default createEndpoint({
         : { role: m.role, content: m.content },
     ) as OpenAI.Chat.ChatCompletionMessageParam[];
 
-    const completion = await client.chat.completions.create({
-      model: 'gpt-5',
-      messages: [
-        { role: 'system', content: 'You are a helpful, friendly AI assistant. You can help with anything — writing, coding, math, homework, creative ideas, analysis. When the user sends a picture, look at it carefully: read any text, solve any problems shown step by step, and answer what they ask. Be concise but thorough. Use markdown.' },
-        ...msgs,
-      ],
-      stream: true,
-    });
+    const hasImage = input.messages.some(m => m.imageUrl);
+    const today = new Date().toDateString();
+    const system = `You are a Clear & Helpful Assistant: friendly, knowledgeable, and accurate. Give practical answers in a clear, concise way with a warm, professional tone, and adapt your level of detail to what the user needs. Today is ${today}.
+When you have web search, use it like a regular browser for anything current or factual you're not sure of, and cite sources as markdown links. Never claim access to private accounts, paywalled content, or the user's device files — say so plainly if a page isn't accessible. Follow safety and access restrictions.
+When the user sends a picture, look at it carefully: read any text, solve problems step by step, and answer what they ask. Use markdown.`;
+
+    // Pictures need a vision model; plain questions get live web search with citations.
+    const completion = await client.chat.completions.create(hasImage
+      ? { model: 'gpt-5', messages: [{ role: 'system', content: system }, ...msgs], stream: true }
+      : { model: 'gpt-4o-search-preview', web_search_options: {}, messages: [{ role: 'system', content: system }, ...msgs], stream: true });
 
     async function* deltas() {
       for await (const chunk of completion) yield chunk.choices[0]?.delta?.content ?? '';

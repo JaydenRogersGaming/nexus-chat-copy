@@ -60,6 +60,9 @@
 //   - Soft-deleted rows are excluded automatically — no WHERE deleted_at IS NULL
 //   - SELECT only — use .create/.update/.delete for writes
 //   - Load the "zite:sql" skill for full SQL reference (formulas, lookups, etc.)
+//
+// Link tables for zite.sql() JOINs (use these exact names):
+//   "ListingsOrders" — columns: "listingsId", "ordersId" (joins "Listings" and "Orders")
 import { createTableClient, createSqlClient, createAuthClient } from 'zitejs/runtime';
 
 /** An attachment as returned when reading a record. */
@@ -105,6 +108,9 @@ export type PresenceRecordType = {
   customRole?: string;
   customRoleColor?: string;
   customRoleColor2?: string;
+  marketRole?: "Customer" | "Seller" | "Moderator" | "Admin" | string;
+  accountRestriction?: "None" | "Muted" | "Selling Disabled" | "Suspended" | string;
+  restrictionReason?: string;
 };
 
 /** What you may write when creating or updating a record in the "Presence" table. */
@@ -124,6 +130,9 @@ export type PresenceRecordInput = {
   customRole: string | null;
   customRoleColor: string | null;
   customRoleColor2: string | null;
+  marketRole: "Customer" | "Seller" | "Moderator" | "Admin" | string | null;
+  accountRestriction: "None" | "Muted" | "Selling Disabled" | "Suspended" | string | null;
+  restrictionReason: string | null;
 };
 
 /** A record in the "Chat Messages" table, as it is read back. */
@@ -179,6 +188,8 @@ export type BansRecordType = {
   bannedBy?: string;
   /** Read-only. "Banned At". Auto-set when record was created (ISO 8601) */
   bannedAt?: string;
+  /** "Expires At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  expiresAt?: string;
 };
 
 /** What you may write when creating or updating a record in the "Bans" table. */
@@ -189,6 +200,7 @@ export type BansRecordInput = {
   banType: "Ban" | "IP Ban" | "Hard Ban" | string | null;
   reason: string | null;
   bannedBy: string | null;
+  expiresAt: string | Date | null;
 };
 
 /** A record in the "User Sightings" table, as it is read back. */
@@ -209,6 +221,115 @@ export type UserSightingsRecordInput = {
   deviceId: string | null;
 };
 
+/** A record in the "Audit Log" table, as it is read back. */
+export type AuditLogRecordType = {
+  id: string;
+  /** Primary field. "Action" */
+  action?: string;
+  actorEmail?: string;
+  target?: string;
+  details?: string;
+  /** Read-only. "Logged At". Auto-set when record was created (ISO 8601) */
+  loggedAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Audit Log" table. */
+export type AuditLogRecordInput = {
+  action: string | null;
+  actorEmail: string | null;
+  target: string | null;
+  details: string | null;
+};
+
+/** A record in the "Listings" table, as it is read back. */
+export type ListingsRecordType = {
+  id: string;
+  /** Primary field. "Title" */
+  title?: string;
+  description?: string;
+  /** "Price". Value is a raw number; display as currency with symbol "$", 2 decimal places, format: local (e.g. 1,000,000.50) */
+  price?: number;
+  /** "Inventory". 0 decimal places, format: local (e.g. 1,000,000.50) */
+  inventory?: number;
+  status?: "Active" | "Paused" | "Removed" | string;
+  sellerEmail?: string;
+  imageUrl?: string;
+  /** Read-only. "Created At". Auto-set when record was created (ISO 8601) */
+  createdAt?: string;
+  /** Links to orders ("Orders"). "Orders" */
+  orders?: string | string[];
+};
+
+/** What you may write when creating or updating a record in the "Listings" table. */
+export type ListingsRecordInput = {
+  title: string | null;
+  description: string | null;
+  price: string | number | null;
+  inventory: string | number | null;
+  status: "Active" | "Paused" | "Removed" | string | null;
+  sellerEmail: string | null;
+  imageUrl: string | null;
+  orders: string | string[] | null;
+};
+
+/** A record in the "Orders" table, as it is read back. */
+export type OrdersRecordType = {
+  id: string;
+  /** Primary field. Read-only. "Order Number" */
+  orderNumber?: number;
+  /** Links to listings ("Listings"). "Listing" */
+  listing?: string | string[];
+  listingTitle?: string;
+  buyerEmail?: string;
+  sellerEmail?: string;
+  /** "Quantity". 0 decimal places, format: local (e.g. 1,000,000.50) */
+  quantity?: number;
+  /** "Total". Value is a raw number; display as currency with symbol "$", 2 decimal places, format: local (e.g. 1,000,000.50) */
+  total?: number;
+  status?: "Placed" | "Shipped" | "Completed" | "Cancelled" | string;
+  /** Read-only. "Ordered At". Auto-set when record was created (ISO 8601) */
+  orderedAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Orders" table. */
+export type OrdersRecordInput = {
+  listing: string | string[] | null;
+  listingTitle: string | null;
+  buyerEmail: string | null;
+  sellerEmail: string | null;
+  quantity: string | number | null;
+  total: string | number | null;
+  status: "Placed" | "Shipped" | "Completed" | "Cancelled" | string | null;
+};
+
+/** A record in the "Reports" table, as it is read back. */
+export type ReportsRecordType = {
+  id: string;
+  /** Primary field. "Subject" */
+  subject?: string;
+  targetType?: "User" | "Listing" | string;
+  targetId?: string;
+  reason?: string;
+  reporterEmail?: string;
+  status?: "Open" | "Resolved" | "Dismissed" | string;
+  resolutionNote?: string;
+  reviewedBy?: string;
+  /** Read-only. "Reported At". Auto-set when record was created (ISO 8601) */
+  reportedAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Reports" table. */
+export type ReportsRecordInput = {
+  subject: string | null;
+  targetType: "User" | "Listing" | string | null;
+  targetId: string | null;
+  reason: string | null;
+  reporterEmail: string | null;
+  status: "Open" | "Resolved" | "Dismissed" | string | null;
+  resolutionNote: string | null;
+  reviewedBy: string | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -223,6 +344,10 @@ export const zite = {
   chatMessages: createTableClient<ChatMessagesRecordType, ChatMessagesRecordInput>('ChatMessages'), // "Chat Messages"
   bans: createTableClient<BansRecordType, BansRecordInput>('Bans'), // "Bans"
   userSightings: createTableClient<UserSightingsRecordType, UserSightingsRecordInput>('UserSightings'), // "User Sightings"
+  auditLog: createTableClient<AuditLogRecordType, AuditLogRecordInput>('AuditLog'), // "Audit Log"
+  listings: createTableClient<ListingsRecordType, ListingsRecordInput>('Listings'), // "Listings"
+  orders: createTableClient<OrdersRecordType, OrdersRecordInput>('Orders'), // "Orders"
+  reports: createTableClient<ReportsRecordType, ReportsRecordInput>('Reports'), // "Reports"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

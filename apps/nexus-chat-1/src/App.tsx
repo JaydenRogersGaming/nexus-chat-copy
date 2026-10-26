@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
 import ChatPage from './pages/ChatPage';
@@ -13,6 +12,8 @@ import AiArtPage from './pages/AiArtPage';
 import AiChatPage from './pages/AiChatPage';
 import BrowserPage from './pages/BrowserPage';
 import CalendarPage from './pages/CalendarPage';
+import MarketplacePage from './pages/MarketplacePage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import BanScreen from './components/BanScreen';
 import { useServerBan } from './hooks/useServerBan';
 import MatrixRain from './components/MatrixRain';
@@ -24,9 +25,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
   const serverBan = useServerBan(!!user);
-  useEffect(() => {
-    if (!isLoading && !user) loginWithRedirect();
-  }, [isLoading, user]);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
       <MatrixRain color={mc} speed={settings.matrixSpeed} />
@@ -74,6 +72,8 @@ export default function App() {
               <Route path="browser"       element={<BrowserPage />} />
               <Route path="calendar"      element={<CalendarPage />} />
               <Route path="admin"        element={<AdminPage />} />
+              <Route path="market"       element={<MarketplacePage />} />
+              <Route path="dashboard"    element={<AdminDashboardPage />} />
             </Route>
           </Routes>
         </AppProvider>

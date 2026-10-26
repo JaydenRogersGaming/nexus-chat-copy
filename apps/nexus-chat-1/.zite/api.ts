@@ -2,18 +2,28 @@
 
 import { createCaller, createStreamingCaller } from 'zitejs/caller';
 
+import type { default as _AdminUsersEp } from '../src/api/adminUsers';
 import type { default as _AiBadgeEp } from '../src/api/aiBadge';
 import type { default as _AiThemeEp } from '../src/api/aiTheme';
 import type { default as _AiTitleEp } from '../src/api/aiTitle';
+import type { default as _AuditLogEp } from '../src/api/auditLog';
 import type { default as _BansEp } from '../src/api/bans';
 import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _ChatBotEp } from '../src/api/chatBot';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
+import type { default as _IpBansEp } from '../src/api/ipBans';
+import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
+import type { default as _ReportsEp } from '../src/api/reports';
 import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _TypingEp } from '../src/api/typing';
+
+type _AdminUsersCfg = typeof _AdminUsersEp;
+export type AdminUsersInputType = NonNullable<_AdminUsersCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AdminUsersCfg['execute']>[0]['input'];
+export type AdminUsersOutputType = Awaited<ReturnType<_AdminUsersCfg['execute']>>;
+export const adminUsers = createCaller<AdminUsersInputType, AdminUsersOutputType>('adminUsers');
 
 type _AiBadgeCfg = typeof _AiBadgeEp;
 export type AiBadgeInputType = NonNullable<_AiBadgeCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiBadgeCfg['execute']>[0]['input'];
@@ -29,6 +39,11 @@ type _AiTitleCfg = typeof _AiTitleEp;
 export type AiTitleInputType = NonNullable<_AiTitleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiTitleCfg['execute']>[0]['input'];
 export type AiTitleOutputType = Awaited<ReturnType<_AiTitleCfg['execute']>>;
 export const aiTitle = createCaller<AiTitleInputType, AiTitleOutputType>('aiTitle');
+
+type _AuditLogCfg = typeof _AuditLogEp;
+export type AuditLogInputType = NonNullable<_AuditLogCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AuditLogCfg['execute']>[0]['input'];
+export type AuditLogOutputType = Awaited<ReturnType<_AuditLogCfg['execute']>>;
+export const auditLog = createCaller<AuditLogInputType, AuditLogOutputType>('auditLog');
 
 type _BansCfg = typeof _BansEp;
 export type BansInputType = NonNullable<_BansCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_BansCfg['execute']>[0]['input'];
@@ -55,6 +70,16 @@ export type GifsInputType = NonNullable<_GifsCfg['inputSchema']> extends { _inpu
 export type GifsOutputType = Awaited<ReturnType<_GifsCfg['execute']>>;
 export const gifs = createCaller<GifsInputType, GifsOutputType>('gifs');
 
+type _IpBansCfg = typeof _IpBansEp;
+export type IpBansInputType = NonNullable<_IpBansCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_IpBansCfg['execute']>[0]['input'];
+export type IpBansOutputType = Awaited<ReturnType<_IpBansCfg['execute']>>;
+export const ipBans = createCaller<IpBansInputType, IpBansOutputType>('ipBans');
+
+type _ListingsCfg = typeof _ListingsEp;
+export type ListingsInputType = NonNullable<_ListingsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ListingsCfg['execute']>[0]['input'];
+export type ListingsOutputType = Awaited<ReturnType<_ListingsCfg['execute']>>;
+export const listings = createCaller<ListingsInputType, ListingsOutputType>('listings');
+
 type _MessagesCfg = typeof _MessagesEp;
 export type MessagesInputType = NonNullable<_MessagesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_MessagesCfg['execute']>[0]['input'];
 export type MessagesOutputType = Awaited<ReturnType<_MessagesCfg['execute']>>;
@@ -64,6 +89,11 @@ type _PresenceCfg = typeof _PresenceEp;
 export type PresenceInputType = NonNullable<_PresenceCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_PresenceCfg['execute']>[0]['input'];
 export type PresenceOutputType = Awaited<ReturnType<_PresenceCfg['execute']>>;
 export const presence = createCaller<PresenceInputType, PresenceOutputType>('presence');
+
+type _ReportsCfg = typeof _ReportsEp;
+export type ReportsInputType = NonNullable<_ReportsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ReportsCfg['execute']>[0]['input'];
+export type ReportsOutputType = Awaited<ReturnType<_ReportsCfg['execute']>>;
+export const reports = createCaller<ReportsInputType, ReportsOutputType>('reports');
 
 type _RolesCfg = typeof _RolesEp;
 export type RolesInputType = NonNullable<_RolesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_RolesCfg['execute']>[0]['input'];
@@ -77,16 +107,21 @@ export const typing = createCaller<TypingInputType, TypingOutputType>('typing');
 
 
 export const api = {
+  adminUsers,
   aiBadge,
   aiTheme,
   aiTitle,
+  auditLog,
   bans,
   chat,
   chatBot,
   generateArt,
   gifs,
+  ipBans,
+  listings,
   messages,
   presence,
+  reports,
   roles,
   typing,
 };

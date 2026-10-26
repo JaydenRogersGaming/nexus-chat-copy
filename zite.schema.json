@@ -150,6 +150,81 @@
             "type": "single_line_text",
             "template": {}
           }
+        },
+        {
+          "id": "ftmznbk8Pvh",
+          "sdkName": "marketRole",
+          "definition": {
+            "name": "Market Role",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "f7tG",
+                  "label": "Customer",
+                  "color": "purple"
+                },
+                {
+                  "value": "uh4L",
+                  "label": "Seller",
+                  "color": "orange"
+                },
+                {
+                  "value": "gm3S",
+                  "label": "Moderator",
+                  "color": "blue"
+                },
+                {
+                  "value": "ba4c",
+                  "label": "Admin",
+                  "color": "gray"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "foTJH6RNdtW",
+          "sdkName": "accountRestriction",
+          "definition": {
+            "name": "Account Restriction",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "kYau",
+                  "label": "None",
+                  "color": "purple"
+                },
+                {
+                  "value": "pSvz",
+                  "label": "Muted",
+                  "color": "orange"
+                },
+                {
+                  "value": "nBnZ",
+                  "label": "Selling Disabled",
+                  "color": "blue"
+                },
+                {
+                  "value": "v5fa",
+                  "label": "Suspended",
+                  "color": "gray"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "fv3iumc2RPj",
+          "sdkName": "restrictionReason",
+          "definition": {
+            "name": "Restriction Reason",
+            "type": "long_text",
+            "template": {}
+          }
         }
       ]
     },
@@ -393,6 +468,20 @@
               "displayTimeZone": false
             }
           }
+        },
+        {
+          "id": "f6sCZbMzdND",
+          "sdkName": "expiresAt",
+          "definition": {
+            "name": "Expires At",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
         }
       ]
     },
@@ -435,6 +524,446 @@
           "definition": {
             "name": "Last Seen",
             "type": "updated_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "t2fg5HKiK9P",
+      "sdkName": "auditLog",
+      "name": "Audit Log",
+      "primaryFieldId": "fm3RenEvgjv",
+      "fields": [
+        {
+          "id": "fm3RenEvgjv",
+          "sdkName": "action",
+          "definition": {
+            "name": "Action",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "feDaLmX9iii",
+          "sdkName": "actorEmail",
+          "definition": {
+            "name": "Actor Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fky6yK13gDf",
+          "sdkName": "target",
+          "definition": {
+            "name": "Target",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fqZNPSmDfaZ",
+          "sdkName": "details",
+          "definition": {
+            "name": "Details",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f2GHdmdhkmP",
+          "sdkName": "loggedAt",
+          "definition": {
+            "name": "Logged At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tnr6xzhWKfp",
+      "sdkName": "listings",
+      "name": "Listings",
+      "primaryFieldId": "f4uMNBjFZWz",
+      "fields": [
+        {
+          "id": "f4uMNBjFZWz",
+          "sdkName": "title",
+          "definition": {
+            "name": "Title",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fj7kjbHVo9M",
+          "sdkName": "description",
+          "definition": {
+            "name": "Description",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "foKy1anEw6x",
+          "sdkName": "price",
+          "definition": {
+            "name": "Price",
+            "type": "currency",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 2,
+              "currencySymbol": "$"
+            }
+          }
+        },
+        {
+          "id": "f2bcTwosspU",
+          "sdkName": "inventory",
+          "definition": {
+            "name": "Inventory",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 0
+            }
+          }
+        },
+        {
+          "id": "fjYdTT9gyay",
+          "sdkName": "status",
+          "definition": {
+            "name": "Status",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "gPjP",
+                  "label": "Active",
+                  "color": "purple"
+                },
+                {
+                  "value": "49Qz",
+                  "label": "Paused",
+                  "color": "orange"
+                },
+                {
+                  "value": "nhvQ",
+                  "label": "Removed",
+                  "color": "blue"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "fvmMnCMAKbx",
+          "sdkName": "sellerEmail",
+          "definition": {
+            "name": "Seller Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fv3eZFE6X5g",
+          "sdkName": "imageUrl",
+          "definition": {
+            "name": "Image Url",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f5D2bGn8WAt",
+          "sdkName": "createdAt",
+          "definition": {
+            "name": "Created At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        },
+        {
+          "id": "fvquAYVUzof",
+          "sdkName": "orders",
+          "definition": {
+            "name": "Orders",
+            "type": "linked_record",
+            "template": {
+              "tableId": "t3toGsNFfaF",
+              "isInverse": true,
+              "allowMultiple": true,
+              "inverseFieldId": "fup16RqsV8z"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "t3toGsNFfaF",
+      "sdkName": "orders",
+      "name": "Orders",
+      "primaryFieldId": "f9tb6xaRQ1t",
+      "fields": [
+        {
+          "id": "f9tb6xaRQ1t",
+          "sdkName": "orderNumber",
+          "definition": {
+            "name": "Order Number",
+            "type": "autonumber",
+            "template": {}
+          }
+        },
+        {
+          "id": "fup16RqsV8z",
+          "sdkName": "listing",
+          "definition": {
+            "name": "Listing",
+            "type": "linked_record",
+            "template": {
+              "tableId": "tnr6xzhWKfp",
+              "isInverse": false,
+              "allowMultiple": true,
+              "inverseFieldId": "fvquAYVUzof"
+            }
+          }
+        },
+        {
+          "id": "fo99wjG22y4",
+          "sdkName": "listingTitle",
+          "definition": {
+            "name": "Listing Title",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "faciKeKAXod",
+          "sdkName": "buyerEmail",
+          "definition": {
+            "name": "Buyer Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fowpq4T6r6e",
+          "sdkName": "sellerEmail",
+          "definition": {
+            "name": "Seller Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fw32HKQp7uF",
+          "sdkName": "quantity",
+          "definition": {
+            "name": "Quantity",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 0
+            }
+          }
+        },
+        {
+          "id": "fis6cjN9UFv",
+          "sdkName": "total",
+          "definition": {
+            "name": "Total",
+            "type": "currency",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 2,
+              "currencySymbol": "$"
+            }
+          }
+        },
+        {
+          "id": "fi4y9g5m4ga",
+          "sdkName": "status",
+          "definition": {
+            "name": "Status",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "cHdG",
+                  "label": "Placed",
+                  "color": "purple"
+                },
+                {
+                  "value": "8J4k",
+                  "label": "Shipped",
+                  "color": "orange"
+                },
+                {
+                  "value": "fhMJ",
+                  "label": "Completed",
+                  "color": "blue"
+                },
+                {
+                  "value": "xbef",
+                  "label": "Cancelled",
+                  "color": "gray"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "fe8sAwKczD1",
+          "sdkName": "orderedAt",
+          "definition": {
+            "name": "Ordered At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "t444qe3s3D5",
+      "sdkName": "reports",
+      "name": "Reports",
+      "primaryFieldId": "faCTvzVTNgM",
+      "fields": [
+        {
+          "id": "faCTvzVTNgM",
+          "sdkName": "subject",
+          "definition": {
+            "name": "Subject",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f9oqKrGc3GF",
+          "sdkName": "targetType",
+          "definition": {
+            "name": "Target Type",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "rfEW",
+                  "label": "User",
+                  "color": "purple"
+                },
+                {
+                  "value": "cGd4",
+                  "label": "Listing",
+                  "color": "orange"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "feYXGgkhHkz",
+          "sdkName": "targetId",
+          "definition": {
+            "name": "Target Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "frj1kCjJZLN",
+          "sdkName": "reason",
+          "definition": {
+            "name": "Reason",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f8gPAt9yBKD",
+          "sdkName": "reporterEmail",
+          "definition": {
+            "name": "Reporter Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "f7TXx2a9jH6",
+          "sdkName": "status",
+          "definition": {
+            "name": "Status",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "qzT2",
+                  "label": "Open",
+                  "color": "purple"
+                },
+                {
+                  "value": "vXZb",
+                  "label": "Resolved",
+                  "color": "orange"
+                },
+                {
+                  "value": "2hGG",
+                  "label": "Dismissed",
+                  "color": "blue"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "f1rZeLHqEPH",
+          "sdkName": "resolutionNote",
+          "definition": {
+            "name": "Resolution Note",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fhZJUo5H8UE",
+          "sdkName": "reviewedBy",
+          "definition": {
+            "name": "Reviewed By",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpTYKEZMpM9",
+          "sdkName": "reportedAt",
+          "definition": {
+            "name": "Reported At",
+            "type": "created_at",
             "template": {
               "timezone": "",
               "dateFormat": "local",
