@@ -5,6 +5,7 @@ import { Button } from '@project/components/ui/button';
 import { Slider } from '@project/components/ui/slider';
 import { addMyEmoji, getMyEmojis, removeMyEmoji, MY_EMOJIS_EVENT, MyEmoji } from '../lib/emojiParts';
 import { cn } from '@project/components/lib/utils';
+import EmojiKitchen from '../components/emoji/EmojiKitchen';
 
 const EMOJIS = ['😀','😂','🥹','😍','😎','🤩','😭','😡','🥶','🤢','😱','🤔','😴','🥳','😇','🤠','👽','🤖','👻','💀','🎃','😺','🐶','🐸','🦄','🐵','🔥','⭐','❤️','💎','🌈','⚡','🍕','🍩','🌮','🎉','👑','🕶️','🎩','🧢','💯','💩','🌵','🌸','🍀','🎮','💰','🍓'];
 
@@ -60,6 +61,7 @@ export default function EmojiMixerPage() {
   const [style, setStyle] = useState('wear');
   const [sB, setSB] = useState(1);
   const [yB, setYB] = useState(0);
+  const [tab, setTab] = useState<'kitchen' | 'custom'>('kitchen');
   const [mine, setMine] = useState<MyEmoji[]>(getMyEmojis());
 
   useEffect(() => { if (ref.current) draw(ref.current, a, b, style, sB, yB); }, [a, b, style, sB, yB]);
@@ -73,10 +75,15 @@ export default function EmojiMixerPage() {
     <div className="h-full overflow-y-auto p-4 md:p-6">
       <div className="max-w-5xl mx-auto space-y-5">
         <div>
-          <h1 className="text-2xl font-black">Emoji Mixer</h1>
-          <p className="text-sm text-muted-foreground">Combine two real emojis into a new one and add it to your chat collection.</p>
+          <h1 className="text-2xl font-black">Emoji Kitchen</h1>
+          <p className="text-sm text-muted-foreground">Cook two emojis into a brand-new one, discover recipes, and add them to your chat collection.</p>
+          <div className="flex gap-1 mt-3">
+            <Button size="sm" variant={tab === 'kitchen' ? 'default' : 'outline'} onClick={() => setTab('kitchen')}>🍳 Kitchen</Button>
+            <Button size="sm" variant={tab === 'custom' ? 'default' : 'outline'} onClick={() => setTab('custom')}>🎨 Custom mix</Button>
+          </div>
         </div>
-        <div className="grid md:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+        {tab === 'kitchen' && <EmojiKitchen />}
+        <div className={cn('grid md:grid-cols-[1fr_auto_1fr] gap-4 items-start', tab !== 'custom' && 'hidden')}>
           <div className="bg-card border border-border rounded-xl p-3"><p className="text-xs font-semibold mb-2">Base emoji {a}</p><Grid value={a} onPick={setA} /></div>
           <div className="flex flex-col items-center gap-3">
             <canvas ref={ref} width={SIZE} height={SIZE} className="w-56 h-56 rounded-2xl border border-border" style={{ backgroundImage: 'repeating-conic-gradient(hsl(var(--muted)) 0 25%, transparent 0 50%)', backgroundSize: '20px 20px' }} />

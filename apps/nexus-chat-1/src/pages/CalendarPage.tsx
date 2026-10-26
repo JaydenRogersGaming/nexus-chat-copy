@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { useApp } from '../contexts/AppContext';
 import EventDialog from '../components/EventDialog';
 import * as DB from '../lib/storage';
+import HolidayCountdown from '../components/HolidayCountdown';
+import { holidaysOn } from '../lib/calendarHolidays';
 
 export default function CalendarPage() {
   const { profile } = useApp();
@@ -35,6 +37,8 @@ export default function CalendarPage() {
         <Button onClick={() => setOpen(true)} size="sm"><Plus className="w-4 h-4 mr-1" />{isStaff ? 'Add event' : 'Add my birthday'}</Button>
       </div>
 
+      <HolidayCountdown />
+
       {todayRoles.length > 0 && (
         <div className="mb-4 p-3 rounded-xl border border-border bg-card flex flex-wrap gap-2 items-center">
           <span className="text-xs font-semibold text-muted-foreground">Today's roles:</span>
@@ -60,12 +64,14 @@ export default function CalendarPage() {
             {days.map(d => {
               const key = DB.toDateKey(d);
               const evs = DB.eventsOn(key);
+              const hols = holidaysOn(d);
               return (
                 <button key={key} onClick={() => setSelected(key)}
                   className={cn('min-h-[64px] sm:min-h-[80px] rounded-lg p-1 text-left border transition-colors flex flex-col gap-0.5',
                     selected === key ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-secondary',
                     !isSameMonth(d, month) && 'opacity-40')}>
                   <span className={cn('text-xs font-semibold w-5 h-5 flex items-center justify-center rounded-full', isToday(d) && 'bg-primary text-primary-foreground')}>{d.getDate()}</span>
+                  {hols.map(h => <span key={h.key} className="text-[9px] truncate rounded px-1 font-semibold" style={{ backgroundColor: h.color + '33', color: h.color }}>{h.emoji} {h.name}</span>)}
                   {evs.slice(0, 2).map(e => (
                     <span key={e.id} className="text-[9px] truncate rounded px-1" style={{ backgroundColor: e.color + '33', color: e.color }}>{e.emoji} {e.title}</span>
                   ))}
@@ -78,7 +84,13 @@ export default function CalendarPage() {
 
         <div className="bg-card border border-border rounded-xl p-3">
           <h3 className="font-bold text-sm mb-2">{format(new Date(selected + 'T12:00:00'), 'EEEE, MMM d')}</h3>
-          {dayEvents.length === 0 && <p className="text-xs text-muted-foreground">Nothing planned.</p>}
+          {holidaysOn(new Date(selected + 'T12:00:00')).map(h => (
+            <div key={h.key} className="p-2 mb-2 rounded-lg border border-border" style={{ borderLeft: `3px solid ${h.color}` }}>
+              <p className="text-sm font-semibold">{h.emoji} {h.name}</p>
+              <p className="text-[10px] text-muted-foreground">Holiday • every year</p>
+            </div>
+          ))}
+          {dayEvents.length === 0 && holidaysOn(new Date(selected + 'T12:00:00')).length === 0 && <p className="text-xs text-muted-foreground">Nothing planned.</p>}
           <div className="space-y-2">
             {dayEvents.map(e => (
               <div key={e.id} className="p-2 rounded-lg border border-border" style={{ borderLeft: `3px solid ${e.color}` }}>
