@@ -6,6 +6,7 @@ import OpenAI from 'openai';
 
 export default createEndpoint({
   description: 'Generates an AI image from a prompt, blocking and reporting inappropriate prompts to the owner',
+  authenticated: true,
   inputSchema: z.object({ prompt: z.string() }),
   outputSchema: z.object({
     imageBase64: z.string(),
@@ -40,7 +41,7 @@ export default createEndpoint({
     }
 
     try {
-      const image = await client.images.generate({ model: 'gpt-image-1', prompt, n: 1, size: '1024x1024', quality: 'medium', moderation: 'auto' });
+      const image = await client.images.generate({ model: 'gpt-image-1-mini', prompt, n: 1, size: '1024x1024' });
       return { imageBase64: image.data?.[0]?.b64_json ?? '', blocked: false };
     } catch (err) {
       const msg = String(err);

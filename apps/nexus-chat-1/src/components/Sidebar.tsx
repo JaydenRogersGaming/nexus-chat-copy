@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Bot, Globe, CalendarDays, Flame, BadgeCheck, Store, Smile, ShieldCheck, Video } from 'lucide-react';
+import { logout } from 'zitejs/auth';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -14,6 +15,7 @@ type Props = { onProfileClick: () => void };
 const NAV = [
   { to: '/chat',         icon: MessageSquare, label: 'Chat' },
   { to: '/video',        icon: Video,         label: 'Video Rooms' },
+  { to: '/draw',         icon: Brush,         label: 'Drawing' },
   { to: '/emoji-maker',  icon: Smile,         label: 'Emoji Maker' },
   { to: '/gamble',       icon: Dices,         label: 'Casino' },
   { to: '/leaderboard',  icon: Trophy,        label: 'Leaderboard' },
@@ -91,6 +93,9 @@ export default function Sidebar({ onProfileClick }: Props) {
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         </button>
       )}
+      <button onClick={() => logout()} className="px-3 py-2 border-t border-border hover:bg-secondary transition-colors flex items-center gap-2 text-xs text-muted-foreground w-full">
+        <LogOut className="w-3.5 h-3.5" /> Sign out
+      </button>
     </aside>
   );
 }

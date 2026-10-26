@@ -57,13 +57,17 @@ export const sticker = (kind: PartKind, color: string, x = CANVAS / 2, y = CANVA
 export const newId = uid;
 
 const C = CANVAS / 2;
+const Y = '#ffcc33';
 export const TEMPLATES: { name: string; emoji: string; build: () => Layer[] }[] = [
   { name: 'Blank', emoji: '⬜', build: () => [] },
-  { name: 'Smiley', emoji: '😊', build: () => [sticker('circle', '#ffcc33', C, C, 4.2), sticker('eyes-dot', INK, C, C - 50, 1.6), sticker('mouth-smile', INK, C, C + 60, 1.6), sticker('blush', '#ff7aa8', C, C + 20, 2.2)] },
-  { name: 'Cool', emoji: '😎', build: () => [sticker('circle', '#ffcc33', C, C, 4.2), sticker('sunglasses', '#1d1b26', C, C - 45, 2.2), sticker('mouth-smile', INK, C, C + 70, 1.4)] },
-  { name: 'In love', emoji: '😍', build: () => [sticker('circle', '#ffcc33', C, C, 4.2), sticker('eyes-heart', '#ff3b6b', C, C - 45, 1.8), sticker('mouth-open', INK, C, C + 70, 1.3)] },
-  { name: 'Sad', emoji: '😢', build: () => [sticker('circle', '#8fd3ff', C, C, 4.2), sticker('eyes-big', INK, C, C - 45, 1.6), sticker('tear', '#2f8fff', C + 60, C + 10, 0.9), sticker('mouth-frown', INK, C, C + 75, 1.5)] },
-  { name: 'Angry', emoji: '😠', build: () => [sticker('circle', '#ff6b4a', C, C, 4.2), sticker('eyebrows-angry', INK, C, C - 75, 1.6), sticker('eyes-dot', INK, C, C - 35, 1.5), sticker('mouth-flat', INK, C, C + 70, 1.5)] },
+  { name: 'Smiling', emoji: '😊', build: () => [sticker('circle', Y, C, C, 4.4), sticker('eyes-happy', INK, C, C - 40, 1.9), sticker('blush', '#ff8fa3', C, C + 25, 2.6), sticker('mouth-smile', INK, C, C + 70, 1.9)] },
+  { name: 'Grinning', emoji: '😀', build: () => [sticker('circle', Y, C, C, 4.4), sticker('eyes-dot', INK, C, C - 50, 2), sticker('mouth-open', INK, C, C + 65, 2.4)] },
+  { name: 'Cool', emoji: '😎', build: () => [sticker('circle', Y, C, C, 4.4), sticker('sunglasses', '#1d1b26', C, C - 40, 2.6), sticker('mouth-smile', INK, C, C + 75, 1.6)] },
+  { name: 'Heart eyes', emoji: '😍', build: () => [sticker('circle', Y, C, C, 4.4), sticker('eyes-heart', '#f2304f', C, C - 40, 2.2), sticker('mouth-open', INK, C, C + 70, 2.2)] },
+  { name: 'Crying', emoji: '😢', build: () => [sticker('circle', Y, C, C, 4.4), sticker('eyes-dot', INK, C, C - 40, 1.8), sticker('tear', '#4fb3ff', C + 75, C + 15, 1.1), sticker('mouth-frown', INK, C, C + 85, 1.7)] },
+  { name: 'Angry', emoji: '😠', build: () => [sticker('circle', '#ff9a3d', C, C, 4.4), sticker('eyebrows-angry', INK, C, C - 70, 1.8), sticker('eyes-dot', INK, C, C - 30, 1.7), sticker('mouth-frown', INK, C, C + 85, 1.6)] },
+  { name: 'Winking', emoji: '😉', build: () => [sticker('circle', Y, C, C, 4.4), sticker('eyes-wink', INK, C, C - 40, 2), sticker('mouth-smile', INK, C, C + 70, 1.9)] },
+  { name: 'Neutral', emoji: '😐', build: () => [sticker('circle', Y, C, C, 4.4), sticker('eyes-dot', INK, C, C - 40, 2), sticker('mouth-flat', INK, C, C + 70, 1.8)] },
 ];
 
 function heartPath(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: number) {

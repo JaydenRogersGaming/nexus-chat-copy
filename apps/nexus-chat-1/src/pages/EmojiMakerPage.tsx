@@ -28,7 +28,8 @@ function ToolButton({ active, onClick, icon, label }: { active: boolean; onClick
   );
 }
 
-export default function EmojiMakerPage() {
+export default function EmojiMakerPage({ mode = 'emoji' }: { mode?: 'emoji' | 'draw' }) {
+  const isEmoji = mode === 'emoji';
   const { layers, canUndo, canRedo, commit, preview, finish, undo, redo } = useLayerHistory();
   const [tool, setTool] = useState<Tool>('pencil');
   const [color, setColor] = useState('#2b2140');
@@ -55,7 +56,7 @@ export default function EmojiMakerPage() {
 
   async function savePng() {
     const url = URL.createObjectURL(await exportBlob(layers));
-    const a = document.createElement('a'); a.href = url; a.download = 'my-emoji.png'; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = isEmoji ? 'my-emoji.png' : 'my-drawing.png'; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('Saved as PNG!');
   }
@@ -70,22 +71,22 @@ export default function EmojiMakerPage() {
     <div className="h-full overflow-y-auto bg-gradient-to-br from-primary/10 via-background to-accent/20">
       <div className="max-w-6xl mx-auto p-3 sm:p-6 space-y-4">
         <header className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-black">🎨 Emoji Maker</h1>
+          <h1 className="text-2xl sm:text-3xl font-black">{isEmoji ? '😀 Emoji Maker' : '🎨 Drawing'}</h1>
           <div className="ml-auto flex gap-2">
             <Button variant="outline" size="icon" onClick={undo} disabled={!canUndo} title="Undo"><Undo2 className="w-4 h-4" /></Button>
             <Button variant="outline" size="icon" onClick={redo} disabled={!canRedo} title="Redo"><Redo2 className="w-4 h-4" /></Button>
             <Button variant="outline" onClick={savePng} className="gap-1.5"><Download className="w-4 h-4" /><span className="hidden sm:inline">Save PNG</span></Button>
-            <Button onClick={addToCollection} disabled={isUploading} className="gap-1.5">{isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}<span className="hidden sm:inline">Add to my emojis</span></Button>
+            {isEmoji && <Button onClick={addToCollection} disabled={isUploading} className="gap-1.5">{isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}<span className="hidden sm:inline">Add to my emojis</span></Button>}
           </div>
         </header>
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        {isEmoji && <div className="flex gap-2 overflow-x-auto pb-1">
           {TEMPLATES.map(t => (
             <button key={t.name} onClick={() => { commit(t.build()); setSelectedId(null); }} className="flex-shrink-0 flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-3 py-1.5 text-xs font-bold hover:border-primary hover:-translate-y-0.5 transition-all">
               <span className="text-lg">{t.emoji}</span>{t.name}
             </button>
           ))}
-        </div>
+        </div>}
 
         <div className="grid gap-4 lg:grid-cols-[220px_1fr_260px]">
           <aside className="space-y-3 order-2 lg:order-1">
@@ -116,14 +117,14 @@ export default function EmojiMakerPage() {
             {selected && tool === 'move' && <SelectedPanel layers={layers} selected={selected} commit={commit} preview={preview} finish={finish} onSelect={setSelectedId} />}
             <div className="rounded-2xl bg-card border-2 border-border p-3">
               <Tabs defaultValue="Shapes">
-                <TabsList className="grid grid-cols-4 w-full h-auto">
-                  {['Shapes', ...PARTS.map(p => p.group)].map(g => <TabsTrigger key={g} value={g} className="text-[11px] px-1">{g}</TabsTrigger>)}
+                <TabsList className={cn('grid w-full h-auto', isEmoji ? 'grid-cols-4' : 'grid-cols-1')}>
+                  {['Shapes', ...(isEmoji ? PARTS.map(p => p.group) : [])].map(g => <TabsTrigger key={g} value={g} className="text-[11px] px-1">{g}</TabsTrigger>)}
                 </TabsList>
                 <TabsContent value="Shapes" className="grid grid-cols-3 gap-1.5">{SHAPES.map(s => <PartThumb key={s.kind} {...s} onClick={() => add(s.kind, s.color)} />)}</TabsContent>
-                {PARTS.map(p => <TabsContent key={p.group} value={p.group} className="grid grid-cols-3 gap-1.5">{p.items.map(s => <PartThumb key={s.kind} {...s} onClick={() => add(s.kind, s.color)} />)}</TabsContent>)}
+                {isEmoji && PARTS.map(p => <TabsContent key={p.group} value={p.group} className="grid grid-cols-3 gap-1.5">{p.items.map(s => <PartThumb key={s.kind} {...s} onClick={() => add(s.kind, s.color)} />)}</TabsContent>)}
               </Tabs>
             </div>
-            <div className="rounded-2xl bg-card border-2 border-border p-3 space-y-2">
+            {isEmoji && <div className="rounded-2xl bg-card border-2 border-border p-3 space-y-2">
               <p className="text-xs font-black uppercase tracking-wider text-muted-foreground">Your emoji collection ({mine.length})</p>
               {mine.length === 0 ? <p className="text-xs text-muted-foreground italic">Tap “Add to my emojis” to use your creations in chat.</p> : (
                 <div className="grid grid-cols-5 gap-1.5">
@@ -135,7 +136,7 @@ export default function EmojiMakerPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </div>}
           </aside>
         </div>
       </div>
