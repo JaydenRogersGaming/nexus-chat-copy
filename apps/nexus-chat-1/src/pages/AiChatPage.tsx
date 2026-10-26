@@ -67,7 +67,6 @@ export default function AiChatPage() {
   const handleGenerateImage = async () => {
     const text = input.trim();
     if (!text || streaming || generatingImage) return;
-    if (!isOwner) { toast.error('🔒 Only the owner can generate images'); return; }
 
     const userMsg: Message = { role: 'user', content: `🎨 Generate image: ${text}` };
     const updated = [...messages, userMsg];
@@ -76,20 +75,19 @@ export default function AiChatPage() {
     setGeneratingImage(true);
 
     try {
-      const result = await generateArt({ prompt: text, relaxed: localStorage.getItem('hub:artFilterOff') === '1' });
+      const result = await generateArt({ prompt: text });
+      if (result.blocked) {
+        const failMsg: Message = { role: 'assistant', content: "🚫 I can't make that image — it breaks the rules. This request has been reported to the owner." };
+        setConversations(prev => prev.map((c, i) => i === activeIdx ? [...updated, failMsg] : c));
+        toast.error('Inappropriate prompt — reported to the owner');
+        return;
+      }
       const dataUrl = `data:image/png;base64,${result.imageBase64}`;
       const assistantMsg: Message = { role: 'assistant', content: `Here's your generated image for: "${text}"`, imageUrl: dataUrl };
       setConversations(prev => prev.map((c, i) => i === activeIdx ? [...updated, assistantMsg] : c));
       toast.success('🎨 Image generated!');
-    } catch (err) {
-      const errorMsg = String(err);
-      if (errorMsg.includes('safety') || errorMsg.includes('rejected') || errorMsg.includes('400')) {
-        const failMsg: Message = { role: 'assistant', content: '⚠️ OpenAI blocked this prompt due to their safety filter. Try rephrasing with more general/artistic language.' };
-        setConversations(prev => prev.map((c, i) => i === activeIdx ? [...updated, failMsg] : c));
-        toast.error('Prompt blocked by safety filter — try rephrasing');
-      } else {
-        toast.error('Failed to generate image');
-      }
+    } catch {
+      toast.error('Failed to generate image');
     } finally {
       setGeneratingImage(false);
     }
@@ -137,7 +135,7 @@ export default function AiChatPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
-          {messages.length === 0 && !isBusy && <EmptyState isOwner={isOwner} />}
+          {messages.length === 0 && !isBusy && <EmptyState isOwner />}
 
           {messages.map((msg, i) => (
             <MessageBubble key={i} message={msg} />
@@ -198,8 +196,8 @@ export default function AiChatPage() {
               el.style.height = Math.min(el.scrollHeight, 160) + 'px';
             }}
           />
-          {isOwner && (
-            <Button onClick={handleGenerateImage} disabled={!input.trim() || isBusy} size="icon" variant="outline" className="rounded-xl h-11 w-11 shrink-0" title="Generate Image (Owner Only)">
+          {(
+            <Button onClick={handleGenerateImage} disabled={!input.trim() || isBusy} size="icon" variant="outline" className="rounded-xl h-11 w-11 shrink-0" title="Generate Image">
               <ImageIcon className="w-4 h-4" />
             </Button>
           )}
@@ -208,7 +206,7 @@ export default function AiChatPage() {
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground text-center mt-1.5 max-w-3xl mx-auto">
-          Press Enter to chat • 📎 upload a picture (homework, screenshots, anything){isOwner ? ' • Click 🖼️ to generate an image' : ''}
+          Press Enter to chat • 📎 upload a picture (homework, screenshots, anything) • Click 🖼️ to generate an image
         </p>
       </div>
     </div>

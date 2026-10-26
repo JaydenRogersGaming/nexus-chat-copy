@@ -9,7 +9,21 @@ export type PartKind =
   | 'blush' | 'tear' | 'sunglasses' | 'eyebrows-angry' | 'sparkle';
 
 export const CANVAS = 512;
-const INK = '#2b2140';
+const INK = '#664500'; // the warm brown used for features on real emoji faces
+
+function shade(hex: string, amt: number) {
+  const m = hex.replace('#', '').match(/^([0-9a-f]{6})$/i); if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const f = (c: number) => Math.max(0, Math.min(255, Math.round(amt >= 0 ? c + (255 - c) * amt : c * (1 + amt))));
+  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+
+/** Glossy radial fill like Apple / Google emoji: bright top-left, deeper rim. */
+function glossy(ctx: CanvasRenderingContext2D, color: string, r = 50) {
+  const g = ctx.createRadialGradient(-r * 0.3, -r * 0.4, r * 0.1, 0, 0, r * 1.1);
+  g.addColorStop(0, shade(color, 0.45)); g.addColorStop(0.55, color); g.addColorStop(1, shade(color, -0.22));
+  ctx.fillStyle = g; ctx.fill();
+}
 
 export const SHAPES: { kind: PartKind; label: string; color: string }[] = [
   { kind: 'circle', label: 'Circle', color: '#ffd23f' },
@@ -45,9 +59,9 @@ export const newId = uid;
 const C = CANVAS / 2;
 export const TEMPLATES: { name: string; emoji: string; build: () => Layer[] }[] = [
   { name: 'Blank', emoji: '⬜', build: () => [] },
-  { name: 'Smiley', emoji: '😊', build: () => [sticker('circle', '#ffd23f', C, C, 4.2), sticker('eyes-dot', INK, C, C - 50, 1.6), sticker('mouth-smile', INK, C, C + 60, 1.6), sticker('blush', '#ff7aa8', C, C + 20, 2.2)] },
-  { name: 'Cool', emoji: '😎', build: () => [sticker('circle', '#ffd23f', C, C, 4.2), sticker('sunglasses', '#1d1b26', C, C - 45, 2.2), sticker('mouth-smile', INK, C, C + 70, 1.4)] },
-  { name: 'In love', emoji: '😍', build: () => [sticker('circle', '#ffd23f', C, C, 4.2), sticker('eyes-heart', '#ff3b6b', C, C - 45, 1.8), sticker('mouth-open', INK, C, C + 70, 1.3)] },
+  { name: 'Smiley', emoji: '😊', build: () => [sticker('circle', '#ffcc33', C, C, 4.2), sticker('eyes-dot', INK, C, C - 50, 1.6), sticker('mouth-smile', INK, C, C + 60, 1.6), sticker('blush', '#ff7aa8', C, C + 20, 2.2)] },
+  { name: 'Cool', emoji: '😎', build: () => [sticker('circle', '#ffcc33', C, C, 4.2), sticker('sunglasses', '#1d1b26', C, C - 45, 2.2), sticker('mouth-smile', INK, C, C + 70, 1.4)] },
+  { name: 'In love', emoji: '😍', build: () => [sticker('circle', '#ffcc33', C, C, 4.2), sticker('eyes-heart', '#ff3b6b', C, C - 45, 1.8), sticker('mouth-open', INK, C, C + 70, 1.3)] },
   { name: 'Sad', emoji: '😢', build: () => [sticker('circle', '#8fd3ff', C, C, 4.2), sticker('eyes-big', INK, C, C - 45, 1.6), sticker('tear', '#2f8fff', C + 60, C + 10, 0.9), sticker('mouth-frown', INK, C, C + 75, 1.5)] },
   { name: 'Angry', emoji: '😠', build: () => [sticker('circle', '#ff6b4a', C, C, 4.2), sticker('eyebrows-angry', INK, C, C - 75, 1.6), sticker('eyes-dot', INK, C, C - 35, 1.5), sticker('mouth-flat', INK, C, C + 70, 1.5)] },
 ];
@@ -73,14 +87,14 @@ function starPath(ctx: CanvasRenderingContext2D, r: number, inner: number, point
 export function drawPart(ctx: CanvasRenderingContext2D, kind: PartKind, color: string) {
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.fillStyle = color; ctx.strokeStyle = color;
-  const outline = () => { ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(43,33,64,0.85)'; ctx.stroke(); };
+  const outline = () => { glossy(ctx, color); ctx.lineWidth = 1.5; ctx.strokeStyle = shade(color, -0.35); ctx.stroke(); };
   switch (kind) {
-    case 'circle': ctx.beginPath(); ctx.arc(0, 0, 50, 0, Math.PI * 2); ctx.fill(); outline(); break;
-    case 'square': ctx.beginPath(); ctx.roundRect(-46, -46, 92, 92, 16); ctx.fill(); outline(); break;
-    case 'triangle': ctx.beginPath(); ctx.moveTo(0, -48); ctx.lineTo(50, 42); ctx.lineTo(-50, 42); ctx.closePath(); ctx.fill(); outline(); break;
-    case 'star': starPath(ctx, 52, 22); ctx.fill(); outline(); break;
-    case 'heart': heartPath(ctx, 0, 0, 40); ctx.fill(); outline(); break;
-    case 'eyes-dot': [-24, 24].forEach(x => { ctx.beginPath(); ctx.ellipse(x, 0, 8, 12, 0, 0, Math.PI * 2); ctx.fill(); }); break;
+    case 'circle': ctx.beginPath(); ctx.arc(0, 0, 50, 0, Math.PI * 2); outline(); break;
+    case 'square': ctx.beginPath(); ctx.roundRect(-46, -46, 92, 92, 16); outline(); break;
+    case 'triangle': ctx.beginPath(); ctx.moveTo(0, -48); ctx.lineTo(50, 42); ctx.lineTo(-50, 42); ctx.closePath(); outline(); break;
+    case 'star': starPath(ctx, 52, 22); outline(); break;
+    case 'heart': heartPath(ctx, 0, 0, 40); outline(); break;
+    case 'eyes-dot': [-22, 22].forEach(x => { ctx.beginPath(); ctx.ellipse(x, 0, 7, 12, 0, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill(); ctx.beginPath(); ctx.ellipse(x - 2, -5, 2, 3, 0, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fill(); }); break;
     case 'eyes-big': [-26, 26].forEach(x => {
       ctx.beginPath(); ctx.ellipse(x, 0, 18, 22, 0, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = color; ctx.stroke();
       ctx.beginPath(); ctx.arc(x + 3, 4, 9, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
@@ -90,18 +104,20 @@ export function drawPart(ctx: CanvasRenderingContext2D, kind: PartKind, color: s
     case 'eyes-wink':
       ctx.beginPath(); ctx.ellipse(-24, 0, 8, 12, 0, 0, Math.PI * 2); ctx.fill();
       ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(36, 0); ctx.stroke(); break;
-    case 'eyes-heart': [-26, 26].forEach(x => { heartPath(ctx, x, 2, 15); ctx.fill(); }); break;
+    case 'eyes-heart': [-26, 26].forEach(x => { ctx.save(); ctx.translate(x, 2); heartPath(ctx, 0, 0, 15); glossy(ctx, color, 18); ctx.restore(); }); break;
     case 'mouth-smile': ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(0, -20, 34, Math.PI * 0.2, Math.PI * 0.8); ctx.stroke(); break;
     case 'mouth-frown': ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(0, 30, 30, Math.PI * 1.2, Math.PI * 1.8); ctx.stroke(); break;
     case 'mouth-flat': ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(26, 0); ctx.stroke(); break;
     case 'mouth-open':
-      ctx.beginPath(); ctx.ellipse(0, 0, 24, 20, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-30, -8); ctx.quadraticCurveTo(0, -2, 30, -8); ctx.quadraticCurveTo(28, 26, 0, 26); ctx.quadraticCurveTo(-28, 26, -30, -8); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-26, -6); ctx.quadraticCurveTo(0, 0, 26, -6); ctx.lineTo(24, 2); ctx.quadraticCurveTo(0, 6, -24, 2); ctx.closePath(); ctx.fillStyle = '#fff'; ctx.fill();
       ctx.beginPath(); ctx.ellipse(0, 9, 13, 7, 0, 0, Math.PI * 2); ctx.fillStyle = '#ff6f91'; ctx.fill(); break;
     case 'mouth-tongue':
       ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(0, -20, 34, Math.PI * 0.2, Math.PI * 0.8); ctx.stroke();
       ctx.beginPath(); ctx.ellipse(8, 18, 11, 14, 0, 0, Math.PI); ctx.fillStyle = '#ff6f91'; ctx.fill(); break;
     case 'blush': ctx.globalAlpha *= 0.55; [-34, 34].forEach(x => { ctx.beginPath(); ctx.ellipse(x, 0, 14, 8, 0, 0, Math.PI * 2); ctx.fill(); }); break;
     case 'tear':
+      { const g = ctx.createLinearGradient(0, -24, 0, 20); g.addColorStop(0, shade(color, 0.4)); g.addColorStop(1, color); ctx.fillStyle = g; }
       ctx.beginPath(); ctx.moveTo(0, -24); ctx.bezierCurveTo(16, -2, 16, 20, 0, 20); ctx.bezierCurveTo(-16, 20, -16, -2, 0, -24); ctx.fill();
       ctx.beginPath(); ctx.arc(-4, 8, 3, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fill(); break;
     case 'sunglasses':

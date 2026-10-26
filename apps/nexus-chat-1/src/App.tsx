@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import VideoRoomsPage from './pages/VideoRoomsPage';
 import EmojiMakerPage from './pages/EmojiMakerPage';
 import MarketplacePage from './pages/MarketplacePage';
@@ -12,7 +11,6 @@ import AdminPage from './pages/AdminPage';
 import AchievementsPage from './pages/AchievementsPage';
 import GamblePage from './pages/GamblePage';
 import HpClickerPage from './pages/HpClickerPage';
-import AiArtPage from './pages/AiArtPage';
 import AiChatPage from './pages/AiChatPage';
 import BrowserPage from './pages/BrowserPage';
 import CalendarPage from './pages/CalendarPage';
@@ -28,9 +26,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
   const serverBan = useServerBan(!!user);
-  useEffect(() => {
-    if (!isLoading && !user) loginWithRedirect();
-  }, [isLoading, user]);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
       <MatrixRain color={mc} speed={settings.matrixSpeed} />
@@ -73,7 +68,6 @@ export default function App() {
               <Route path="achievements" element={<AchievementsPage />} />
               <Route path="gamble"       element={<GamblePage />} />
               <Route path="hpclicker"    element={<HpClickerPage />} />
-              <Route path="aiart"         element={<AiArtPage />} />
               <Route path="aichat"        element={<AiChatPage />} />
               <Route path="browser"       element={<BrowserPage />} />
               <Route path="calendar"      element={<CalendarPage />} />

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { logout } from 'zitejs/auth';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Smile, ShieldCheck, Video } from 'lucide-react';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Bot, Globe, CalendarDays, Flame, BadgeCheck, Store, Smile, ShieldCheck, Video } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -19,7 +18,6 @@ const NAV = [
   { to: '/gamble',       icon: Dices,         label: 'Casino' },
   { to: '/leaderboard',  icon: Trophy,        label: 'Leaderboard' },
   { to: '/hpclicker',    icon: Heart,         label: 'HP Clicker' },
-  { to: '/aiart',         icon: Wand2,         label: 'AI Art' },
   { to: '/aichat',        icon: Bot,           label: 'AI Assistant' },
   { to: '/browser',       icon: Globe,         label: 'Browser' },
   { to: '/calendar',      icon: CalendarDays,  label: 'Calendar' },
@@ -93,9 +91,6 @@ export default function Sidebar({ onProfileClick }: Props) {
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         </button>
       )}
-      <button onClick={() => logout()} className="px-3 py-2 border-t border-border hover:bg-secondary transition-colors flex items-center gap-2 text-xs text-muted-foreground w-full">
-        <LogOut className="w-3.5 h-3.5" /> Sign out
-      </button>
     </aside>
   );
 }
