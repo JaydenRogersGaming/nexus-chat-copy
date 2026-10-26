@@ -48,32 +48,32 @@ function buildUpgrades(): UpgradeDef[] {
     'Universe Click','Multiverse Click','Omega Click','Infinity Click','Transcend Click','Supreme Click',
     'Atomic Tap','Quantum Click','Plasma Click','Neutron Click','Photon Click','Dark Matter Click',
     'Antimatter Click','Singularity Click','Big Bang Click','Eternal Click',
-  ], 30, 2.2, 1.4, 2, (l, p) => `+${l * p} HP/click`);
+  ], 30, 2.2, 1.4, 2, (l, p) => `+${formatGems(l * p)} HP/click`);
 
   make('Auto Clicker', '🤖', [
     'Tiny Bot','Mini Bot','Small Bot','Medium Bot','Large Bot','Mega Bot','Ultra Bot','Hyper Bot',
     'Super Bot','Titan Bot','God Bot','Divine Bot','Celestial Bot','Cosmic Bot','Galaxy Bot',
     'Quantum Bot','Plasma Bot','Neutron Bot','Photon Bot','Dark Bot',
     'Aether Bot','Chrono Bot','Infinity Bot',
-  ], 150, 2.5, 1.6, 3, (l, p) => `+${l * p} HP/sec`);
+  ], 150, 2.5, 1.6, 3, (l, p) => `+${formatGems(l * p)} HP/sec`);
 
   make('Multi Click', '✨', [
     'Lucky Tap','Double Chance','Triple Threat','Quad Strike','Penta Hit','Hexa Blow','Septa Strike',
     'Octa Slam','Nona Crush','Deca Smash','Rapid Multi','Chain Multi','Storm Multi','Tempest Multi',
     'Hurricane Multi','Cyclone Multi','Vortex Multi','Maelstrom Multi','Cataclysm Multi','Apocalypse Multi',
-  ], 200, 2.4, 1.5, 2, (l, p) => `+${l * p}% 2x`);
+  ], 200, 2.4, 1.5, 2, (l, p) => `+${formatGems(l * p)}% 2x`);
 
   make('Critical Hit', '⚡', [
     'Sharp Eye','Keen Sight','Eagle Eye','Hawk Vision','Sniper Focus','Critical Mass','Lethal Precision',
     'Fatal Strike','Death Touch','Annihilate','Piercing Gaze','Killer Instinct','Assassin Eye',
     'Phantom Strike','Omega Crit','Infinity Crit','Transcend Crit','Supreme Crit',
-  ], 500, 2.6, 1.6, 1, (l, p) => `+${l * p}% crit`);
+  ], 500, 2.6, 1.6, 1, (l, p) => `+${formatGems(l * p)}% crit`);
 
   make('Gem Bonus', '💎', [
     'Gem Finder','Gem Miner','Gem Digger','Gem Expert','Gem Master','Gem Lord','Gem King','Gem Emperor',
     'Gem God','Gem Titan','Gem Seeker','Gem Hunter','Gem Collector','Gem Hoarder','Gem Magnate',
     'Gem Baron','Gem Tycoon','Gem Overlord','Gem Sovereign','Gem Almighty',
-  ], 400, 2.5, 1.7, 2, (l, p) => `+${l * p} gems/100`);
+  ], 400, 2.5, 1.7, 2, (l, p) => `+${formatGems(l * p)} gems/100`);
 
   make('Multiplier', '🔥', [
     'Warm Up','Momentum','Acceleration','Overdrive','Turbo','Nitro','Blaze','Inferno','Supernova',
@@ -85,18 +85,18 @@ function buildUpgrades(): UpgradeDef[] {
     'Quick Hands','Fast Fingers','Rapid Fire','Blitz Mode','Storm Click','Thunder Click','Lightning Click',
     'Tempest Click','Hurricane Click','Tornado Click','Combo King','Chain Master','Rush Lord',
     'Frenzy Mode','Rampage Mode','Berserk Mode','Ultra Frenzy','Mega Rush','Giga Combo','Tera Combo',
-  ], 400, 2.3, 1.5, 3, (l, p) => `+${l * p}% combo`);
+  ], 400, 2.3, 1.5, 3, (l, p) => `+${formatGems(l * p)}% combo`);
 
   make('Time Warp', '⏰', [
     'Time Skip','Time Hop','Time Leap','Time Jump','Time Warp','Chrono Shift','Temporal Rift',
     'Time Dilation','Chrono Surge','Time Storm','Epoch Shift','Era Warp','Aeon Skip',
     'Eternity Pulse','Infinity Loop',
-  ], 1000, 3, 1.9, 4, (l, p) => `+${l * p}% speed`);
+  ], 1000, 3, 1.9, 4, (l, p) => `+${formatGems(l * p)}% speed`);
 
   make('Celestial', '⭐', [
     'Starlight','Moonbeam','Sunburst','Comet Tail','Aurora Flash','Constellation Power',
     'Zodiac Force','Galaxy Pulse','Nebula Core','Supernova Heart',
-  ], 2000, 3.5, 2.1, 8, (l, p) => `+${l * p}% celestial`);
+  ], 2000, 3.5, 2.1, 8, (l, p) => `+${formatGems(l * p)}% celestial`);
 
   return ups;
 }
@@ -325,7 +325,7 @@ export default function HpClickerPage() {
     const level = upgrades[key] || 0;
     if (level >= MAX_LEVEL) { toast.error(`Max level (${MAX_LEVEL.toLocaleString()}) reached!`); return; }
     const { total, n } = bulkCost(baseCost, costMult, level);
-    if (hp < total) { toast.error(`Need ${total.toLocaleString()} HP!`); return; }
+    if (hp < total) { toast.error(`Need ${formatGems(total)} HP!`); return; }
     setHp(prev => prev - total);
     setUpgrades(prev => ({ ...prev, [key]: Math.min((prev[key] || 0) + n, MAX_LEVEL) }));
     gainXp(n * 2);
@@ -357,7 +357,7 @@ export default function HpClickerPage() {
     if (h.boostType === 'comet' || h.boostType === 'supernova') {
       const secs = h.boostType === 'comet' ? 60 : 600;
       const gain = Math.max(100, Math.floor(bonuses.autoHP * bonuses.hpMult * secs));
-      setHp(p => p + gain); toast.success(`${h.emoji} +${gain.toLocaleString()} HP!`); return;
+      setHp(p => p + gain); toast.success(`${h.emoji} +${formatGems(gain)} HP!`); return;
     }
     if (h.boostType === 'void') {
       const per = Math.floor(bonuses.clickPower * bonuses.hpMult * evMult);
@@ -421,7 +421,7 @@ export default function HpClickerPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
-        <StatBox icon={<Heart className="w-4 h-4 text-destructive" />} value={hp >= 999999999 ? '∞' : hp.toLocaleString()} label="HP" />
+        <StatBox icon={<Heart className="w-4 h-4 text-destructive" />} value={hp >= 999999999 ? '∞' : formatGems(hp)} label="HP" />
         <StatBox icon={<Zap className="w-4 h-4 text-yellow-400" />} value={totalClicks >= 999999999 ? '∞' : totalClicks.toLocaleString()} label="Clicks" />
         <StatBox icon={<ArrowUp className="w-4 h-4 text-primary" />} value={totalUpgradeLevels.toLocaleString()} label="Levels" />
         <StatBox icon={<RotateCcw className="w-4 h-4 text-cyan-400" />} value={prestige >= 999999999 ? '∞' : String(prestige)} label="Prestige" />
@@ -502,7 +502,7 @@ export default function HpClickerPage() {
       <div className="bg-card border border-border rounded-xl p-2.5 mb-4">
         <div className="flex items-center justify-between text-[10px] mb-1">
           <span className="text-muted-foreground flex items-center gap-1"><Trophy className="w-3 h-3" />Milestone</span>
-          <span className="font-bold">{hp.toLocaleString()} / {nextMilestone.toLocaleString()}</span>
+          <span className="font-bold">{formatGems(hp)} / {formatGems(nextMilestone)}</span>
         </div>
         <div className="h-2 bg-secondary rounded-full overflow-hidden">
           <div className="h-full bg-destructive rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
@@ -589,8 +589,8 @@ export default function HpClickerPage() {
                   </div>
                   <p className="text-[10px] font-semibold text-primary mt-0.5">{u.format(level, u.perLevel)}</p>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-[9px] text-muted-foreground">Lv.{level.toLocaleString()} / {MAX_LEVEL.toLocaleString()}</span>
-                    <span className="text-[9px] font-bold text-destructive">{maxed ? 'MAXED' : `${bc.n > 1 ? `×${bc.n} ` : ''}♥${cost.toLocaleString()}`}</span>
+                    <span className="text-[9px] text-muted-foreground">Lv.{formatGems(level)} / {formatGems(MAX_LEVEL)}</span>
+                    <span className="text-[9px] font-bold text-destructive">{maxed ? 'MAXED' : `${bc.n > 1 ? `×${bc.n} ` : ''}♥${formatGems(cost)}`}</span>
                   </div>
                 </button>
               );

@@ -5,9 +5,12 @@ import { useApp } from '../contexts/AppContext';
 export type OnlineUser = PresenceOutputType['online'][number];
 
 // Pings "I'm here" and fetches everyone online, across all devices, every 10s.
-export function useOnlineUsers() {
+export function useOnlineUsers() { return usePresence().online; }
+
+export function usePresence() {
   const { profile } = useApp();
   const [online, setOnline] = useState<OnlineUser[]>([]);
+  const [everyone, setEveryone] = useState<OnlineUser[]>([]);
 
   useEffect(() => {
     if (!profile) return;
@@ -23,7 +26,7 @@ export function useOnlineUsers() {
             role: profile.role,
           },
         });
-        if (alive) setOnline(res.online);
+        if (alive) { setOnline(res.online); setEveryone(res.everyone); }
       } catch { /* try again next tick */ }
     };
     tick();
@@ -31,5 +34,5 @@ export function useOnlineUsers() {
     return () => { alive = false; clearInterval(t); };
   }, [profile?.email, profile?.name, profile?.profilePic, profile?.nameColor, profile?.activeTitle, profile?.role]);
 
-  return online;
+  return { online, everyone };
 }

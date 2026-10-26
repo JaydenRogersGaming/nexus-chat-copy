@@ -20,7 +20,7 @@ export default createEndpoint({
     action: z.enum(['ping', 'getOnline']),
     user: userSchema.omit({ lastSeen: true }).optional(),
   }),
-  outputSchema: z.object({ online: z.array(userSchema) }),
+  outputSchema: z.object({ online: z.array(userSchema), everyone: z.array(userSchema) }),
   execute: async ({ input }) => {
     if (input.action === 'ping' && input.user) {
       const u = input.user;
@@ -29,22 +29,21 @@ export default createEndpoint({
         records: [{
           email: u.email, displayName: u.name, profilePic: u.profilePic, nameColor: u.nameColor,
           activeTitle: u.activeTitle, activeTitleColor: u.activeTitleColor,
-          activeTitleEffect: u.activeTitleEffect, lastSeen: new Date().toISOString(),
+          activeTitleEffect: u.activeTitleEffect, role: u.role, lastSeen: new Date().toISOString(),
         }],
       });
     }
     const cutoff = new Date(Date.now() - 60 * 1000).toISOString();
     const { rows } = await zite.sql({
-      query: `SELECT "email","displayName","profilePic","nameColor","activeTitle","activeTitleColor","activeTitleEffect","role","lastSeen" FROM "Presence" WHERE "lastSeen" > $1 ORDER BY "displayName" ASC`,
-      params: [cutoff],
+      query: `SELECT "email","displayName","profilePic","nameColor","activeTitle","activeTitleColor","activeTitleEffect","role","lastSeen" FROM "Presence" ORDER BY "displayName" ASC LIMIT 1000`,
     });
-    return {
-      online: rows.map(r => ({
+    const all = rows.map(r => ({
         email: String(r.email ?? ''), name: String(r.displayName ?? ''), profilePic: String(r.profilePic ?? ''),
         nameColor: String(r.nameColor ?? ''), activeTitle: String(r.activeTitle ?? ''),
         activeTitleColor: String(r.activeTitleColor ?? ''), activeTitleEffect: String(r.activeTitleEffect ?? ''),
         role: String(r.role ?? 'user'), lastSeen: r.lastSeen ? new Date(String(r.lastSeen)).getTime() : 0,
-      })),
-    };
+      }));
+    const cut = Date.parse(cutoff);
+    return { online: all.filter(u => u.lastSeen > cut), everyone: all };
   },
 });
