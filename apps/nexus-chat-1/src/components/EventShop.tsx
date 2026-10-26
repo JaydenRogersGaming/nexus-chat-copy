@@ -8,6 +8,15 @@ import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { COSMETICS_EVENT } from './SettingsExtras';
 import { ActiveEvent, limitedItems } from '../lib/holidays';
+import { holidaySong, resolveSongUrl } from '../lib/holidaySongs';
+import { setMusic, getMusic } from '../lib/personalize';
+
+let previewAudio: HTMLAudioElement | null = null;
+function preview(url: string) {
+  if (previewAudio && !previewAudio.paused) { previewAudio.pause(); previewAudio = null; return; }
+  previewAudio = new Audio(resolveSongUrl(url)); previewAudio.volume = 0.5; previewAudio.play().catch(() => {});
+  setTimeout(() => previewAudio?.pause(), 10000);
+}
 
 type Props = { event: ActiveEvent; open: boolean; onOpenChange: (o: boolean) => void };
 
@@ -16,6 +25,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   const [, bump] = useState(0);
   if (!profile) return null;
   const { theme, typing, badge } = limitedItems(event);
+  const song = holidaySong(event.holiday.key, event.year);
   const owned = DB.getUserItems(profile.email);
   const eq = DB.getEquipped(profile.email);
   const [c1, c2, c3] = event.variant.colors;
@@ -34,6 +44,10 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
       sub: <p className="text-[11px] animate-pulse" style={{ color: typing.color }}>You {typing.text}</p>, on: eq.typing === typing.id, use: () => equip({ typing: eq.typing === typing.id ? '' : typing.id }) },
     { id: badge.id, label: 'Limited Badge', name: `${badge.emoji} ${badge.name}`, cost: badge.cost, preview: <div className="w-14 h-10 rounded-lg border border-border flex items-center justify-center text-2xl" style={{ background: `${c3}22` }}>{badge.emoji}</div>,
       on: profile.activeTitle === `${badge.emoji} ${badge.name}`, use: wearBadge },
+    { id: song.id, label: 'Limited Song', name: song.name, cost: song.cost,
+      preview: <button onClick={() => preview(song.url)} title="Preview" className="w-14 h-10 rounded-lg border border-border flex items-center justify-center text-xl hover:scale-105 transition-transform" style={{ background: `${c3}22` }}>🎵</button>,
+      sub: <p className="text-[11px] text-muted-foreground">Tap 🎵 to preview · plays in your music player</p>,
+      on: getMusic().url === song.url, use: () => { setMusic({ ...getMusic(), url: song.url }); toast.success('Added to your songs — open the 🎵 music player to play it'); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); } },
   ];
 
   return (

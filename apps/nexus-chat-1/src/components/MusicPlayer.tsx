@@ -6,16 +6,30 @@ import { Input } from '@project/components/ui/input';
 import { Slider } from '@project/components/ui/slider';
 import { toast } from 'sonner';
 import { SONGS, getMusic, setMusic, type MusicPrefs } from '../lib/personalize';
+import { allHolidaySongs, resolveSongUrl } from '../lib/holidaySongs';
+import { useApp } from '../contexts/AppContext';
+import * as DB from '../lib/storage';
+import { COSMETICS_EVENT } from './SettingsExtras';
 
 export default function MusicPlayer() {
   const audio = useRef<HTMLAudioElement | null>(null);
   const [prefs, setPrefs] = useState<MusicPrefs>(() => ({ ...getMusic(), playing: false }));
   const [custom, setCustom] = useState('');
+  const { profile } = useApp();
+  const [owned, setOwned] = useState<string[]>([]);
+  useEffect(() => {
+    if (!profile) return;
+    const sync = () => setOwned(DB.getUserItems(profile.email));
+    sync(); window.addEventListener(COSMETICS_EVENT, sync);
+    return () => window.removeEventListener(COSMETICS_EVENT, sync);
+  }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
+  const mySongs = allHolidaySongs().filter(s => owned.includes(s.id));
 
   useEffect(() => {
     if (!audio.current) { audio.current = new Audio(); audio.current.loop = true; }
     const a = audio.current;
-    if (a.src !== prefs.url) a.src = prefs.url;
+    const src = resolveSongUrl(prefs.url);
+    if (a.src !== src) a.src = src;
     a.volume = prefs.volume;
     if (prefs.playing) a.play().catch(() => { toast.error("Couldn't play that song"); setPrefs(p => ({ ...p, playing: false })); });
     else a.pause();
@@ -29,7 +43,7 @@ export default function MusicPlayer() {
     update({ url: custom.trim(), playing: true });
     setCustom('');
   }
-  const current = SONGS.find(s => s.url === prefs.url)?.name || 'Custom song';
+  const current = [...SONGS, ...mySongs].find(s => s.url === prefs.url)?.name || 'Custom song';
 
   return (
     <Popover>
@@ -57,6 +71,17 @@ export default function MusicPlayer() {
             </button>
           ))}
         </div>
+        {mySongs.length > 0 && (
+          <div className="space-y-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Your limited holiday songs</p>
+            {mySongs.map(s => (
+              <button key={s.id} onClick={() => update({ url: s.url, playing: true })}
+                className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs ${prefs.url === s.url ? 'bg-primary/15 font-semibold' : 'hover:bg-secondary text-muted-foreground'}`}>
+                {s.name}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="flex gap-1.5">
           <Input value={custom} onChange={e => setCustom(e.target.value)} onKeyDown={e => e.key === 'Enter' && useCustom()} placeholder="Paste song URL (.mp3)" className="h-8 text-xs" />
           <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={useCustom}><Link2 className="w-3.5 h-3.5" /></Button>
