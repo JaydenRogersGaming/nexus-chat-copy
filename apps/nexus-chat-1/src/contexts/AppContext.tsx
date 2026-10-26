@@ -118,12 +118,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addGems = useCallback((amount: number) => {
     setProfile(prev => {
       if (!prev) return prev;
-      // Infinite gems (999999999+) can never be reduced
-      if (prev.gems >= 999999999 && amount < 0) return prev;
+      if (!Number.isFinite(amount)) return prev;
       const base = DB.getUser(prev.email) || prev;
-      // ∞ gems can only be granted by the owner — earned gems cap just below it
-      const INF = 999999999;
-      const next = base.gems >= INF ? base.gems : Math.min(INF - 1, Math.max(0, base.gems + amount));
+      // No cap — gems grow endlessly, but never become Infinity/NaN
+      const cur = Number.isFinite(base.gems) ? base.gems : Number.MAX_SAFE_INTEGER;
+      const sum = cur + amount;
+      const next = Math.max(0, Math.floor(Number.isFinite(sum) ? Math.min(sum, Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER));
       const updated = { ...base, gems: next };
       DB.saveUser(updated);
       return updated;

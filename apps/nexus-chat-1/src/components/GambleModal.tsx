@@ -83,7 +83,7 @@ export default function GambleModal({ open, onClose }: Props) {
             </div>
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Gem className="w-3.5 h-3.5 text-purple-400" />{profile.gems >= 999999999 ? '∞' : profile.gems.toLocaleString()} gems</span>
+            <span className="flex items-center gap-1"><Gem className="w-3.5 h-3.5 text-purple-400" />{profile.gems.toLocaleString()} gems</span>
             <span>Win rate ~40% • Jackpot 5x</span>
           </div>
           <Button className="w-full" onClick={spin} disabled={spinning}>{spinning ? 'Spinning…' : '🎰 Spin!'}</Button>

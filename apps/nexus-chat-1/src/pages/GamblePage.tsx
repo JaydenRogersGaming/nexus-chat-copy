@@ -69,9 +69,9 @@ export default function GamblePage() {
 
   // ── Slots ──────────────────────────────────────────────────
   function spinSlots() {
-    if (betNum <= 0 || (profile!.gems < 999999999 && betNum > profile!.gems)) { toast.error(betNum <= 0 ? 'Enter a valid bet' : 'Not enough gems!'); return; }
+    if (betNum <= 0 || (betNum > profile!.gems)) { toast.error(betNum <= 0 ? 'Enter a valid bet' : 'Not enough gems!'); return; }
     setSpinning(true); setSlotResult(null);
-    if (profile!.gems < 999999999) addGems(-betNum);
+    addGems(-betNum);
     let ticks = 0;
     const currentRig = DB.getGambleRig();
     const iv = setInterval(() => {
@@ -96,9 +96,9 @@ export default function GamblePage() {
 
   // ── Coin Flip ─────────────────────────────────────────────
   function flipCoin() {
-    if (betNum <= 0 || (profile!.gems < 999999999 && betNum > profile!.gems)) { toast.error(betNum <= 0 ? 'Enter a valid bet' : 'Not enough gems!'); return; }
+    if (betNum <= 0 || (betNum > profile!.gems)) { toast.error(betNum <= 0 ? 'Enter a valid bet' : 'Not enough gems!'); return; }
     setCoinFlipping(true); setCoinResult(null); setCoinSide(null);
-    if (profile!.gems < 999999999) addGems(-betNum);
+    addGems(-betNum);
     setTimeout(() => {
       const currentRig = DB.getGambleRig();
       const result = resolveCoinOutcome(currentRig, coinChoice);
@@ -119,10 +119,10 @@ export default function GamblePage() {
 
   const settle: Settle = {
     bet: betNum,
-    disabled: betNum <= 0 || (profile.gems < 999999999 && betNum > profile.gems),
+    disabled: betNum <= 0 || (betNum > profile.gems),
     start: () => {
-      if (betNum <= 0 || (profile!.gems < 999999999 && betNum > profile!.gems)) { toast.error(betNum <= 0 ? 'Enter a valid bet' : 'Not enough gems!'); return false; }
-      if (profile!.gems < 999999999) addGems(-betNum);
+      if (betNum <= 0 || (betNum > profile!.gems)) { toast.error(betNum <= 0 ? 'Enter a valid bet' : 'Not enough gems!'); return false; }
+      addGems(-betNum);
       return true;
     },
     finish: (game, payout) => {
@@ -163,7 +163,7 @@ export default function GamblePage() {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-card border border-border rounded-xl p-3 text-center">
           <Gem className="w-5 h-5 text-purple-400 mx-auto mb-1" />
-          <p className="text-lg font-black text-purple-300">{(profile.gems ?? 0) >= 999999999 ? '∞' : (profile.gems ?? 0).toLocaleString()}</p>
+          <p className="text-lg font-black text-purple-300">{(profile.gems ?? 0).toLocaleString()}</p>
           <p className="text-[10px] text-muted-foreground">Gems</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-3 text-center">
@@ -188,7 +188,7 @@ export default function GamblePage() {
           <Button variant="outline" size="sm" onClick={() => setBet(String(Math.floor(profile.gems / 2)))}>½</Button>
           <Button variant="outline" size="sm" onClick={() => setBet(String(profile.gems))}>Max</Button>
         </div>
-        {profile.gems < 999999999 && betNum > profile.gems && <p className="text-destructive text-xs mt-1">Not enough gems! You have {profile.gems.toLocaleString()}</p>}
+        {betNum > profile.gems && <p className="text-destructive text-xs mt-1">Not enough gems! You have {profile.gems.toLocaleString()}</p>}
       </div>
 
       <Tabs defaultValue="slots">
@@ -222,7 +222,7 @@ export default function GamblePage() {
               </div>
             )}
             <p className="text-xs text-muted-foreground text-center">Triple → <span className="text-yellow-400 font-bold">10x</span> · Pair → <span className="text-green-400 font-bold">2x</span> · Lucky → <span className="text-blue-400 font-bold">1.5x</span></p>
-            <Button className="w-full text-base h-12" onClick={spinSlots} disabled={spinning || betNum <= 0 || (profile.gems < 999999999 && betNum > profile.gems)}>
+            <Button className="w-full text-base h-12" onClick={spinSlots} disabled={spinning || betNum <= 0 || (betNum > profile.gems)}>
               {spinning ? '🎰 Spinning…' : `🎰 Spin for ${betNum.toLocaleString()} gems`}
             </Button>
           </div>
@@ -252,7 +252,7 @@ export default function GamblePage() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground text-center">50/50 chance · Win = 2x your bet</p>
-            <Button className="w-full text-base h-12" onClick={flipCoin} disabled={coinFlipping || betNum <= 0 || (profile.gems < 999999999 && betNum > profile.gems)}>
+            <Button className="w-full text-base h-12" onClick={flipCoin} disabled={coinFlipping || betNum <= 0 || (betNum > profile.gems)}>
               {coinFlipping ? '🪙 Flipping…' : `🪙 Flip for ${betNum.toLocaleString()} gems`}
             </Button>
           </div>

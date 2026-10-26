@@ -7,7 +7,7 @@ export default function GemDisplay() {
   return (
     <div className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 py-1.5 shadow-lg">
       <Gem className="w-4 h-4 text-purple-400 gem-icon" />
-      <span className="text-sm font-bold text-purple-300">{(profile.gems ?? 0) >= 999999999 ? '∞' : (profile.gems ?? 0).toLocaleString()}</span>
+      <span className="text-sm font-bold text-purple-300">{(profile.gems ?? 0).toLocaleString()}</span>
     </div>
   );
 }

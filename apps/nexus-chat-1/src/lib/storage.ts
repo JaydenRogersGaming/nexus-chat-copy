@@ -127,7 +127,7 @@ export function resolveTitleRequest(id: string, approve: boolean) {
     addUserTitle(r.email, r.name);
   } else {
     const u = getUser(r.email);
-    if (u && u.gems < 999999999) saveUser({ ...u, gems: u.gems + r.cost });
+    if (u) saveUser({ ...u, gems: u.gems + r.cost });
   }
 }
 

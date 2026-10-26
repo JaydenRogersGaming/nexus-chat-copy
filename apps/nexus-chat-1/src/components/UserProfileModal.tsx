@@ -121,7 +121,7 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
           <div className="grid grid-cols-4 gap-2">
             {[
               { icon: <MessageSquare className="w-3.5 h-3.5" />, val: user.messageCount, label: 'Messages' },
-              { icon: <Gem className="w-3.5 h-3.5" />, val: user.gems >= 999999999 ? '∞' : user.gems, label: 'Gems' },
+              { icon: <Gem className="w-3.5 h-3.5" />, val: user.gems, label: 'Gems' },
               { icon: <Trophy className="w-3.5 h-3.5" />, val: achievements.length, label: 'Achievements' },
               { icon: <Dices className="w-3.5 h-3.5" />, val: user.gambleWins, label: 'Gamble Wins' },
             ].map((s, i) => (
