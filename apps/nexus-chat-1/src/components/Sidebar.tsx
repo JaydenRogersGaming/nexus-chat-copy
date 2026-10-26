@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Wand2, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { logout } from 'zitejs/auth';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
 import * as DB from '../lib/storage';
@@ -89,6 +90,9 @@ export default function Sidebar({ onProfileClick }: Props) {
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         </button>
       )}
+      <button onClick={() => logout()} className="px-3 py-2.5 border-t border-border hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors flex items-center gap-2 w-full text-xs font-medium">
+        <LogOut className="w-3.5 h-3.5" /> Sign out
+      </button>
     </aside>
   );
 }
