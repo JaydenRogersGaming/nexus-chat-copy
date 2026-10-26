@@ -5,7 +5,7 @@ import SuggestionsModal from './SuggestionsModal';
 import PersonalizeSettings from './PersonalizeSettings';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
-import { getAllBgThemes, TYPING_STYLES } from '../lib/cosmetics';
+import { getAllBgThemes, getAllTypingStyles } from '../lib/cosmetics';
 import { toast } from 'sonner';
 
 export const COSMETICS_EVENT = 'nexus-cosmetics';
@@ -54,7 +54,7 @@ export default function SettingsExtras() {
         <h3 className="text-sm font-semibold mt-3 mb-2">My Typing Style</h3>
         <div className="flex flex-wrap gap-1.5">
           <button className={chip(!eq.typing)} onClick={() => equip({ typing: '' })}>Default</button>
-          {TYPING_STYLES.filter(t => owned.includes(t.id)).map(t => <button key={t.id} className={chip(eq.typing === t.id)} onClick={() => equip({ typing: t.id })}>{t.name}</button>)}
+          {getAllTypingStyles().filter(t => owned.includes(t.id)).map(t => <button key={t.id} className={chip(eq.typing === t.id)} onClick={() => equip({ typing: t.id })}>{t.name}</button>)}
         </div>
         {owned.length === 0 && <p className="text-[11px] text-muted-foreground mt-2">Buy backgrounds and typing styles in the Shop.</p>}
       </div>

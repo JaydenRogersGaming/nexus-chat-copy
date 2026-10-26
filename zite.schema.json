@@ -1231,6 +1231,52 @@
           }
         }
       ]
+    },
+    {
+      "id": "thnvW76Niiw",
+      "sdkName": "eventOverrides",
+      "name": "Event Overrides",
+      "primaryFieldId": "f9PAg2wq1Ur",
+      "fields": [
+        {
+          "id": "f9PAg2wq1Ur",
+          "sdkName": "holidayKey",
+          "definition": {
+            "name": "Holiday Key",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "feM2MsM4aZP",
+          "sdkName": "earlyStart",
+          "definition": {
+            "name": "Early Start",
+            "type": "date",
+            "template": {
+              "dateFormat": "local"
+            }
+          }
+        },
+        {
+          "id": "fcunEuZxw1U",
+          "sdkName": "forceOff",
+          "definition": {
+            "name": "Force Off",
+            "type": "checkbox",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpBK8gLdKfu",
+          "sdkName": "forceOn",
+          "definition": {
+            "name": "Force On",
+            "type": "checkbox",
+            "template": {}
+          }
+        }
+      ]
     }
   ]
 }

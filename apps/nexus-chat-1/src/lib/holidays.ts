@@ -1,0 +1,94 @@
+import type { BgTheme, TypingStyle } from './cosmetics';
+
+export type Variant = { name: string; colors: [string, string, string]; particles: string[]; tagline: string; badgeEmoji: string; typing: string };
+export type Holiday = { key: string; name: string; emoji: string; date: (y: number) => Date; decor: 'spooky' | 'snow' | 'hearts' | 'fireworks' | 'confetti' | 'leaves' | 'clover' | 'eggs'; variants: Variant[] };
+
+const d = (y: number, m: number, day: number) => new Date(y, m - 1, day);
+const nthWeekday = (y: number, m: number, wd: number, n: number) => { const f = d(y, m, 1); return d(y, m, 1 + ((wd - f.getDay() + 7) % 7) + (n - 1) * 7); };
+function easter(y: number) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, dd = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - dd - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  return d(y, Math.floor((h + l - 7 * m + 114) / 31), ((h + l - 7 * m + 114) % 31) + 1);
+}
+
+export const HOLIDAYS: Holiday[] = [
+  { key: 'newyear', name: "New Year's", emoji: '🎆', date: y => d(y, 1, 1), decor: 'fireworks', variants: [
+    { name: 'Midnight Gold', colors: ['#0a0a1a', '#3b2a05', '#facc15'], particles: ['🎆', '✨', '🥂'], tagline: 'Out with the old!', badgeEmoji: '🥂', typing: 'is counting down… 3, 2, 1 🎆' },
+    { name: 'Neon Countdown', colors: ['#0b0217', '#4c1d95', '#22d3ee'], particles: ['🎇', '🎉', '⭐'], tagline: 'New year, new vibes', badgeEmoji: '🎇', typing: 'is making a resolution ✨' },
+    { name: 'Silver Sparkle', colors: ['#020617', '#334155', '#e2e8f0'], particles: ['✨', '🎊', '🪩'], tagline: 'Sparkle into the new year', badgeEmoji: '🪩', typing: 'is popping confetti 🎊' },
+  ] },
+  { key: 'valentines', name: "Valentine's Day", emoji: '💘', date: y => d(y, 2, 14), decor: 'hearts', variants: [
+    { name: 'Rose Petals', colors: ['#2a0510', '#9f1239', '#fb7185'], particles: ['💖', '🌹', '💕'], tagline: 'Love is in the chat', badgeEmoji: '💘', typing: 'is writing a love letter 💌' },
+    { name: 'Candy Hearts', colors: ['#3b0a2a', '#db2777', '#fbcfe8'], particles: ['💗', '🍬', '💝'], tagline: 'Be mine?', badgeEmoji: '💝', typing: 'is blushing… 😳💗' },
+    { name: 'Cupid Sky', colors: ['#1e1033', '#be185d', '#f9a8d4'], particles: ['💘', '🏹', '💞'], tagline: 'Cupid is online', badgeEmoji: '🏹', typing: 'got hit by cupid 🏹' },
+  ] },
+  { key: 'stpatricks', name: "St. Patrick's Day", emoji: '☘️', date: y => d(y, 3, 17), decor: 'clover', variants: [
+    { name: 'Lucky Meadow', colors: ['#03140a', '#166534', '#4ade80'], particles: ['☘️', '🍀', '🪙'], tagline: 'Feeling lucky?', badgeEmoji: '🍀', typing: 'found a four-leaf clover 🍀' },
+    { name: 'Pot of Gold', colors: ['#0a1a05', '#3f6212', '#facc15'], particles: ['🪙', '🌈', '☘️'], tagline: 'Chase the rainbow', badgeEmoji: '🪙', typing: 'is chasing a rainbow 🌈' },
+  ] },
+  { key: 'easter', name: 'Easter', emoji: '🐣', date: easter, decor: 'eggs', variants: [
+    { name: 'Pastel Garden', colors: ['#1a1030', '#7c3aed', '#fde68a'], particles: ['🥚', '🐣', '🌷'], tagline: 'Egg hunt season', badgeEmoji: '🐣', typing: 'is hunting for eggs 🥚' },
+    { name: 'Bunny Hop', colors: ['#0f1a2a', '#0e7490', '#f9a8d4'], particles: ['🐰', '🌸', '🥕'], tagline: 'Hop hop hooray', badgeEmoji: '🐰', typing: 'is hopping around 🐰' },
+  ] },
+  { key: 'july4', name: 'Fourth of July', emoji: '🎇', date: y => d(y, 7, 4), decor: 'fireworks', variants: [
+    { name: 'Star Spangled', colors: ['#0a1030', '#1e3a8a', '#dc2626'], particles: ['🎆', '⭐', '🎇'], tagline: 'Light up the sky', badgeEmoji: '🎆', typing: 'is lighting fireworks 🎇' },
+    { name: 'Summer Blast', colors: ['#020617', '#7f1d1d', '#60a5fa'], particles: ['🎇', '🌭', '✨'], tagline: 'Boom boom!', badgeEmoji: '🌭', typing: 'is at the cookout 🌭' },
+  ] },
+  { key: 'halloween', name: 'Halloween', emoji: '🎃', date: y => d(y, 10, 31), decor: 'spooky', variants: [
+    { name: 'Haunted Pumpkin', colors: ['#0a0503', '#431407', '#f97316'], particles: ['🎃', '🦇', '🕷️'], tagline: 'Something spooky is in the chat…', badgeEmoji: '🎃', typing: 'is brewing a potion 🧪' },
+    { name: 'Witching Hour', colors: ['#07020f', '#3b0764', '#84cc16'], particles: ['🦇', '👻', '🕸️'], tagline: 'The witching hour is here', badgeEmoji: '🧙', typing: 'is casting a hex 🔮' },
+    { name: 'Graveyard Fog', colors: ['#030712', '#1f2937', '#a3e635'], particles: ['👻', '💀', '🕯️'], tagline: 'Boo! 👻', badgeEmoji: '💀', typing: 'is rising from the grave 💀' },
+  ] },
+  { key: 'thanksgiving', name: 'Thanksgiving', emoji: '🦃', date: y => nthWeekday(y, 11, 4, 4), decor: 'leaves', variants: [
+    { name: 'Harvest Feast', colors: ['#1a0c03', '#7c2d12', '#f59e0b'], particles: ['🍂', '🍁', '🦃'], tagline: 'Thankful for you', badgeEmoji: '🦃', typing: 'is saying what they’re thankful for 🍂' },
+    { name: 'Autumn Glow', colors: ['#120a02', '#92400e', '#fb923c'], particles: ['🍁', '🥧', '🌽'], tagline: 'Pass the pie', badgeEmoji: '🥧', typing: 'is grabbing seconds 🥧' },
+  ] },
+  { key: 'christmas', name: 'Christmas', emoji: '🎄', date: y => d(y, 12, 25), decor: 'snow', variants: [
+    { name: 'Winter Wonderland', colors: ['#020c1b', '#1e3a8a', '#e0f2fe'], particles: ['❄️', '⛄', '✨'], tagline: 'Let it snow!', badgeEmoji: '⛄', typing: 'is building a snowman ⛄' },
+    { name: 'Candy Cane', colors: ['#1a0303', '#991b1b', '#16a34a'], particles: ['🎁', '🎄', '❄️'], tagline: 'Ho ho ho!', badgeEmoji: '🎅', typing: 'is wrapping presents 🎁' },
+    { name: 'Northern Lights', colors: ['#02061a', '#064e3b', '#a78bfa'], particles: ['❄️', '🌟', '🦌'], tagline: 'Magic in the air', badgeEmoji: '🦌', typing: 'is riding with reindeer 🦌' },
+  ] },
+];
+
+export type Override = { holidayKey: string; earlyStart: string | null; forceOn: boolean; forceOff: boolean };
+export type ActiveEvent = { holiday: Holiday; year: number; variant: Variant; start: Date; end: Date; day: Date };
+
+const DAY = 864e5;
+export const variantFor = (h: Holiday, year: number) => h.variants[year % h.variants.length];
+
+/** Normal window: 7 days before through 7 days after the holiday. */
+export function windowFor(h: Holiday, year: number, o?: Override) {
+  const day = h.date(year);
+  const start = o?.earlyStart ? new Date(o.earlyStart + 'T00:00:00') : new Date(day.getTime() - 7 * DAY);
+  return { day, start, end: new Date(day.getTime() + 8 * DAY) };
+}
+
+export function getActiveEvent(overrides: Override[], now = new Date()): ActiveEvent | null {
+  const forced = overrides.find(o => o.forceOn);
+  for (const year of [now.getFullYear(), now.getFullYear() + 1, now.getFullYear() - 1]) {
+    for (const h of HOLIDAYS) {
+      const o = overrides.find(x => x.holidayKey === h.key);
+      if (o?.forceOff) continue;
+      const w = windowFor(h, year, o);
+      const isForced = forced?.holidayKey === h.key && year === now.getFullYear();
+      if (isForced || (now >= w.start && now < w.end)) return { holiday: h, year, variant: variantFor(h, year), ...w };
+    }
+  }
+  return null;
+}
+
+// ── Limited items: unique ids per holiday + year, so each year's set is gone forever after ──
+export type LimitedBadge = { id: string; name: string; emoji: string; color: string; cost: number };
+export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'>) {
+  const { holiday: h, year, variant: v } = e;
+  const [c1, c2, c3] = v.colors;
+  const theme: BgTheme = { id: `ev-${h.key}-${year}`, name: `${h.emoji} ${v.name} ${year}`, cost: 1500, css: `radial-gradient(circle at 80% 10%, ${c3}55 0%, transparent 45%), linear-gradient(160deg, ${c1} 0%, ${c2} 60%, ${c1} 100%)` };
+  const typing: TypingStyle = { id: `evt-${h.key}-${year}`, name: `${v.badgeEmoji} ${h.name} ${year}`, cost: 800, text: v.typing, className: 'animate-pulse', color: c3 };
+  const badge: LimitedBadge = { id: `evb-${h.key}-${year}`, name: `${h.name} ${year}`, emoji: v.badgeEmoji, color: c3, cost: 1000 };
+  return { theme, typing, badge };
+}
+
+/** Every limited item that could ever exist (for rendering owned items after the event ends). */
+function allYears() { const y = new Date().getFullYear(); return Array.from({ length: 6 }, (_, i) => y - 3 + i); }
+export function allLimitedThemes(): BgTheme[] { return HOLIDAYS.flatMap(h => allYears().map(y => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }).theme)); }
+export function allLimitedTyping(): TypingStyle[] { return HOLIDAYS.flatMap(h => allYears().map(y => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }).typing)); }

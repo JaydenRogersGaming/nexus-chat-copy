@@ -10,6 +10,7 @@ import type { default as _AuditLogEp } from '../src/api/auditLog';
 import type { default as _BansEp } from '../src/api/bans';
 import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _ChatBotEp } from '../src/api/chatBot';
+import type { default as _EventsEp } from '../src/api/events';
 import type { default as _FriendsEp } from '../src/api/friends';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
 import type { default as _GifsEp } from '../src/api/gifs';
@@ -63,6 +64,11 @@ type _ChatBotCfg = typeof _ChatBotEp;
 export type ChatBotInputType = NonNullable<_ChatBotCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ChatBotCfg['execute']>[0]['input'];
 export type ChatBotOutputType = Awaited<ReturnType<_ChatBotCfg['execute']>>;
 export const chatBot = createCaller<ChatBotInputType, ChatBotOutputType>('chatBot');
+
+type _EventsCfg = typeof _EventsEp;
+export type EventsInputType = NonNullable<_EventsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_EventsCfg['execute']>[0]['input'];
+export type EventsOutputType = Awaited<ReturnType<_EventsCfg['execute']>>;
+export const events = createCaller<EventsInputType, EventsOutputType>('events');
 
 type _FriendsCfg = typeof _FriendsEp;
 export type FriendsInputType = NonNullable<_FriendsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_FriendsCfg['execute']>[0]['input'];
@@ -139,6 +145,7 @@ export const api = {
   bans,
   chat,
   chatBot,
+  events,
   friends,
   generateArt,
   gifs,

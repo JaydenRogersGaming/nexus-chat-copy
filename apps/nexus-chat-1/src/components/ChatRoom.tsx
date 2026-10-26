@@ -14,7 +14,7 @@ import * as DB from '../lib/storage';
 import { mergeMessages } from '../lib/messageOrder';
 import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
-import { TYPING_STYLES } from '../lib/cosmetics';
+import { getAllTypingStyles } from '../lib/cosmetics';
 import { useDebouncedCallback } from 'use-debounce';
 import { toast } from 'sonner';
 import { messages as messagesApi, chatBot, typing as typingApi, roles as rolesApi, RolesOutputType } from 'zitejs/api';
@@ -497,7 +497,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
           </span>
           <span className="text-xs text-muted-foreground italic flex flex-wrap gap-x-3">
             {typing.map(t => {
-              const st = TYPING_STYLES.find(x => x.id === t.style);
+              const st = getAllTypingStyles().find(x => x.id === t.style);
               return st
                 ? <span key={t.email} className={st.className} style={{ color: st.color }}><span className="font-semibold not-italic">{t.name}</span> {st.text}</span>
                 : <span key={t.email}><span className="text-foreground/70 font-medium">{t.name}</span> is typing…</span>;

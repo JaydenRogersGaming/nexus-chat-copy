@@ -422,6 +422,25 @@ export type VideoSignalsRecordInput = {
   payload: string | null;
 };
 
+/** A record in the "Event Overrides" table, as it is read back. */
+export type EventOverridesRecordType = {
+  id: string;
+  /** Primary field. "Holiday Key" */
+  holidayKey?: string;
+  /** "Early Start". Date-only field (YYYY-MM-DD string), null when unset, display as "local" format */
+  earlyStart?: string;
+  forceOff?: boolean;
+  forceOn?: boolean;
+};
+
+/** What you may write when creating or updating a record in the "Event Overrides" table. */
+export type EventOverridesRecordInput = {
+  holidayKey: string | null;
+  earlyStart: string | Date | null;
+  forceOff: string | boolean | null;
+  forceOn: string | boolean | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -445,6 +464,7 @@ export const zite = {
   videoRooms: createTableClient<VideoRoomsRecordType, VideoRoomsRecordInput>('VideoRooms'), // "Video Rooms"
   videoParticipants: createTableClient<VideoParticipantsRecordType, VideoParticipantsRecordInput>('VideoParticipants'), // "Video Participants"
   videoSignals: createTableClient<VideoSignalsRecordType, VideoSignalsRecordInput>('VideoSignals'), // "Video Signals"
+  eventOverrides: createTableClient<EventOverridesRecordType, EventOverridesRecordInput>('EventOverrides'), // "Event Overrides"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

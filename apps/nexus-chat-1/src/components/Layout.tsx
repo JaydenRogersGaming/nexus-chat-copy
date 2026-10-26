@@ -20,6 +20,9 @@ import { Link } from 'react-router-dom';
 import { Store } from 'lucide-react';
 import * as P from '../lib/personalize';
 import { OWNER_EMAIL } from '../lib/gameData';
+import HolidayDecor from './HolidayDecor';
+import EventShop from './EventShop';
+import { useActiveEvent } from '../hooks/useActiveEvent';
 
 const CLOAK_PRESETS = [
   { label: 'Google Docs', title: 'Untitled document - Google Docs', favicon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
@@ -218,6 +221,8 @@ export default function Layout() {
     return () => window.removeEventListener(COSMETICS_EVENT, sync);
   }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
   const bgCss = getAllBgThemes().find(b => b.id === bgId)?.css;
+  const { active: holidayEvent } = useActiveEvent();
+  const [eventShopOpen, setEventShopOpen] = useState(false);
   const [myCss, setMyCss] = useState('');
   const [myBg, setMyBg] = useState('');
   useEffect(() => {
@@ -242,8 +247,17 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background" style={myBg ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : bgCss ? { background: bgCss } : undefined}>
+      {holidayEvent && <HolidayDecor event={holidayEvent} />}
+      {holidayEvent && <EventShop event={holidayEvent} open={eventShopOpen} onOpenChange={setEventShopOpen} />}
       <Sidebar onProfileClick={() => setProfileOpen(true)} />
       <div className="flex-1 flex flex-col min-w-0">
+        {holidayEvent && (
+          <button onClick={() => setEventShopOpen(true)} className="text-white text-xs font-semibold px-4 py-1.5 flex items-center gap-2 hover:brightness-110 transition" style={{ background: `linear-gradient(90deg, ${holidayEvent.variant.colors[1]}, ${holidayEvent.variant.colors[0]})` }}>
+            <span className="text-base">{holidayEvent.holiday.emoji}</span>
+            {holidayEvent.holiday.name} {holidayEvent.year}: {holidayEvent.variant.tagline}
+            <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: holidayEvent.variant.colors[2], color: holidayEvent.variant.colors[0] }}>🛍️ Limited shop</span>
+          </button>
+        )}
         {impersonating && (
           <div className="bg-amber-500 text-black text-xs font-semibold px-4 py-1.5 flex items-center gap-2">
             👀 Signed in as {profile?.name} ({impersonating})

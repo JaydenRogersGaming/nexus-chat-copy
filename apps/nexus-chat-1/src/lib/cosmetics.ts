@@ -1,3 +1,4 @@
+import { allLimitedThemes, allLimitedTyping } from './holidays';
 export type BgTheme = { id: string; name: string; cost: number; css: string };
 export const BG_THEMES: BgTheme[] = [
   { id: 'bg-sunset', name: '🌅 Sunset', cost: 300, css: 'linear-gradient(135deg, #2a0f2e 0%, #5b1a3a 45%, #a8432f 100%)' },
@@ -27,7 +28,7 @@ export function saveCustomThemes(list: CustomTheme[]) {
   window.dispatchEvent(new Event(THEMES_EVENT));
 }
 /** Every background: built-in + owner-made themes. */
-export function getAllBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes()]; }
+export function getAllBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes(), ...allLimitedThemes()]; }
 /** Backgrounds that appear for sale in the shop. */
 export function getShopBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes().filter(t => t.inShop)]; }
 
@@ -40,3 +41,6 @@ export const TYPING_STYLES: TypingStyle[] = [
   { id: 'type-robot', name: '🤖 Robot', cost: 350, text: 'is computing… beep boop', className: '', color: '#22d3ee' },
   { id: 'type-king', name: '👑 Royal', cost: 1500, text: 'is preparing a royal decree 👑', className: 'animate-pulse', color: '#facc15' },
 ];
+
+/** Every typing style including limited holiday ones. */
+export function getAllTypingStyles(): TypingStyle[] { return [...TYPING_STYLES, ...allLimitedTyping()]; }
