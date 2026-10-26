@@ -7,6 +7,9 @@ import EmojiGifPicker from './EmojiGifPicker';
 import PhotoUploadButton from './PhotoUploadButton';
 import UserProfileModal from './UserProfileModal';
 import { useApp } from '../contexts/AppContext';
+import { usePresence } from '../hooks/useOnlineUsers';
+
+type NameSuggestion = { email: string; name: string; profilePic?: string; nameColor?: string };
 import * as DB from '../lib/storage';
 import { mergeMessages } from '../lib/messageOrder';
 import { OWNER_EMAIL, censorMessage } from '../lib/gameData';
@@ -34,7 +37,17 @@ export default function ChatRoom({ room, onStartDM }: Props) {
   const [messages, setMessages] = useState<DB.Message[]>([]);
   const [input, setInput] = useState('');
   const [typing, setTypingList] = useState<DB.TypingUser[]>([]);
-  const [suggestions, setSuggestions] = useState<DB.UserProfile[]>([]);
+  const [suggestions, setSuggestions] = useState<NameSuggestion[]>([]);
+  const { everyone } = usePresence();
+  const userPool = (): NameSuggestion[] => {
+    const map = new Map<string, NameSuggestion>();
+    everyone.forEach(u => map.set(u.email, { email: u.email, name: u.name || u.email, profilePic: u.profilePic, nameColor: u.nameColor }));
+    DB.getAllUsers().forEach(u => map.set(u.email, { email: u.email, name: u.name, profilePic: u.profilePic, nameColor: u.nameColor }));
+    return [...map.values()];
+  };
+  const matchUsers = (q: string, list = userPool()) => list
+    .filter(u => !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+    .sort((a, b) => Number(b.name.toLowerCase().startsWith(q)) - Number(a.name.toLowerCase().startsWith(q)));
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [replyingTo, setReplyingTo] = useState<DB.Message | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -139,25 +152,25 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     if (val.startsWith('/setrole') && isOwner && !signedUpLoaded.current) { signedUpLoaded.current = true; loadSignedUp(); }
     if (val.startsWith('/ban ') && canBan) {
       const query = val.slice(5).toLowerCase().trim();
-      const users = DB.getAllUsers().filter(u => u.email !== profile.email && u.email !== OWNER_EMAIL && (!query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query)));
-      setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
+      setSuggestions(matchUsers(query, userPool().filter(u => u.email !== profile.email && u.email !== OWNER_EMAIL)).slice(0, 8)); setShowSuggestions(true);
     } else if (val.startsWith('/unban ') && canBan) {
       const query = val.slice(7).toLowerCase().trim();
-      const users = DB.getBans().filter(b => !query || b.email.toLowerCase().includes(query)).map(b => DB.getUser(b.email)).filter(Boolean) as DB.UserProfile[];
-      setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
+      const banned = new Set(DB.getBans().map(b => b.email));
+      setSuggestions(matchUsers(query, userPool().filter(u => banned.has(u.email))).slice(0, 8)); setShowSuggestions(true);
     } else if ((val.startsWith('/mute ') || val.startsWith('/unmute ') || val.startsWith('/give ') || val.startsWith('/infgems ') || val.startsWith('/setstreak ') || val.startsWith('/setquest ') || val.startsWith('/giverole ')) && (isStaff || canMute || canGiveRole)) {
       const parts = val.split(' ');
       const query = (parts[1] || '').toLowerCase();
-      const users = DB.getAllUsers().filter(u => !query || u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
-      setSuggestions(users.slice(0, 5)); setShowSuggestions(true);
+      if (parts.length > 2) { setShowSuggestions(false); return; }
+      setSuggestions(matchUsers(query).slice(0, 8)); setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
     }
   }
 
-  function selectSuggestion(user: DB.UserProfile) {
+  function selectSuggestion(user: NameSuggestion) {
     const cmd = input.split(' ')[0];
-    setInput(`${cmd} ${user.email}`);
+    setInput(`${cmd} ${user.email} `);
+    inputRef.current?.focus();
     setShowSuggestions(false);
   }
 
@@ -551,7 +564,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
         })()}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute bottom-full left-4 right-4 mb-1 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
-            <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">Select user</div>
+            <div className="px-3 py-1.5 text-[10px] text-muted-foreground font-semibold border-b border-border bg-secondary/30">Select user — {suggestions.length} match{suggestions.length === 1 ? '' : 'es'}</div>
             {suggestions.map(u => (
               <button key={u.email} onClick={() => selectSuggestion(u)}
                 className="w-full flex items-center gap-2 px-3 py-2 hover:bg-secondary/50 transition-colors text-left">
