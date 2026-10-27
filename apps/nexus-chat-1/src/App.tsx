@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import VideoRoomsPage from './pages/VideoRoomsPage';
 import EmojiMixerPage from './pages/EmojiMixerPage';
 import ArtPage from './pages/ArtPage';
@@ -29,9 +28,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
   const serverBan = useServerBan(!!user);
-  useEffect(() => {
-    if (!isLoading && !user) loginWithRedirect();
-  }, [isLoading, user]);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
       <MatrixRain color={mc} speed={settings.matrixSpeed} />
@@ -39,23 +35,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         <h1 className="text-4xl font-black text-white mb-2" style={{ textShadow: `0 0 20px ${mc}` }}>
           {settings.appName}
         </h1>
-        {isLoading ? (
-          <>
-            <div className="flex gap-1 mt-4">
-              {[0,1,2].map(i => (
-                <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
-                  style={{ backgroundColor: mc, animationDelay: `${i * 0.15}s` }} />
-              ))}
-            </div>
-            <p className="text-xs mt-4" style={{ color: mc + '88' }}>Loading...</p>
-          </>
-        ) : (
-          <button onClick={() => loginWithRedirect()}
-            className="mt-6 px-6 py-2.5 rounded-lg font-bold text-black"
-            style={{ backgroundColor: mc }}>
-            Sign in to continue
-          </button>
-        )}
+        <div className="flex gap-1 mt-4">
+          {[0,1,2].map(i => (
+            <div key={i} className="w-2.5 h-2.5 rounded-full animate-bounce"
+              style={{ backgroundColor: mc, animationDelay: `${i * 0.15}s` }} />
+          ))}
+        </div>
+        <p className="text-xs mt-4" style={{ color: mc + '88' }}>Loading...</p>
       </div>
     </div>
   );
