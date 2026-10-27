@@ -1,4 +1,4 @@
-import { formatGems } from '../lib/formatGems';
+import { formatGems, INFINITE_GEMS } from '../lib/formatGems';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Heart, Gem, Zap, Trophy, ArrowUp, ChevronDown, ChevronUp, Crown, Infinity, RotateCcw, Star, Timer } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -456,8 +456,8 @@ export default function HpClickerPage() {
             <Button size="sm" variant="outline" className="text-[10px] h-8 text-yellow-400 border-yellow-400/40" onClick={() => { setGodPrestige(999999999); toast.success('⚡ ∞ God Prestige!'); }}>∞ God P.</Button>
             <Button size="sm" variant="outline" className="text-[10px] h-8 text-purple-400 border-purple-400/40" onClick={() => {
               if (!profile) return;
-              DB.saveUser({ ...profile, gems: 999999999 });
-              addGems(999999999 - profile.gems);
+              DB.saveUser({ ...profile, gems: INFINITE_GEMS });
+              addGems(0);
               toast.success('♾️ ∞ Gems!');
             }}>∞ 💎</Button>
             <Button size="sm" variant="outline" className="text-[10px] h-8" onClick={() => {

@@ -1,4 +1,4 @@
-import { formatGems } from '../lib/formatGems';
+import { formatGems, INFINITE_GEMS } from '../lib/formatGems';
 import { useState, useEffect } from 'react';
 import ServerBanPanel from '../components/ServerBanPanel';
 import OwnerThemesTab from '../components/OwnerThemesTab';
@@ -274,7 +274,7 @@ export default function AdminPage() {
                   const email = targetEmail.trim() || 'self';
                   const user = email === 'self' ? profile : DB.getUser(email);
                   if (!user) { toast.error('User not found'); return; }
-                  DB.saveUser({ ...user, gems: 999999999 });
+                  DB.saveUser({ ...user, gems: INFINITE_GEMS });
                   reload(); toast.success(`♾️ Gave infinite gems to ${user.name}!`);
                 }}>♾️ Infinite Gems</Button>
               </div>

@@ -3,6 +3,7 @@ import { useAuth } from 'zitejs/auth';
 import { ACHIEVEMENTS, OWNER_EMAIL } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import * as DB from '../lib/storage';
+import { isInfiniteGems } from '../lib/formatGems';
 import { toast } from 'sonner';
 import { roles as rolesApi } from 'zitejs/api';
 
@@ -120,6 +121,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!prev) return prev;
       if (!Number.isFinite(amount)) return prev;
       const base = DB.getUser(prev.email) || prev;
+      // Infinite gems stay infinite — spending or earning doesn't change them.
+      if (isInfiniteGems(base.gems)) return base;
       // No cap — gems grow endlessly, but never become Infinity/NaN
       const cur = Number.isFinite(base.gems) ? base.gems : Number.MAX_SAFE_INTEGER;
       const sum = cur + amount;

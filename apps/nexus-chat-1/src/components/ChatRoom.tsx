@@ -1,3 +1,4 @@
+import { INFINITE_GEMS } from '../lib/formatGems';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Users, X } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -257,7 +258,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const target = parts[1]?.trim() || profile.email;
       const targetUser = DB.getUser(target);
       if (!targetUser) { toast.error('User not found'); return true; }
-      DB.saveUser({ ...targetUser, gems: 999999999 });
+      DB.saveUser({ ...targetUser, gems: INFINITE_GEMS });
       toast.success(`♾️ Gave infinite gems to ${targetUser.name}`); return true;
     }
 
