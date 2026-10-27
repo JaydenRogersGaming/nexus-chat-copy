@@ -1405,6 +1405,64 @@
           }
         }
       ]
+    },
+    {
+      "id": "taZEXcGKV6Z",
+      "sdkName": "warnings",
+      "name": "Warnings",
+      "primaryFieldId": "f6CMQWY9mQd",
+      "fields": [
+        {
+          "id": "f6CMQWY9mQd",
+          "sdkName": "reason",
+          "definition": {
+            "name": "Reason",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f6N4WC1F7w1",
+          "sdkName": "toEmail",
+          "definition": {
+            "name": "To Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "f9H5k9jbmWi",
+          "sdkName": "fromEmail",
+          "definition": {
+            "name": "From Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fa4mfrx1ijk",
+          "sdkName": "acknowledged",
+          "definition": {
+            "name": "Acknowledged",
+            "type": "checkbox",
+            "template": {}
+          }
+        },
+        {
+          "id": "forNiLiWP1v",
+          "sdkName": "created",
+          "definition": {
+            "name": "Created",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
     }
   ]
 }

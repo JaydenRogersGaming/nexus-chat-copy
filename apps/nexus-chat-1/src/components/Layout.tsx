@@ -14,6 +14,7 @@ import * as DB from '../lib/storage';
 import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
 import { getAllBgThemes } from '../lib/cosmetics';
 import TradesDialog from './TradesDialog';
+import WarningNotice from './WarningNotice';
 import { ArrowLeftRight } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import MusicPlayer from './MusicPlayer';
@@ -257,6 +258,7 @@ export default function Layout() {
         <ArrowLeftRight className="h-4 w-4" />Trade
       </button>
       <TradesDialog open={tradesOpen} onOpenChange={setTradesOpen} />
+      <WarningNotice />
       {holidayEvent && <EventShop event={holidayEvent} open={eventShopOpen} onOpenChange={setEventShopOpen} />}
       <Sidebar onProfileClick={() => setProfileOpen(true)} />
       <div className="flex-1 flex flex-col min-w-0">

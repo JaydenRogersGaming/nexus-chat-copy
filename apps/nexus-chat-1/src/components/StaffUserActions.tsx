@@ -5,6 +5,7 @@ import { Input } from '@project/components/ui/input';
 import { toast } from 'sonner';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
+import StaffModTools from './StaffModTools';
 
 const TITLE_GIVERS = ['owner', 'co-owner', 'admin'];
 
@@ -43,7 +44,8 @@ export default function StaffUserActions({ email, name, onDone }: { email: strin
   const [editing, setEditing] = useState(false);
   const canGive = isRealOwner || TITLE_GIVERS.includes(profile?.role || '');
   const canEdit = isRealOwner || profile?.role === 'owner' || DB.hasPerm(profile, 'editusers');
-  if ((!canGive && !canEdit) || email === profile?.email) return null;
+  const canMod = isRealOwner || ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'].includes(profile?.role || '');
+  if ((!canGive && !canEdit && !canMod) || email === profile?.email) return null;
 
   function give() {
     const t = title.trim();
@@ -66,6 +68,7 @@ export default function StaffUserActions({ email, name, onDone }: { email: strin
         ? <EditAccount email={email} onDone={onDone} />
         : <Button size="sm" variant="outline" className="w-full h-8 text-xs gap-1.5" onClick={() => setEditing(true)}><UserCog className="w-3.5 h-3.5" /> Edit account</Button>
       )}
+      {(isRealOwner || ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'].includes(profile?.role || '')) && <StaffModTools email={email} name={name} />}
       {isRealOwner && (
         <Button size="sm" variant="outline" className="w-full h-8 text-xs gap-1.5" onClick={() => { impersonate(email); toast.success(`Now signed in as ${name}`); onDone(); }}>
           <LogIn className="w-3.5 h-3.5" /> Sign in as {name}

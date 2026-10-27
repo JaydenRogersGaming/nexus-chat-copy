@@ -469,6 +469,26 @@ export type TradesRecordInput = {
   appliedByTo: string | boolean | null;
 };
 
+/** A record in the "Warnings" table, as it is read back. */
+export type WarningsRecordType = {
+  id: string;
+  /** Primary field. "Reason" */
+  reason?: string;
+  toEmail?: string;
+  fromEmail?: string;
+  acknowledged?: boolean;
+  /** Read-only. "Created". Auto-set when record was created (ISO 8601) */
+  created?: string;
+};
+
+/** What you may write when creating or updating a record in the "Warnings" table. */
+export type WarningsRecordInput = {
+  reason: string | null;
+  toEmail: string | null;
+  fromEmail: string | null;
+  acknowledged: string | boolean | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -494,6 +514,7 @@ export const zite = {
   videoSignals: createTableClient<VideoSignalsRecordType, VideoSignalsRecordInput>('VideoSignals'), // "Video Signals"
   eventOverrides: createTableClient<EventOverridesRecordType, EventOverridesRecordInput>('EventOverrides'), // "Event Overrides"
   trades: createTableClient<TradesRecordType, TradesRecordInput>('Trades'), // "Trades"
+  warnings: createTableClient<WarningsRecordType, WarningsRecordInput>('Warnings'), // "Warnings"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };
