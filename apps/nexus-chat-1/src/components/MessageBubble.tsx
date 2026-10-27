@@ -6,7 +6,7 @@ import TitleBadge from './TitleBadge';
 import ReportMessageButton from './ReportMessageButton';
 import TranslatedText from './TranslatedText';
 import { useApp } from '../contexts/AppContext';
-import { EMOJI_LIST, isOwnerEmail, censorMessage } from '../lib/gameData';
+import { EMOJI_LIST, isOwnerEmail, ownerLabel, censorMessage } from '../lib/gameData';
 import * as DB from '../lib/storage';
 import { getRoleTextStyle, textStyleCss } from '../lib/personalize';
 import { cn } from '@project/components/lib/utils';
@@ -132,7 +132,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
           )}
           {isOwnerEmail(msg.senderEmail) && (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: '#ffd700', backgroundColor: '#ffd70022', border: '1px solid #ffd70055' }}>
-              <Crown className="w-2.5 h-2.5" />OWNER
+              <Crown className="w-2.5 h-2.5" />{ownerLabel(msg.senderEmail).toUpperCase()}
             </span>
           )}
           {!isOwnerEmail(msg.senderEmail) && senderCustomRole && (

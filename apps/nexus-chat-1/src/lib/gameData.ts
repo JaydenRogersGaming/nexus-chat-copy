@@ -1,6 +1,10 @@
 export const OWNER_EMAIL = 'jaydenaltfirst@gmail.com';
 export const OWNER_EMAILS = ['jaydenaltfirst@gmail.com', 's.chhina@bthstu.catholic.edu.au'];
 export const isOwnerEmail = (e?: string | null) => !!e && OWNER_EMAILS.includes(e.toLowerCase());
+export const GF_OWNER_EMAIL = 's.chhina@bthstu.catholic.edu.au';
+/** "Owner Gf" for the one GF owner, "Owner" for the OG owner. */
+export const ownerLabel = (e?: string | null) => (e?.toLowerCase() === GF_OWNER_EMAIL ? 'Owner Gf' : 'Owner');
+export const isOgOwner = (e?: string | null) => e?.toLowerCase() === OWNER_EMAIL;
 
 
 export type TitleEffect = 'none' | 'rainbow' | 'pink-glow' | 'breath-pink-blue' | 'coin-rain' | 'moon';

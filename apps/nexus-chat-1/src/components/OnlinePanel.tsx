@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Circle } from 'lucide-react';
 import * as DB from '../lib/storage';
-import { isOwnerEmail } from '../lib/gameData';
+import { isOwnerEmail, isOgOwner } from '../lib/gameData';
 import TitleBadge from './TitleBadge';
 import UserProfileModal from './UserProfileModal';
 import { cn } from '@project/components/lib/utils';
@@ -30,7 +30,7 @@ export default function OnlinePanel({ roomId, currentUserEmail }: Props) {
   const [viewEmail, setViewEmail] = useState<string | null>(null);
   const onlineSet = new Set(onlineUsers.map(u => u.email));
   const merged = [...onlineUsers, ...everyone.filter(u => !onlineSet.has(u.email))].map(u => isOwnerEmail(u.email) ? { ...u, role: 'owner' } : u)
-    .sort((a, b) => rank(a.role) - rank(b.role) || Number(onlineSet.has(b.email)) - Number(onlineSet.has(a.email)) || a.name.localeCompare(b.name));
+    .sort((a, b) => Number(isOgOwner(b.email)) - Number(isOgOwner(a.email)) || rank(a.role) - rank(b.role) || Number(onlineSet.has(b.email)) - Number(onlineSet.has(a.email)) || a.name.localeCompare(b.name));
   const groups = [
     { label: 'Staff', users: merged.filter(u => STAFF.includes(u.role)) },
     { label: 'Users', users: merged.filter(u => !STAFF.includes(u.role)) },

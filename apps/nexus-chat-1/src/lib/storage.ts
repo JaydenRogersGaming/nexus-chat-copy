@@ -1,5 +1,5 @@
 import { bans as bansApi } from 'zitejs/api';
-import { isOwnerEmail } from './gameData';
+import { isOwnerEmail, ownerLabel } from './gameData';
 
 export type UserProfile = {
   email: string;
@@ -199,11 +199,12 @@ export function getOrCreateUser(email: string): UserProfile {
   const existing = getUser(email);
   if (existing) {
     if (isOwnerEmail(email) && existing.role !== 'owner') { existing.role = 'owner'; saveUser(existing); }
+    if (isOwnerEmail(email) && existing.activeTitle === 'Owner' && ownerLabel(email) !== 'Owner') { existing.activeTitle = ownerLabel(email); saveUser(existing); }
     return existing;
   }
   const p: UserProfile = {
     email, name: email === 'jaydenaltfirst@gmail.com' ? 'Jayden Rogres' : email.split('@')[0], profilePic: '', nameColor: '#e0e0ff', nameColor2: '', bio: '',
-    gems: 0, activeTitle: isOwnerEmail(email) ? 'Owner' : '',
+    gems: 0, activeTitle: isOwnerEmail(email) ? ownerLabel(email) : '',
     activeTitleEffect: '', activeTitleColor: isOwnerEmail(email) ? '#ffd700' : '',
     role: isOwnerEmail(email) ? 'owner' : 'user', badges: [],
     messageCount: 0, gambleCount: 0, gambleWins: 0, gambleLoseStreak: 0,

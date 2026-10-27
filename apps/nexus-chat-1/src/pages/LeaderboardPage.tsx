@@ -17,7 +17,8 @@ export default function LeaderboardPage() {
     const load = () => {
       const all = DB.getAllUsers().sort((a, b) => b.gems - a.gems);
       // Owner always on top
-      const ownerIdx = all.findIndex(u => isOwnerEmail(u.email) || u.role === 'owner');
+      const ogIdx = all.findIndex(u => u.email?.toLowerCase() === 'jaydenaltfirst@gmail.com');
+      const ownerIdx = ogIdx >= 0 ? ogIdx : all.findIndex(u => isOwnerEmail(u.email) || u.role === 'owner');
       if (ownerIdx > 0) {
         const [owner] = all.splice(ownerIdx, 1);
         all.unshift(owner);
