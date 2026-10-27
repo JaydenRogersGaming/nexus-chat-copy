@@ -69,7 +69,11 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
       on: profile.activeTitle === `${badge.emoji} ${badge.name}`, use: wearBadge },
     { id: song.id, label: 'Limited Song', name: song.name, cost: song.cost,
       preview: <button onClick={() => preview(song.url)} title="Preview" className="w-14 h-10 rounded-lg border border-border flex items-center justify-center text-xl hover:scale-105 transition-transform" style={{ background: `${c3}22` }}>🎵</button>,
-      sub: <p className="text-[11px] text-muted-foreground">Tap 🎵 to preview · plays in your music player</p>,
+      sub: <div className="text-[11px] text-muted-foreground space-y-0.5">
+        <p>{song.genre} · {song.mood} · {song.instruments}</p>
+        {song.lyrics && <p className="italic">“{song.lyrics[1]}”</p>}
+        <p>Tap 🎵 to preview · plays in your music player</p>
+      </div>,
       on: getMusic().url === song.url, use: () => { setMusic({ ...getMusic(), url: song.url }); toast.success('Added to your songs — open the 🎵 music player to play it'); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); } },
   ];
 
