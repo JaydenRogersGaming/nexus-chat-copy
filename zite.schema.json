@@ -1282,6 +1282,96 @@
           }
         }
       ]
+    },
+    {
+      "id": "tfsk23Dn3Pq",
+      "sdkName": "swapPartyMembers",
+      "name": "Swap Party Members",
+      "primaryFieldId": "fs5uqDSkVHS",
+      "fields": [
+        {
+          "id": "fs5uqDSkVHS",
+          "sdkName": "partyCode",
+          "definition": {
+            "name": "Party Code",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fwk6YJDDP2u",
+          "sdkName": "email",
+          "definition": {
+            "name": "Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fdGSwq2gHJH",
+          "sdkName": "displayName",
+          "definition": {
+            "name": "Display Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpxK8jS5WpG",
+          "sdkName": "themeName",
+          "definition": {
+            "name": "Theme Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fsGE8P9aY3G",
+          "sdkName": "themeCss",
+          "definition": {
+            "name": "Theme Css",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f351FHvxNyv",
+          "sdkName": "isHost",
+          "definition": {
+            "name": "Is Host",
+            "type": "checkbox",
+            "template": {}
+          }
+        },
+        {
+          "id": "foTM7nLaMYN",
+          "sdkName": "endsAt",
+          "definition": {
+            "name": "Ends At",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        },
+        {
+          "id": "frZ6oP5rE1v",
+          "sdkName": "joinedAt",
+          "definition": {
+            "name": "Joined At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
     }
   ]
 }

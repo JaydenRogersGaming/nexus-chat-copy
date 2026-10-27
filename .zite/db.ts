@@ -441,6 +441,33 @@ export type EventOverridesRecordInput = {
   forceOn: string | boolean | null;
 };
 
+/** A record in the "Swap Party Members" table, as it is read back. */
+export type SwapPartyMembersRecordType = {
+  id: string;
+  /** Primary field. "Party Code" */
+  partyCode?: string;
+  email?: string;
+  displayName?: string;
+  themeName?: string;
+  themeCss?: string;
+  isHost?: boolean;
+  /** "Ends At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  endsAt?: string;
+  /** Read-only. "Joined At". Auto-set when record was created (ISO 8601) */
+  joinedAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Swap Party Members" table. */
+export type SwapPartyMembersRecordInput = {
+  partyCode: string | null;
+  email: string | null;
+  displayName: string | null;
+  themeName: string | null;
+  themeCss: string | null;
+  isHost: string | boolean | null;
+  endsAt: string | Date | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -465,6 +492,7 @@ export const zite = {
   videoParticipants: createTableClient<VideoParticipantsRecordType, VideoParticipantsRecordInput>('VideoParticipants'), // "Video Participants"
   videoSignals: createTableClient<VideoSignalsRecordType, VideoSignalsRecordInput>('VideoSignals'), // "Video Signals"
   eventOverrides: createTableClient<EventOverridesRecordType, EventOverridesRecordInput>('EventOverrides'), // "Event Overrides"
+  swapPartyMembers: createTableClient<SwapPartyMembersRecordType, SwapPartyMembersRecordInput>('SwapPartyMembers'), // "Swap Party Members"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

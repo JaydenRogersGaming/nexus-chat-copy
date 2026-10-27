@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import * as DB from '../lib/storage';
 import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
 import { getAllBgThemes } from '../lib/cosmetics';
+import SwapPartyDialog, { useSwapParty } from './SwapPartyDialog';
 import { useApp } from '../contexts/AppContext';
 import MusicPlayer from './MusicPlayer';
 import NotificationBell from './NotificationBell';
@@ -220,7 +221,9 @@ export default function Layout() {
     window.addEventListener(COSMETICS_EVENT, sync);
     return () => window.removeEventListener(COSMETICS_EVENT, sync);
   }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
-  const bgCss = getAllBgThemes().find(b => b.id === bgId)?.css;
+  const myTheme = getAllBgThemes().find(b => b.id === bgId);
+  const { party, setParty } = useSwapParty();
+  const bgCss = party?.myTheme?.css || myTheme?.css;
   const { active: holidayEvent } = useActiveEvent();
   const [eventShopOpen, setEventShopOpen] = useState(false);
   const [myCss, setMyCss] = useState('');
@@ -246,8 +249,9 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background" style={myBg ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : bgCss ? { background: bgCss } : undefined}>
+    <div className="flex h-screen overflow-hidden bg-background" style={myBg && !party?.myTheme ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : bgCss ? { background: bgCss } : undefined}>
       {holidayEvent && <HolidayDecor event={holidayEvent} />}
+      <SwapPartyDialog party={party} setParty={setParty} theme={myTheme ? { name: myTheme.name, css: myTheme.css } : undefined} />
       {holidayEvent && <EventShop event={holidayEvent} open={eventShopOpen} onOpenChange={setEventShopOpen} />}
       <Sidebar onProfileClick={() => setProfileOpen(true)} />
       <div className="flex-1 flex flex-col min-w-0">

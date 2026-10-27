@@ -58,7 +58,12 @@ export default createEndpoint({
       const canAssign = myRole === 'owner' || RANK[role] < RANK[myRole];
       const canTouch = myRole === 'owner' || RANK[targetRole] < RANK[myRole];
       if (!canAssign || !canTouch) throw new ZiteError({ code: 'FORBIDDEN', message: 'rank', userFacingMessage: "You can only give roles below your own, to people below you." });
-      const { records } = await zite.auth.findAllUsers({ filters: { email }, limit: 1 });
+      let { records } = await zite.auth.findAllUsers({ filters: { email }, limit: 1 });
+      if (!records.length) {
+        // Emails may be stored with capital letters — fall back to a case-insensitive match.
+        const all = await zite.auth.findAllUsers({ limit: 1000 });
+        records = all.records.filter(u => u.email.toLowerCase() === email);
+      }
       if (!records.length) throw new ZiteError({ code: 'NOT_FOUND', message: 'not found', userFacingMessage: 'No one has signed up with that email.' });
       const u = records[0];
       await zite.presence.bulkCreate({ matchOn: ['email'], records: [{ email: u.email, role, displayName: u.name || u.email.split('@')[0] }] });
