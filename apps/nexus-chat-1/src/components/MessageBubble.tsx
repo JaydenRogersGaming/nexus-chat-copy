@@ -4,6 +4,7 @@ import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck, Pen
 import { toast } from 'sonner';
 import TitleBadge from './TitleBadge';
 import ReportMessageButton from './ReportMessageButton';
+import TranslatedText from './TranslatedText';
 import { useApp } from '../contexts/AppContext';
 import { EMOJI_LIST, OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import * as DB from '../lib/storage';
@@ -187,7 +188,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             </div>
           ) : isGif
             ? <img src={msg.content.slice(5)} alt="GIF" className="rounded-lg max-w-[240px] max-h-60 object-contain" loading="lazy" />
-            : <span style={textStyleCss(getRoleTextStyle(senderRole))}>{msg.uncensored ? msg.content : censorMessage(msg.content).censored}</span>}
+            : <TranslatedText style={textStyleCss(getRoleTextStyle(senderRole))} text={msg.uncensored ? msg.content : censorMessage(msg.content).censored} lang={profile?.language || 'en'} auto={!isOwn && !!profile?.language && profile.language !== 'en'} />}
           {/* Action buttons */}
           {!editing && <div className="absolute -top-1 right-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
             {isOwn && !isGif && (

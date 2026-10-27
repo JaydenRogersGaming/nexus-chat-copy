@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Gem, Clock } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Gem, Clock, RefreshCw, Crown, Users } from 'lucide-react';
+import { itemOwners, events as eventsApi } from 'zitejs/api';
+import { useActiveEvent, EVENTS_CHANGED } from '../hooks/useActiveEvent';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@project/components/ui/button';
@@ -21,18 +23,39 @@ function preview(url: string) {
 type Props = { event: ActiveEvent; open: boolean; onOpenChange: (o: boolean) => void };
 
 export default function EventShop({ event, open, onOpenChange }: Props) {
-  const { profile, addGems, updateProfile } = useApp();
+  const { profile, addGems, updateProfile, isRealOwner } = useApp();
   const [, bump] = useState(0);
+  const { overrides } = useActiveEvent();
+  const drop = overrides.find(o => o.holidayKey === event.holiday.key)?.shopDrop ?? 0;
+  const { theme, typing, badge } = limitedItems(event, drop);
+  const [stats, setStats] = useState<Record<string, { count: number; firstEmail: string; firstName: string }>>({});
+  const [refreshing, setRefreshing] = useState(false);
+  const ids = [theme.id, typing.id, badge.id].join(',');
+  useEffect(() => {
+    if (!open) return;
+    itemOwners({ action: 'stats', itemIds: ids.split(',') })
+      .then(r => setStats(Object.fromEntries(r.stats.map(s => [s.itemId, s])))).catch(() => {});
+  }, [open, ids]);
   if (!profile) return null;
-  const { theme, typing, badge } = limitedItems(event);
   const song = holidaySong(event.holiday.key, event.year);
   const owned = DB.getUserItems(profile.email);
   const eq = DB.getEquipped(profile.email);
   const [c1, c2, c3] = event.variant.colors;
+  const me = profile.email.toLowerCase();
+
+  const refreshShop = async () => {
+    setRefreshing(true);
+    try { await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key }); window.dispatchEvent(new Event(EVENTS_CHANGED)); toast.success('🔄 Limited shop refreshed with new items!'); }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Could not refresh'); }
+    finally { setRefreshing(false); }
+  };
 
   const pay = (id: string, cost: number, name: string) => {
     if (profile.gems < cost) { toast.error(`Need ${(cost - profile.gems).toLocaleString()} more gems!`); return false; }
-    addGems(-cost); DB.addUserItem(profile.email, id); toast.success(`🎉 You got ${name}! Limited — gone after this event.`); return true;
+    addGems(-cost); DB.addUserItem(profile.email, id); toast.success(`🎉 You got ${name}! Limited — gone after this event.`);
+    itemOwners({ action: 'claim', itemId: id, ownerName: profile.name })
+      .then(r => r.stats[0] && setStats(s => ({ ...s, [id]: r.stats[0] }))).catch(() => {});
+    return true;
   };
   const equip = (patch: { bg?: string; typing?: string }) => { DB.setEquipped(profile.email, patch); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); };
   const wearBadge = () => { updateProfile({ activeTitle: `${badge.emoji} ${badge.name}`, activeTitleColor: badge.color, activeTitleEffect: 'glow' }); bump(n => n + 1); };
@@ -57,6 +80,11 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
           <DialogHeader><DialogTitle className="text-xl">{event.holiday.emoji} {event.holiday.name} {event.year} — {event.variant.name}</DialogTitle></DialogHeader>
           <p className="text-sm opacity-80">{event.variant.tagline}</p>
           <p className="text-xs mt-2 flex items-center gap-1" style={{ color: c3 }}><Clock className="w-3 h-3" />Ends {formatDistanceToNow(event.end, { addSuffix: true })} — these items never come back</p>
+          {isRealOwner && (
+            <Button size="sm" variant="secondary" className="mt-3 gap-1.5 h-7 text-xs" disabled={refreshing} onClick={refreshShop}>
+              <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} /> Refresh shop (new drop{drop ? ` · #${drop}` : ''})
+            </Button>
+          )}
         </div>
         <div className="p-4 space-y-2">
           {rows.map(r => {
@@ -68,6 +96,12 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
                   <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: c3 }}>{r.label}</p>
                   <p className="text-sm font-semibold truncate">{r.name}</p>
                   {r.sub}
+                  {stats[r.id] && (
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-2 mt-0.5">
+                      <span className="flex items-center gap-0.5"><Users className="w-3 h-3" />{stats[r.id].count.toLocaleString()} own this</span>
+                      <span className="flex items-center gap-0.5 text-amber-500 font-semibold"><Crown className="w-3 h-3" />{stats[r.id].firstEmail === me ? 'You were first!' : `First: ${stats[r.id].firstName}`}</span>
+                    </p>
+                  )}
                 </div>
                 {has
                   ? <Button size="sm" variant={r.on ? 'secondary' : 'outline'} onClick={r.use}>{r.on ? 'Equipped ✓' : 'Equip'}</Button>

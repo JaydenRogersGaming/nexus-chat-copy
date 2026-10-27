@@ -17,6 +17,7 @@ import type { default as _GifsEp } from '../src/api/gifs';
 import type { default as _GroupsEp } from '../src/api/groups';
 import type { default as _IdeasEp } from '../src/api/ideas';
 import type { default as _IpBansEp } from '../src/api/ipBans';
+import type { default as _ItemOwnersEp } from '../src/api/itemOwners';
 import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
@@ -104,6 +105,11 @@ export type IpBansInputType = NonNullable<_IpBansCfg['inputSchema']> extends { _
 export type IpBansOutputType = Awaited<ReturnType<_IpBansCfg['execute']>>;
 export const ipBans = createCaller<IpBansInputType, IpBansOutputType>('ipBans');
 
+type _ItemOwnersCfg = typeof _ItemOwnersEp;
+export type ItemOwnersInputType = NonNullable<_ItemOwnersCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ItemOwnersCfg['execute']>[0]['input'];
+export type ItemOwnersOutputType = Awaited<ReturnType<_ItemOwnersCfg['execute']>>;
+export const itemOwners = createCaller<ItemOwnersInputType, ItemOwnersOutputType>('itemOwners');
+
 type _ListingsCfg = typeof _ListingsEp;
 export type ListingsInputType = NonNullable<_ListingsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ListingsCfg['execute']>[0]['input'];
 export type ListingsOutputType = Awaited<ReturnType<_ListingsCfg['execute']>>;
@@ -176,6 +182,7 @@ export const api = {
   groups,
   ideas,
   ipBans,
+  itemOwners,
   listings,
   messages,
   presence,

@@ -272,9 +272,9 @@ export default function Layout() {
           </button>
         )}
         {impersonating && (
-          <div className="bg-amber-500 text-black text-xs font-semibold px-4 py-1.5 flex items-center gap-2">
+          <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto bg-amber-500 text-black text-xs font-semibold pl-4 pr-1.5 py-1.5 rounded-full shadow-lg flex items-center gap-2">
             👀 Signed in as {profile?.name} ({impersonating})
-            <button onClick={() => impersonate('')} className="ml-auto underline">Back to my account</button>
+            <button type="button" onClick={() => impersonate('')} className="rounded-full bg-black text-amber-400 px-3 py-1 hover:bg-black/80">Back to my account</button>
           </div>
         )}
         {/* Top Bar */}

@@ -50,7 +50,7 @@ export const HOLIDAYS: Holiday[] = [
   ] },
 ];
 
-export type Override = { holidayKey: string; earlyStart: string | null; forceOn: boolean; forceOff: boolean };
+export type Override = { holidayKey: string; earlyStart: string | null; forceOn: boolean; forceOff: boolean; shopDrop?: number };
 export type ActiveEvent = { holiday: Holiday; year: number; variant: Variant; start: Date; end: Date; day: Date };
 
 const DAY = 864e5;
@@ -79,16 +79,24 @@ export function getActiveEvent(overrides: Override[], now = new Date()): ActiveE
 
 // ── Limited items: unique ids per holiday + year, so each year's set is gone forever after ──
 export type LimitedBadge = { id: string; name: string; emoji: string; color: string; cost: number };
-export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'>) {
+const DROP_NAMES = ['', 'Remix', 'Neon', 'Glow', 'Shadow', 'Prism', 'Frost', 'Blaze', 'Cosmic', 'Retro', 'Royal'];
+const DROP_TYPING = ['', 'is remixing the vibe', 'is glowing up', 'is shining bright', 'is lurking in the shadows', 'is splitting light', 'is freezing the chat', 'is on fire', 'is out of this world', 'is going retro', 'is making a royal entrance'];
+
+/** drop = how many times the owner refreshed this event's limited shop (0 = original items). */
+export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'>, drop = 0) {
   const { holiday: h, year, variant: v } = e;
-  const [c1, c2, c3] = v.colors;
-  const theme: BgTheme = { id: `ev-${h.key}-${year}`, name: `${h.emoji} ${v.name} ${year}`, cost: 1500, css: `radial-gradient(circle at 80% 10%, ${c3}55 0%, transparent 45%), linear-gradient(160deg, ${c1} 0%, ${c2} 60%, ${c1} 100%)` };
-  const typing: TypingStyle = { id: `evt-${h.key}-${year}`, name: `${v.badgeEmoji} ${h.name} ${year}`, cost: 800, text: v.typing, className: 'animate-pulse', color: c3 };
-  const badge: LimitedBadge = { id: `evb-${h.key}-${year}`, name: `${h.name} ${year}`, emoji: v.badgeEmoji, color: c3, cost: 1000 };
+  const cols = v.colors;
+  const [c1, c2, c3] = drop ? [cols[(drop) % 3], cols[(drop + 1) % 3], cols[(drop + 2) % 3]] : cols;
+  const sfx = drop ? `-d${drop}` : '';
+  const tag = drop ? ` ${DROP_NAMES[drop % DROP_NAMES.length]}` : '';
+  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${year}`, cost: 1500, css: `radial-gradient(circle at ${drop ? 20 : 80}% 10%, ${c3}55 0%, transparent 45%), linear-gradient(${160 + drop * 20}deg, ${c1} 0%, ${c2} 60%, ${c1} 100%)` };
+  const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${year}`, cost: 800, text: drop ? DROP_TYPING[drop % DROP_TYPING.length] : v.typing, className: 'animate-pulse', color: c3 };
+  const badge: LimitedBadge = { id: `evb-${h.key}-${year}${sfx}`, name: `${h.name}${tag} ${year}`, emoji: v.badgeEmoji, color: c3, cost: 1000 };
   return { theme, typing, badge };
 }
 
 /** Every limited item that could ever exist (for rendering owned items after the event ends). */
 function allYears() { const y = new Date().getFullYear(); return Array.from({ length: 6 }, (_, i) => y - 3 + i); }
-export function allLimitedThemes(): BgTheme[] { return HOLIDAYS.flatMap(h => allYears().map(y => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }).theme)); }
-export function allLimitedTyping(): TypingStyle[] { return HOLIDAYS.flatMap(h => allYears().map(y => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }).typing)); }
+const DROPS = Array.from({ length: 11 }, (_, i) => i);
+export function allLimitedThemes(): BgTheme[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).theme))); }
+export function allLimitedTyping(): TypingStyle[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).typing))); }

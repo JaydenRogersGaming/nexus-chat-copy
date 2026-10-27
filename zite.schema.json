@@ -1285,6 +1285,18 @@
             "type": "checkbox",
             "template": {}
           }
+        },
+        {
+          "id": "fbhiB5u3A45",
+          "sdkName": "shopDrop",
+          "definition": {
+            "name": "Shop Drop",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 1
+            }
+          }
         }
       ]
     },
@@ -1607,6 +1619,55 @@
             "template": {
               "numberFormat": "local",
               "decimalPlaces": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tkDLDJFRiZH",
+      "sdkName": "itemOwners",
+      "name": "Item Owners",
+      "primaryFieldId": "f2wcJ6Ywkkx",
+      "fields": [
+        {
+          "id": "f2wcJ6Ywkkx",
+          "sdkName": "itemId",
+          "definition": {
+            "name": "Item Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fgmm6j2PqRz",
+          "sdkName": "ownerEmail",
+          "definition": {
+            "name": "Owner Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fmeKmFvnKzP",
+          "sdkName": "ownerName",
+          "definition": {
+            "name": "Owner Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fjrp5qSom4p",
+          "sdkName": "claimedAt",
+          "definition": {
+            "name": "Claimed At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
             }
           }
         }

@@ -431,6 +431,8 @@ export type EventOverridesRecordType = {
   earlyStart?: string;
   forceOff?: boolean;
   forceOn?: boolean;
+  /** "Shop Drop". 1 decimal places, format: local (e.g. 1,000,000.50) */
+  shopDrop?: number;
 };
 
 /** What you may write when creating or updating a record in the "Event Overrides" table. */
@@ -439,6 +441,7 @@ export type EventOverridesRecordInput = {
   earlyStart: string | Date | null;
   forceOff: string | boolean | null;
   forceOn: string | boolean | null;
+  shopDrop: string | number | null;
 };
 
 /** A record in the "Trades" table, as it is read back. */
@@ -535,6 +538,24 @@ export type TournamentEntriesRecordInput = {
   attempts: string | number | null;
 };
 
+/** A record in the "Item Owners" table, as it is read back. */
+export type ItemOwnersRecordType = {
+  id: string;
+  /** Primary field. "Item Id" */
+  itemId?: string;
+  ownerEmail?: string;
+  ownerName?: string;
+  /** Read-only. "Claimed At". Auto-set when record was created (ISO 8601) */
+  claimedAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Item Owners" table. */
+export type ItemOwnersRecordInput = {
+  itemId: string | null;
+  ownerEmail: string | null;
+  ownerName: string | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -563,6 +584,7 @@ export const zite = {
   warnings: createTableClient<WarningsRecordType, WarningsRecordInput>('Warnings'), // "Warnings"
   tournaments: createTableClient<TournamentsRecordType, TournamentsRecordInput>('Tournaments'), // "Tournaments"
   tournamentEntries: createTableClient<TournamentEntriesRecordType, TournamentEntriesRecordInput>('TournamentEntries'), // "Tournament Entries"
+  itemOwners: createTableClient<ItemOwnersRecordType, ItemOwnersRecordInput>('ItemOwners'), // "Item Owners"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

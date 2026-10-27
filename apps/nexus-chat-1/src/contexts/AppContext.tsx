@@ -59,9 +59,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const realEmail = user?.email || '';
   const email = realEmail === OWNER_EMAIL && impersonating ? impersonating : realEmail;
   const impersonate = useCallback((target: string) => {
+    if (target && realEmail.toLowerCase() !== OWNER_EMAIL.toLowerCase()) return; // owner only
     if (target) localStorage.setItem(IMP_KEY, target); else localStorage.removeItem(IMP_KEY);
     setImpersonating(target);
-  }, []);
+  }, [realEmail]);
   const [profile, setProfile] = useState<DB.UserProfile | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [activeRoomId, setActiveRoomId] = useState('global');
