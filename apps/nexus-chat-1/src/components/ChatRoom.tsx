@@ -320,7 +320,9 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     if (!raw.trim() || !profile) return;
     const text = raw.trim();
 
-    if (!override && text.startsWith('/') && handleCommand(text)) { setInput(''); return; }
+    const isBotCmd = /^\/chatrobot\b/i.test(text);
+    if (isBotCmd && !text.replace(/^\/chatrobot/i, '').trim()) { toast.info('Try: /chatrobot tell me a joke'); return; }
+    if (!override && !isBotCmd && text.startsWith('/') && handleCommand(text)) { setInput(''); return; }
 
     // Cooldown check (3 seconds between messages, owner bypasses)
     if (!isOwner && cooldown > 0) {
@@ -410,7 +412,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     DB.incrementQuestProgress(profile.email, 'send_20');
     DB.incrementQuestProgress(profile.email, 'send_50');
 
-    if (/@(jaydenchatbot|jayden|nexusbot)\b/i.test(text)) handleBot(text, censored);
+    if (isBotCmd || /@(jaydenchatbot|jayden|nexusbot)\b/i.test(text)) handleBot(text, censored);
 
     setTimeout(() => { checkAchievements(); checkBadges(profile.email); }, 100);
   }
@@ -441,12 +443,13 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     }
     try {
       const history = messages.slice(-15).map(m => ({ name: m.senderName, content: m.content }));
-      const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/@(jaydenchatbot|jayden|nexusbot)/ig, '').trim() || 'hi', history });
+      const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/^\/chatrobot\b/i, '').replace(/@(jaydenchatbot|jayden|nexusbot)/ig, '').trim() || 'hi', history });
       postBot(censorMessage(reply).censored);
     } catch { postBot("Beep boop… my brain lagged 🤖 try again in a sec!"); }
   }
 
   const ALL_COMMANDS: { cmd: string; desc: string; level: 'all' | 'staff' | 'owner' }[] = [
+    { cmd: '/chatrobot', desc: 'Ask JaydenChatBot anything — questions, jokes, riddles, advice', level: 'all' },
     { cmd: '/ban', desc: 'Ban a user', level: 'staff' },
     { cmd: '/unban', desc: 'Unban a user', level: 'staff' },
     { cmd: '/unbanall', desc: 'Unban every user', level: 'staff' },
