@@ -29,7 +29,7 @@ export default createEndpoint({
         records: [{
           email: u.email, displayName: u.name, profilePic: u.profilePic, nameColor: u.nameColor,
           activeTitle: u.activeTitle, activeTitleColor: u.activeTitleColor,
-          activeTitleEffect: u.activeTitleEffect, role: u.role, lastSeen: new Date().toISOString(),
+          activeTitleEffect: u.activeTitleEffect, lastSeen: new Date().toISOString(),
         }],
       });
     }
