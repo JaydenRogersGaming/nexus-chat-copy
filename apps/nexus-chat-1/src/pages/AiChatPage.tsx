@@ -6,7 +6,7 @@ import { Markdown } from '@project/components/markdown';
 import { toast } from 'sonner';
 import { chat, generateArt } from 'zitejs/api';
 import { useAuth } from 'zitejs/auth';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 import AiTitleMaker from '../components/AiTitleMaker';
 import AiIdeasButton from '../components/AiIdeasButton';
 
@@ -14,7 +14,7 @@ type Message = { role: 'user' | 'assistant'; content: string; imageUrl?: string;
 
 export default function AiChatPage() {
   const { user } = useAuth();
-  const isOwner = user?.email === OWNER_EMAIL;
+  const isOwner = isOwnerEmail(user?.email);
   const [conversations, setConversations] = useState<Message[][]>([[]]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [input, setInput] = useState('');

@@ -1,5 +1,5 @@
 import { bans as bansApi } from 'zitejs/api';
-import { OWNER_EMAIL } from './gameData';
+import { isOwnerEmail } from './gameData';
 
 export type UserProfile = {
   email: string;
@@ -198,19 +198,19 @@ export function deleteUser(email: string) {
 export function getOrCreateUser(email: string): UserProfile {
   const existing = getUser(email);
   if (existing) {
-    if (email === OWNER_EMAIL && existing.role !== 'owner') { existing.role = 'owner'; saveUser(existing); }
+    if (isOwnerEmail(email) && existing.role !== 'owner') { existing.role = 'owner'; saveUser(existing); }
     return existing;
   }
   const p: UserProfile = {
-    email, name: email === OWNER_EMAIL ? 'Jayden Rogres' : email.split('@')[0], profilePic: '', nameColor: '#e0e0ff', nameColor2: '', bio: '',
-    gems: 0, activeTitle: email === OWNER_EMAIL ? 'Owner' : '',
-    activeTitleEffect: '', activeTitleColor: email === OWNER_EMAIL ? '#ffd700' : '',
-    role: email === OWNER_EMAIL ? 'owner' : 'user', badges: [],
+    email, name: email === 'jaydenaltfirst@gmail.com' ? 'Jayden Rogres' : email.split('@')[0], profilePic: '', nameColor: '#e0e0ff', nameColor2: '', bio: '',
+    gems: 0, activeTitle: isOwnerEmail(email) ? 'Owner' : '',
+    activeTitleEffect: '', activeTitleColor: isOwnerEmail(email) ? '#ffd700' : '',
+    role: isOwnerEmail(email) ? 'owner' : 'user', badges: [],
     messageCount: 0, gambleCount: 0, gambleWins: 0, gambleLoseStreak: 0,
     reactionCount: 0, dmCount: 0, groupCount: 0, bugCount: 0, suggestionCount: 0,
     voiceJoined: false, proxyUsed: false, lastSeen: Date.now(),
     streak: 0, lastStreakDate: '', lastMessageTime: 0, language: 'en',
-    verified: email === OWNER_EMAIL,
+    verified: isOwnerEmail(email),
   };
   saveUser(p); return p;
 }

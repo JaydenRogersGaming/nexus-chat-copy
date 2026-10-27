@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Heart, Gem, Zap, Trophy, ArrowUp, ChevronDown, ChevronUp, Crown, Infinity, RotateCcw, Star, Timer } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
 import { useApp } from '../contexts/AppContext';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
 
@@ -157,7 +157,7 @@ function formatTime(ms: number) {
 
 export default function HpClickerPage() {
   const { profile, addGems } = useApp();
-  const isOwner = profile && (profile.email === OWNER_EMAIL || profile.role === 'owner');
+  const isOwner = profile && (isOwnerEmail(profile.email) || profile.role === 'owner');
   const [hp, setHp] = useState(0);
   const [totalClicks, setTotalClicks] = useState(0);
   const [upgrades, setUpgrades] = useState<UpgradesMap>({});

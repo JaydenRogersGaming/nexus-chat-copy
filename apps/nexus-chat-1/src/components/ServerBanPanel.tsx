@@ -5,7 +5,7 @@ import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { Label } from '@project/components/ui/label';
 import { toast } from 'sonner';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 
 type BanType = 'Ban' | 'IP Ban' | 'Hard Ban';
 const TYPES: { id: BanType; icon: typeof Ban; desc: string }[] = [
@@ -61,7 +61,7 @@ export default function ServerBanPanel({ staffName }: { staffName: string }) {
         <div><Label>Reason (optional)</Label><Input value={reason} onChange={e => setReason(e.target.value)} placeholder="Spamming" className="mt-1" /></div>
         <Button variant="destructive" className="w-full" disabled={busy || !email.trim()} onClick={() => {
           const t = email.trim().toLowerCase();
-          if (t === OWNER_EMAIL.toLowerCase()) { toast.error("Can't ban the owner!"); return; }
+          if (isOwnerEmail(t)) { toast.error("Can't ban the owner!"); return; }
           run('ban', t);
         }}>
           {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Ban className="w-4 h-4 mr-2" />}{type}

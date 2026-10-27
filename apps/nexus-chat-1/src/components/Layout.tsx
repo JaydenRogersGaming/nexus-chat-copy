@@ -23,7 +23,7 @@ import NotificationBell from './NotificationBell';
 import { Link } from 'react-router-dom';
 import { Store } from 'lucide-react';
 import * as P from '../lib/personalize';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 import HolidayDecor from './HolidayDecor';
 import EventShop from './EventShop';
 import { useActiveEvent } from '../hooks/useActiveEvent';
@@ -234,8 +234,8 @@ export default function Layout() {
   useEffect(() => {
     if (!profile) return;
     const sync = () => {
-      setMyCss(P.hasCustomCss(profile.email) || profile.email === OWNER_EMAIL ? P.getCustomCss(profile.email) : '');
-      setMyBg(P.hasCustomBg(profile.email) || profile.email === OWNER_EMAIL ? P.getCustomBg(profile.email) : '');
+      setMyCss(P.hasCustomCss(profile.email) || isOwnerEmail(profile.email) ? P.getCustomCss(profile.email) : '');
+      setMyBg(P.hasCustomBg(profile.email) || isOwnerEmail(profile.email) ? P.getCustomBg(profile.email) : '');
     };
     sync();
     window.addEventListener(P.PERSONALIZE_EVENT, sync);

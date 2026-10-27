@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createEndpoint, ZiteError } from 'zitejs/backend';
 import { zite } from 'zitejs/db';
-import { OWNER_EMAIL } from '../lib/permissions';
+import { isOwnerEmail } from '../lib/permissions';
 
 const ov = z.object({ holidayKey: z.string(), earlyStart: z.string().nullable(), forceOn: z.boolean(), forceOff: z.boolean(), shopDrop: z.number() });
 
@@ -16,7 +16,7 @@ export default createEndpoint({
   }),
   outputSchema: z.object({ overrides: z.array(ov) }),
   execute: async ({ input, context }) => {
-    const isOwner = context.user?.email?.toLowerCase() === OWNER_EMAIL.toLowerCase();
+    const isOwner = isOwnerEmail(context.user?.email?.toLowerCase());
     if (input.action !== 'list') {
       if (!isOwner) throw new ZiteError('Only the owner can change events.');
       if (!input.holidayKey) throw new ZiteError('Pick a holiday.');

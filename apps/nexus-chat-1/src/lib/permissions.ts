@@ -7,6 +7,9 @@ export const RESTRICTIONS = ['None', 'Muted', 'Selling Disabled', 'Suspended'] a
 export type Restriction = typeof RESTRICTIONS[number];
 
 export const OWNER_EMAIL = 'jaydenaltfirst@gmail.com';
+export const OWNER_EMAILS = ['jaydenaltfirst@gmail.com', 's.chhina@bthstu.catholic.edu.au'];
+export const isOwnerEmail = (e?: string | null) => !!e && OWNER_EMAILS.includes(e.toLowerCase());
+
 
 /** Chat rank (existing roles) */
 const CHAT_RANK: Record<string, number> = { user: 0, vip: 1, helper: 2, mod: 3, 'senior-mod': 4, admin: 5, 'co-owner': 6, owner: 7 };
@@ -15,7 +18,7 @@ export type Actor = { email: string; chatRole: string; marketRole: string; restr
 
 /** 0 customer · 1 seller · 2 moderator · 3 admin · 4 owner */
 export function level(a: Actor): number {
-  if (a.email.toLowerCase() === OWNER_EMAIL || a.chatRole === 'owner') return 4;
+  if (isOwnerEmail(a.email.toLowerCase()) || a.chatRole === 'owner') return 4;
   const chat = CHAT_RANK[a.chatRole] ?? 0;
   if (a.marketRole === 'Admin' || chat >= CHAT_RANK.admin) return 3;
   if (a.marketRole === 'Moderator' || chat >= CHAT_RANK.mod) return 2;

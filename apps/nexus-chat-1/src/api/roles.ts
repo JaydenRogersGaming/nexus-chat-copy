@@ -4,12 +4,12 @@ import { zite } from 'zitejs/db';
 
 type RoleUser = { email: string; name: string; role: string };
 const NO_USERS: RoleUser[] = [];
-const OWNER_EMAIL = 'jaydenaltfirst@gmail.com';
+import { isOwnerEmail } from '../lib/permissions';
 const ROLES = ['user', 'vip', 'helper', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'] as const;
 const RANK: Record<string, number> = { user: 0, vip: 1, helper: 2, mod: 3, 'senior-mod': 4, admin: 5, 'co-owner': 6, owner: 7 };
 
 async function roleOf(email: string): Promise<string> {
-  if (email.toLowerCase() === OWNER_EMAIL) return 'owner';
+  if (isOwnerEmail(email.toLowerCase())) return 'owner';
   const { rows } = await zite.sql({ query: `SELECT "role" FROM "Presence" WHERE lower("email") = $1 LIMIT 1`, params: [email.toLowerCase()] });
   const r = String(rows[0]?.role ?? 'user');
   return r in RANK ? r : 'user';
@@ -43,7 +43,7 @@ export default createEndpoint({
       return { myRole, users: NO_USERS, profile: {
         email: String(r.email), name: String(r.displayName || email.split('@')[0]), profilePic: String(r.profilePic ?? ''),
         nameColor: String(r.nameColor ?? ''), activeTitle: String(r.activeTitle ?? ''), activeTitleColor: String(r.activeTitleColor ?? ''),
-        activeTitleEffect: String(r.activeTitleEffect ?? ''), role: email === OWNER_EMAIL ? 'owner' : String(r.role || 'user'),
+        activeTitleEffect: String(r.activeTitleEffect ?? ''), role: isOwnerEmail(email) ? 'owner' : String(r.role || 'user'),
         lastSeen: r.lastSeen ? new Date(String(r.lastSeen)).getTime() : 0,
       } };
     }
@@ -53,7 +53,7 @@ export default createEndpoint({
       const role = input.role;
       if (!email || !role) throw new ZiteError({ code: 'BAD_REQUEST', message: 'Missing email or role', userFacingMessage: 'Pick a user and a role.' });
       if (RANK[myRole] < RANK.admin) throw new ZiteError({ code: 'FORBIDDEN', message: 'forbidden', userFacingMessage: 'Only Admins and above can set roles.' });
-      if (email === OWNER_EMAIL) throw new ZiteError({ code: 'FORBIDDEN', message: 'owner', userFacingMessage: "The owner's role can't be changed." });
+      if (isOwnerEmail(email)) throw new ZiteError({ code: 'FORBIDDEN', message: 'owner', userFacingMessage: "The owner's role can't be changed." });
       const targetRole = await roleOf(email);
       const canAssign = myRole === 'owner' || RANK[role] < RANK[myRole];
       const canTouch = myRole === 'owner' || RANK[targetRole] < RANK[myRole];
@@ -91,7 +91,7 @@ export default createEndpoint({
     const byEmail = new Map(rows.map(r => [String(r.email).toLowerCase(), r]));
     const users = all.map(u => {
       const p = byEmail.get(u.email.toLowerCase());
-      const role = u.email.toLowerCase() === OWNER_EMAIL ? 'owner' : String(p?.role ?? 'user');
+      const role = isOwnerEmail(u.email.toLowerCase()) ? 'owner' : String(p?.role ?? 'user');
       return {
         email: u.email, name: String(p?.displayName || u.name || u.email.split('@')[0]), role: role in RANK ? role : 'user',
         customRole: String(p?.customRole ?? ''), customRoleColor: String(p?.customRoleColor ?? ''), customRoleColor2: String(p?.customRoleColor2 ?? ''),

@@ -1,7 +1,7 @@
 // Server-only helpers (imported by endpoints in src/api). Never import from UI code.
 import { zite } from 'zitejs/db';
 import { ZiteError } from 'zitejs/backend';
-import { Actor, OWNER_EMAIL, Permission, can } from './permissions';
+import { Actor, isOwnerEmail, Permission, can } from './permissions';
 
 export async function loadActor(email: string): Promise<Actor> {
   const e = email.toLowerCase();
@@ -12,7 +12,7 @@ export async function loadActor(email: string): Promise<Actor> {
   const r = rows[0];
   return {
     email: e,
-    chatRole: e === OWNER_EMAIL ? 'owner' : String(r?.role || 'user'),
+    chatRole: isOwnerEmail(e) ? 'owner' : String(r?.role || 'user'),
     marketRole: String(r?.marketRole || 'Customer'),
     restriction: String(r?.accountRestriction || 'None'),
   };

@@ -6,7 +6,7 @@ import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { Skeleton } from '@project/components/ui/skeleton';
 import { useAuth } from 'zitejs/auth';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 
 const FOCUS = ['Games', 'Chat features', 'Making money with gems', 'Staff tools', 'Customization', 'Events'];
 
@@ -15,7 +15,7 @@ const KINDS: [Kind, string][] = [['features', '✨ Features'], ['roles', '🛡�
 
 export default function IdeasPage() {
   const { user } = useAuth();
-  const isOwner = user?.email?.toLowerCase() === OWNER_EMAIL;
+  const isOwner = isOwnerEmail(user?.email?.toLowerCase());
   const [kind, setKind] = useState<Kind>('features');
   const [focus, setFocus] = useState('');
   const [loading, setLoading] = useState(false);

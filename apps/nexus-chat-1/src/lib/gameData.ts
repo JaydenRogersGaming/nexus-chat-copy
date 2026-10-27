@@ -1,4 +1,7 @@
 export const OWNER_EMAIL = 'jaydenaltfirst@gmail.com';
+export const OWNER_EMAILS = ['jaydenaltfirst@gmail.com', 's.chhina@bthstu.catholic.edu.au'];
+export const isOwnerEmail = (e?: string | null) => !!e && OWNER_EMAILS.includes(e.toLowerCase());
+
 
 export type TitleEffect = 'none' | 'rainbow' | 'pink-glow' | 'breath-pink-blue' | 'coin-rain' | 'moon';
 

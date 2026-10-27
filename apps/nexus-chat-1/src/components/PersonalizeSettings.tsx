@@ -4,7 +4,7 @@ import { Button } from '@project/components/ui/button';
 import { Textarea } from '@project/components/ui/textarea';
 import { toast } from 'sonner';
 import { useApp } from '../contexts/AppContext';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 import * as P from '../lib/personalize';
 import CustomBackground from './CustomBackground';
 
@@ -15,7 +15,7 @@ export default function PersonalizeSettings() {
   const [css, setCss] = useState(() => (profile ? P.getCustomCss(profile.email) : ''));
   const [, bump] = useState(0);
   if (!profile) return null;
-  const unlocked = profile.email === OWNER_EMAIL || P.hasCustomCss(profile.email);
+  const unlocked = isOwnerEmail(profile.email) || P.hasCustomCss(profile.email);
 
   function update(patch: Partial<P.TextStyle>) {
     const next = { ...style, ...patch };

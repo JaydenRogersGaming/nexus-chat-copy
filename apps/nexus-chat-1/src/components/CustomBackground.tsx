@@ -4,7 +4,7 @@ import { useUpload } from 'zitejs/upload';
 import { Button } from '@project/components/ui/button';
 import { toast } from 'sonner';
 import { useApp } from '../contexts/AppContext';
-import { OWNER_EMAIL } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 import * as P from '../lib/personalize';
 
 export default function CustomBackground() {
@@ -13,7 +13,7 @@ export default function CustomBackground() {
   const [url, setUrl] = useState(() => (profile ? P.getCustomBg(profile.email) : ''));
   const [, bump] = useState(0);
   if (!profile) return null;
-  const unlocked = profile.email === OWNER_EMAIL || P.hasCustomBg(profile.email);
+  const unlocked = isOwnerEmail(profile.email) || P.hasCustomBg(profile.email);
 
   function buy() {
     if (profile!.gems < P.CUSTOM_BG_PRICE) { toast.error(`You need ${P.CUSTOM_BG_PRICE} gems`); return; }

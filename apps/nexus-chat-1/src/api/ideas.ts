@@ -3,7 +3,7 @@ import { createEndpoint, ZiteError } from 'zitejs/backend';
 import { integrations } from 'zitejs/integrations';
 import OpenAI from 'openai';
 
-const OWNER_EMAIL = 'jaydenaltfirst@gmail.com';
+import { isOwnerEmail } from '../lib/permissions';
 const FEATURES = 'global chat, DMs, group chats, video rooms, emoji/GIF picker, emoji kitchen, art studio (drawing + music maker), casino games with gems, HP clicker idle game, leaderboard, achievements, daily quests, cosmetic shop, titles & badges, themes, typing effects, holiday events with a limited shop, marketplace, friends & notifications, AI assistant, calendar, in-app browser, staff roles and moderation tools';
 const ROLES = 'user, vip, helper, mod, senior-mod, admin, co-owner, owner';
 
@@ -28,7 +28,7 @@ export default createEndpoint({
   }),
   execute: async ({ input, context }) => {
     const kind = input.kind ?? 'features';
-    if (kind !== 'features' && context.user?.email?.toLowerCase() !== OWNER_EMAIL) {
+    if (kind !== 'features' && !isOwnerEmail(context.user?.email?.toLowerCase())) {
       throw new ZiteError({ code: 'FORBIDDEN', message: 'owner only', userFacingMessage: 'Only the owner can use this idea type.' });
     }
     const { accessToken } = await integrations.get('openai');

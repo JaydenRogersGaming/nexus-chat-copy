@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from 'zitejs/auth';
-import { ACHIEVEMENTS, OWNER_EMAIL } from '../lib/gameData';
+import { ACHIEVEMENTS, isOwnerEmail } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import * as DB from '../lib/storage';
 import { isInfiniteGems } from '../lib/formatGems';
@@ -57,9 +57,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [impersonating, setImpersonating] = useState<string>(() => localStorage.getItem(IMP_KEY) || '');
   const realEmail = user?.email || '';
-  const email = realEmail === OWNER_EMAIL && impersonating ? impersonating : realEmail;
+  const email = isOwnerEmail(realEmail) && impersonating ? impersonating : realEmail;
   const impersonate = useCallback((target: string) => {
-    if (target && realEmail.toLowerCase() !== OWNER_EMAIL.toLowerCase()) return; // owner only
+    if (target && !isOwnerEmail(realEmail.toLowerCase())) return; // owner only
     if (target) localStorage.setItem(IMP_KEY, target); else localStorage.removeItem(IMP_KEY);
     setImpersonating(target);
   }, [realEmail]);
@@ -78,7 +78,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (p.verified === undefined) { p.verified = false; DB.saveUser(p); }
     // Apply language
     document.documentElement.lang = p.language;
-    if (email === OWNER_EMAIL) {
+    if (isOwnerEmail(email)) {
       let changed = false;
       if (p.role !== 'owner') { p.role = 'owner'; changed = true; }
       if (!p.name || p.name === email.split('@')[0]) { p.name = 'Jayden Rogres'; changed = true; }
@@ -204,7 +204,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Keep every locally-known user's role in line with the shared server copy
       for (const su of users) {
         const lu = DB.getUser(su.email);
-        if (lu && lu.role !== su.role && su.email !== OWNER_EMAIL) DB.saveUser({ ...lu, role: su.role as DB.UserProfile['role'] });
+        if (lu && lu.role !== su.role && !isOwnerEmail(su.email)) DB.saveUser({ ...lu, role: su.role as DB.UserProfile['role'] });
         const lu2 = DB.getUser(su.email);
         if (lu2 && (lu2.customRole || '') !== su.customRole) {
           DB.applyCustomRoleLocally(su.email, su.customRole ? { name: su.customRole, color: su.customRoleColor, color2: su.customRoleColor2 } : null);
@@ -217,7 +217,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           : prev);
       }
       const p = DB.getUser(email);
-      if (p && p.role !== myRole && email !== OWNER_EMAIL && email === realEmail) {
+      if (p && p.role !== myRole && !isOwnerEmail(email) && email === realEmail) {
         DB.saveUser({ ...p, role: myRole as DB.UserProfile['role'] });
         setProfile(prev => prev ? { ...prev, role: myRole as DB.UserProfile['role'] } : prev);
       }
@@ -231,7 +231,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => DB.initBroadcast(), []);
 
   return (
-    <Ctx.Provider value={{ profile, refreshProfile, updateProfile, addGems, checkAchievements, unreadCount, setUnreadCount, playNotifSound: playBeep, activeRoomId, setActiveRoomId, impersonating: realEmail === OWNER_EMAIL ? impersonating : '', isRealOwner: realEmail === OWNER_EMAIL, impersonate }}>
+    <Ctx.Provider value={{ profile, refreshProfile, updateProfile, addGems, checkAchievements, unreadCount, setUnreadCount, playNotifSound: playBeep, activeRoomId, setActiveRoomId, impersonating: isOwnerEmail(realEmail) ? impersonating : '', isRealOwner: isOwnerEmail(realEmail), impersonate }}>
       {children}
     </Ctx.Provider>
   );

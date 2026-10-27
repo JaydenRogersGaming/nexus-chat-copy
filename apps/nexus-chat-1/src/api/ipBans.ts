@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createEndpoint } from 'zitejs/backend';
 import { zite } from 'zitejs/db';
-import { OWNER_EMAIL, can, checkIpBan, isBanActive, level, maskIp } from '../lib/permissions';
+import { isOwnerEmail, can, checkIpBan, isBanActive, level, maskIp } from '../lib/permissions';
 import { audit, bad, deny, requirePerm } from '../lib/serverAuth';
 
 const DURATIONS = ['1h', '24h', '7d', '30d', 'permanent'] as const;
@@ -35,7 +35,7 @@ export default createEndpoint({
     const myIps = new Set<string>();
     for (const r of seen) {
       const email = String(r.email);
-      const lvl = level({ email, chatRole: email === OWNER_EMAIL ? 'owner' : String(r.role || 'user'), marketRole: String(r.marketRole || ''), restriction: 'None' });
+      const lvl = level({ email, chatRole: isOwnerEmail(email) ? 'owner' : String(r.role || 'user'), marketRole: String(r.marketRole || ''), restriction: 'None' });
       if (lvl >= 2) staffIps.add(String(r.ipAddress));
       if (email === me.email) myIps.add(String(r.ipAddress));
     }
