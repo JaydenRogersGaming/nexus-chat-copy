@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from 'zitejs/auth';
+import { useEffect } from 'react';
+import { useAuth, loginWithRedirect } from 'zitejs/auth';
 import VideoRoomsPage from './pages/VideoRoomsPage';
 import EmojiMixerPage from './pages/EmojiMixerPage';
 import ArtPage from './pages/ArtPage';
@@ -28,6 +29,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
   const serverBan = useServerBan(!!user);
+  useEffect(() => {
+    if (!isLoading && !user) loginWithRedirect();
+  }, [isLoading, user]);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
       <MatrixRain color={mc} speed={settings.matrixSpeed} />
@@ -42,6 +46,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
           ))}
         </div>
         <p className="text-xs mt-4" style={{ color: mc + '88' }}>Loading...</p>
+        {!isLoading && (
+          <button onClick={() => loginWithRedirect()}
+            className="mt-6 px-6 py-2.5 rounded-lg font-bold text-black"
+            style={{ backgroundColor: mc }}>
+            Sign in to continue
+          </button>
+        )}
       </div>
     </div>
   );
