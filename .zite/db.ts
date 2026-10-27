@@ -489,6 +489,52 @@ export type WarningsRecordInput = {
   acknowledged: string | boolean | null;
 };
 
+/** A record in the "Tournaments" table, as it is read back. */
+export type TournamentsRecordType = {
+  id: string;
+  /** Primary field. "Title" */
+  title?: string;
+  game?: "Reaction" | "Click Frenzy" | "Speed Typing" | string;
+  /** "Prize Gems". 1 decimal places, format: local (e.g. 1,000,000.50) */
+  prizeGems?: number;
+  /** "Ends At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  endsAt?: string;
+  createdBy?: string;
+  prizePaid?: boolean;
+};
+
+/** What you may write when creating or updating a record in the "Tournaments" table. */
+export type TournamentsRecordInput = {
+  title: string | null;
+  game: "Reaction" | "Click Frenzy" | "Speed Typing" | string | null;
+  prizeGems: string | number | null;
+  endsAt: string | Date | null;
+  createdBy: string | null;
+  prizePaid: string | boolean | null;
+};
+
+/** A record in the "Tournament Entries" table, as it is read back. */
+export type TournamentEntriesRecordType = {
+  id: string;
+  /** Primary field. "Player Name" */
+  playerName?: string;
+  tournamentId?: string;
+  playerEmail?: string;
+  /** "Best Score". 0 decimal places, format: local (e.g. 1,000,000.50) */
+  bestScore?: number;
+  /** "Attempts". 1 decimal places, format: local (e.g. 1,000,000.50) */
+  attempts?: number;
+};
+
+/** What you may write when creating or updating a record in the "Tournament Entries" table. */
+export type TournamentEntriesRecordInput = {
+  playerName: string | null;
+  tournamentId: string | null;
+  playerEmail: string | null;
+  bestScore: string | number | null;
+  attempts: string | number | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -515,6 +561,8 @@ export const zite = {
   eventOverrides: createTableClient<EventOverridesRecordType, EventOverridesRecordInput>('EventOverrides'), // "Event Overrides"
   trades: createTableClient<TradesRecordType, TradesRecordInput>('Trades'), // "Trades"
   warnings: createTableClient<WarningsRecordType, WarningsRecordInput>('Warnings'), // "Warnings"
+  tournaments: createTableClient<TournamentsRecordType, TournamentsRecordInput>('Tournaments'), // "Tournaments"
+  tournamentEntries: createTableClient<TournamentEntriesRecordType, TournamentEntriesRecordInput>('TournamentEntries'), // "Tournament Entries"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

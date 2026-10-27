@@ -1463,6 +1463,154 @@
           }
         }
       ]
+    },
+    {
+      "id": "t9ctPcm99Eu",
+      "sdkName": "tournaments",
+      "name": "Tournaments",
+      "primaryFieldId": "ftrLhJnERNm",
+      "fields": [
+        {
+          "id": "ftrLhJnERNm",
+          "sdkName": "title",
+          "definition": {
+            "name": "Title",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fmF5UYxbsms",
+          "sdkName": "game",
+          "definition": {
+            "name": "Game",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "5nbc",
+                  "label": "Reaction",
+                  "color": "purple"
+                },
+                {
+                  "value": "nerG",
+                  "label": "Click Frenzy",
+                  "color": "orange"
+                },
+                {
+                  "value": "pmVz",
+                  "label": "Speed Typing",
+                  "color": "blue"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "f6zHaB869sn",
+          "sdkName": "prizeGems",
+          "definition": {
+            "name": "Prize Gems",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 1
+            }
+          }
+        },
+        {
+          "id": "fdTmHDpBu6E",
+          "sdkName": "endsAt",
+          "definition": {
+            "name": "Ends At",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        },
+        {
+          "id": "fcFmFg688x7",
+          "sdkName": "createdBy",
+          "definition": {
+            "name": "Created By",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fxiQmcrqh45",
+          "sdkName": "prizePaid",
+          "definition": {
+            "name": "Prize Paid",
+            "type": "checkbox",
+            "template": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "tbykKooUpPs",
+      "sdkName": "tournamentEntries",
+      "name": "Tournament Entries",
+      "primaryFieldId": "f5tcoCTFt9N",
+      "fields": [
+        {
+          "id": "f5tcoCTFt9N",
+          "sdkName": "playerName",
+          "definition": {
+            "name": "Player Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fhgSKDCPvrL",
+          "sdkName": "tournamentId",
+          "definition": {
+            "name": "Tournament Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f66ZduTGNTF",
+          "sdkName": "playerEmail",
+          "definition": {
+            "name": "Player Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fbATuodeEpz",
+          "sdkName": "bestScore",
+          "definition": {
+            "name": "Best Score",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 0
+            }
+          }
+        },
+        {
+          "id": "ffFmu1wZxAA",
+          "sdkName": "attempts",
+          "definition": {
+            "name": "Attempts",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 1
+            }
+          }
+        }
+      ]
     }
   ]
 }

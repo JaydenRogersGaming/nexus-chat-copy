@@ -23,6 +23,7 @@ import type { default as _PresenceEp } from '../src/api/presence';
 import type { default as _ReportsEp } from '../src/api/reports';
 import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _StaffToolsEp } from '../src/api/staffTools';
+import type { default as _TournamentsEp } from '../src/api/tournaments';
 import type { default as _TradesEp } from '../src/api/trades';
 import type { default as _TypingEp } from '../src/api/typing';
 import type { default as _VideoRoomsEp } from '../src/api/videoRooms';
@@ -132,6 +133,11 @@ export type StaffToolsInputType = NonNullable<_StaffToolsCfg['inputSchema']> ext
 export type StaffToolsOutputType = Awaited<ReturnType<_StaffToolsCfg['execute']>>;
 export const staffTools = createCaller<StaffToolsInputType, StaffToolsOutputType>('staffTools');
 
+type _TournamentsCfg = typeof _TournamentsEp;
+export type TournamentsInputType = NonNullable<_TournamentsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_TournamentsCfg['execute']>[0]['input'];
+export type TournamentsOutputType = Awaited<ReturnType<_TournamentsCfg['execute']>>;
+export const tournaments = createCaller<TournamentsInputType, TournamentsOutputType>('tournaments');
+
 type _TradesCfg = typeof _TradesEp;
 export type TradesInputType = NonNullable<_TradesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_TradesCfg['execute']>[0]['input'];
 export type TradesOutputType = Awaited<ReturnType<_TradesCfg['execute']>>;
@@ -170,6 +176,7 @@ export const api = {
   reports,
   roles,
   staffTools,
+  tournaments,
   trades,
   typing,
   videoRooms,

@@ -20,6 +20,7 @@ const NAV = [
   { to: '/gamble',       icon: Dices,         label: 'Casino' },
   { to: '/leaderboard',  icon: Trophy,        label: 'Leaderboard' },
   { to: '/hpclicker',    icon: Heart,         label: 'HP Clicker' },
+  { to: '/tournament',   icon: Trophy,        label: 'Tournament' },
   { to: '/ideas',        icon: Lightbulb,     label: 'Idea Generator' },
   { to: '/aichat',        icon: Bot,           label: 'AI Assistant' },
   { to: '/browser',       icon: Globe,         label: 'Browser' },
