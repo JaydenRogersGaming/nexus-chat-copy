@@ -307,7 +307,7 @@ export type ReportsRecordType = {
   id: string;
   /** Primary field. "Subject" */
   subject?: string;
-  targetType?: "User" | "Listing" | "Ban Appeal" | string;
+  targetType?: "User" | "Listing" | "Ban Appeal" | "Chat Message" | string;
   targetId?: string;
   reason?: string;
   reporterEmail?: string;
@@ -321,7 +321,7 @@ export type ReportsRecordType = {
 /** What you may write when creating or updating a record in the "Reports" table. */
 export type ReportsRecordInput = {
   subject: string | null;
-  targetType: "User" | "Listing" | "Ban Appeal" | string | null;
+  targetType: "User" | "Listing" | "Ban Appeal" | "Chat Message" | string | null;
   targetId: string | null;
   reason: string | null;
   reporterEmail: string | null;
@@ -441,31 +441,32 @@ export type EventOverridesRecordInput = {
   forceOn: string | boolean | null;
 };
 
-/** A record in the "Swap Party Members" table, as it is read back. */
-export type SwapPartyMembersRecordType = {
+/** A record in the "Trades" table, as it is read back. */
+export type TradesRecordType = {
   id: string;
-  /** Primary field. "Party Code" */
-  partyCode?: string;
-  email?: string;
-  displayName?: string;
-  themeName?: string;
-  themeCss?: string;
-  isHost?: boolean;
-  /** "Ends At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
-  endsAt?: string;
-  /** Read-only. "Joined At". Auto-set when record was created (ISO 8601) */
-  joinedAt?: string;
+  /** Primary field. "Summary" */
+  summary?: string;
+  fromEmail?: string;
+  toEmail?: string;
+  offerItems?: string;
+  returnItems?: string;
+  status?: "Pending" | "Accepted" | "Declined" | "Cancelled" | string;
+  appliedByFrom?: boolean;
+  appliedByTo?: boolean;
+  /** Read-only. "Created". Auto-set when record was created (ISO 8601) */
+  created?: string;
 };
 
-/** What you may write when creating or updating a record in the "Swap Party Members" table. */
-export type SwapPartyMembersRecordInput = {
-  partyCode: string | null;
-  email: string | null;
-  displayName: string | null;
-  themeName: string | null;
-  themeCss: string | null;
-  isHost: string | boolean | null;
-  endsAt: string | Date | null;
+/** What you may write when creating or updating a record in the "Trades" table. */
+export type TradesRecordInput = {
+  summary: string | null;
+  fromEmail: string | null;
+  toEmail: string | null;
+  offerItems: string | null;
+  returnItems: string | null;
+  status: "Pending" | "Accepted" | "Declined" | "Cancelled" | string | null;
+  appliedByFrom: string | boolean | null;
+  appliedByTo: string | boolean | null;
 };
 
 export interface ZiteAuthUser {
@@ -492,7 +493,7 @@ export const zite = {
   videoParticipants: createTableClient<VideoParticipantsRecordType, VideoParticipantsRecordInput>('VideoParticipants'), // "Video Participants"
   videoSignals: createTableClient<VideoSignalsRecordType, VideoSignalsRecordInput>('VideoSignals'), // "Video Signals"
   eventOverrides: createTableClient<EventOverridesRecordType, EventOverridesRecordInput>('EventOverrides'), // "Event Overrides"
-  swapPartyMembers: createTableClient<SwapPartyMembersRecordType, SwapPartyMembersRecordInput>('SwapPartyMembers'), // "Swap Party Members"
+  trades: createTableClient<TradesRecordType, TradesRecordInput>('Trades'), // "Trades"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

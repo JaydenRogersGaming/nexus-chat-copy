@@ -11,7 +11,7 @@ export default createEndpoint({
   description: 'Anyone can report a user or listing; Moderators review and resolve reports',
   inputSchema: z.object({
     action: z.enum(['create', 'list', 'review']),
-    targetType: z.enum(['User', 'Listing', 'Ban Appeal']).optional(),
+    targetType: z.enum(['User', 'Listing', 'Ban Appeal', 'Chat Message']).optional(),
     targetId: z.string().trim().max(200).optional(),
     subject: z.string().trim().max(150).optional(),
     reason: z.string().trim().max(2000).optional(),

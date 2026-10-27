@@ -5,18 +5,26 @@ import { ideas as ideasApi, IdeasOutputType } from 'zitejs/api';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { Skeleton } from '@project/components/ui/skeleton';
+import { useAuth } from 'zitejs/auth';
+import { OWNER_EMAIL } from '../lib/gameData';
 
 const FOCUS = ['Games', 'Chat features', 'Making money with gems', 'Staff tools', 'Customization', 'Events'];
 
+type Kind = 'features' | 'roles' | 'events' | 'tabs';
+const KINDS: [Kind, string][] = [['features', '✨ Features'], ['roles', '🛡️ New roles'], ['events', '🎃 Theme events'], ['tabs', '🗂️ New tabs']];
+
 export default function IdeasPage() {
+  const { user } = useAuth();
+  const isOwner = user?.email?.toLowerCase() === OWNER_EMAIL;
+  const [kind, setKind] = useState<Kind>('features');
   const [focus, setFocus] = useState('');
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState<IdeasOutputType['ideas']>([]);
 
-  const generate = async (f = focus) => {
+  const generate = async (f = focus, k = kind) => {
     setLoading(true);
-    try { setList((await ideasApi({ focus: f || undefined })).ideas); }
-    catch { toast.error('Could not get ideas — try again'); }
+    try { setList((await ideasApi({ focus: f || undefined, kind: k })).ideas); }
+    catch (e) { toast.error((e as { userFacingMessage?: string }).userFacingMessage || 'Could not get ideas — try again'); }
     finally { setLoading(false); }
   };
 
@@ -27,6 +35,14 @@ export default function IdeasPage() {
           <h1 className="text-2xl font-black flex items-center gap-2"><Lightbulb className="w-6 h-6 text-yellow-400" />AI Idea Generator</h1>
           <p className="text-sm text-muted-foreground">Stuck on what to add next? Get fresh feature ideas for Nexus.</p>
         </div>
+        {isOwner && (
+          <div className="flex flex-wrap gap-1.5 p-1 bg-secondary rounded-lg w-fit">
+            {KINDS.map(([k, label]) => (
+              <button key={k} disabled={loading} onClick={() => { setKind(k); generate(focus, k); }}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${kind === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>
+            ))}
+          </div>
+        )}
         <div className="flex gap-2">
           <Input placeholder="Optional focus, e.g. 'something for Halloween'" value={focus} onChange={e => setFocus(e.target.value)} onKeyDown={e => e.key === 'Enter' && generate()} />
           <Button onClick={() => generate()} disabled={loading}>{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Sparkles className="w-4 h-4 mr-1" />Generate</>}</Button>

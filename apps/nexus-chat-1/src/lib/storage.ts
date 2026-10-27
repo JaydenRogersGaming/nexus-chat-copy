@@ -277,6 +277,11 @@ export function getUserTitles(email: string): string[] { return g<string[]>(`use
 export function addUserTitle(email: string, title: string) {
   const t = getUserTitles(email); if (!t.includes(title)) { t.push(title); s(`userTitles:${email}`, t); }
 }
+export function removeUserTitle(email: string, title: string) {
+  s(`userTitles:${email}`, getUserTitles(email).filter(x => x !== title));
+  const u = getUser(email);
+  if (u && u.activeTitle === title) saveUser({ ...u, activeTitle: '' });
+}
 
 // ── Custom Titles ─────────────────────────────────────────────
 export function getCustomTitles(): CustomTitle[] { return g<CustomTitle[]>('customTitles') || []; }
@@ -645,6 +650,13 @@ export function getUserItems(email: string): string[] { return (g<Record<string,
 export function addUserItem(email: string, id: string) {
   const all = g<Record<string, string[]>>('userItems') || {};
   all[email] = [...new Set([...(all[email] || []), id])]; s('userItems', all);
+}
+export function removeUserItem(email: string, id: string) {
+  const all = g<Record<string, string[]>>('userItems') || {};
+  all[email] = (all[email] || []).filter(x => x !== id); s('userItems', all);
+  const eq = getEquipped(email);
+  if (eq.bg === id) setEquipped(email, { bg: '' });
+  if (eq.typing === id) setEquipped(email, { typing: '' });
 }
 export function getEquipped(email: string): { bg: string; typing: string } {
   return (g<Record<string, { bg: string; typing: string }>>('equipped') || {})[email] || { bg: '', typing: '' };

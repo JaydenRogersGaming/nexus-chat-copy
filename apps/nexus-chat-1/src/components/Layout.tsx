@@ -13,7 +13,8 @@ import { toast } from 'sonner';
 import * as DB from '../lib/storage';
 import SettingsExtras, { COSMETICS_EVENT } from './SettingsExtras';
 import { getAllBgThemes } from '../lib/cosmetics';
-import SwapPartyDialog, { useSwapParty } from './SwapPartyDialog';
+import TradesDialog from './TradesDialog';
+import { ArrowLeftRight } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import MusicPlayer from './MusicPlayer';
 import NotificationBell from './NotificationBell';
@@ -222,8 +223,8 @@ export default function Layout() {
     return () => window.removeEventListener(COSMETICS_EVENT, sync);
   }, [profile?.email]); // eslint-disable-line react-hooks/exhaustive-deps
   const myTheme = getAllBgThemes().find(b => b.id === bgId);
-  const { party, setParty } = useSwapParty();
-  const bgCss = party?.myTheme?.css || myTheme?.css;
+  const [tradesOpen, setTradesOpen] = useState(false);
+  const bgCss = myTheme?.css;
   const { active: holidayEvent } = useActiveEvent();
   const [eventShopOpen, setEventShopOpen] = useState(false);
   const [myCss, setMyCss] = useState('');
@@ -249,9 +250,13 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background" style={myBg && !party?.myTheme ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : bgCss ? { background: bgCss } : undefined}>
+    <div className="flex h-screen overflow-hidden bg-background" style={myBg ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : bgCss ? { background: bgCss } : undefined}>
       {holidayEvent && <HolidayDecor event={holidayEvent} />}
-      <SwapPartyDialog party={party} setParty={setParty} theme={myTheme ? { name: myTheme.name, css: myTheme.css } : undefined} />
+      <button onClick={() => setTradesOpen(true)} title="Trade items"
+        className="fixed bottom-4 right-4 z-40 h-11 px-4 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center gap-2 text-sm font-semibold hover:brightness-110 transition">
+        <ArrowLeftRight className="h-4 w-4" />Trade
+      </button>
+      <TradesDialog open={tradesOpen} onOpenChange={setTradesOpen} />
       {holidayEvent && <EventShop event={holidayEvent} open={eventShopOpen} onOpenChange={setEventShopOpen} />}
       <Sidebar onProfileClick={() => setProfileOpen(true)} />
       <div className="flex-1 flex flex-col min-w-0">

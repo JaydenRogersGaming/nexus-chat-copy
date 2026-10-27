@@ -884,6 +884,11 @@
                   "value": "dChP",
                   "label": "Ban Appeal",
                   "color": "blue"
+                },
+                {
+                  "value": "iDDQ",
+                  "label": "Chat Message",
+                  "color": "gray"
                 }
               ],
               "disableColors": false
@@ -1284,84 +1289,112 @@
       ]
     },
     {
-      "id": "tfsk23Dn3Pq",
-      "sdkName": "swapPartyMembers",
-      "name": "Swap Party Members",
-      "primaryFieldId": "fs5uqDSkVHS",
+      "id": "thRD4kbvsmT",
+      "sdkName": "trades",
+      "name": "Trades",
+      "primaryFieldId": "feSgARJvijQ",
       "fields": [
         {
-          "id": "fs5uqDSkVHS",
-          "sdkName": "partyCode",
+          "id": "feSgARJvijQ",
+          "sdkName": "summary",
           "definition": {
-            "name": "Party Code",
+            "name": "Summary",
             "type": "single_line_text",
             "template": {}
           }
         },
         {
-          "id": "fwk6YJDDP2u",
-          "sdkName": "email",
+          "id": "f1yNeXLuxLr",
+          "sdkName": "fromEmail",
           "definition": {
-            "name": "Email",
+            "name": "From Email",
             "type": "email",
             "template": {}
           }
         },
         {
-          "id": "fdGSwq2gHJH",
-          "sdkName": "displayName",
+          "id": "f6SZoDzeLo6",
+          "sdkName": "toEmail",
           "definition": {
-            "name": "Display Name",
-            "type": "single_line_text",
+            "name": "To Email",
+            "type": "email",
             "template": {}
           }
         },
         {
-          "id": "fpxK8jS5WpG",
-          "sdkName": "themeName",
+          "id": "f69qtYqrjjJ",
+          "sdkName": "offerItems",
           "definition": {
-            "name": "Theme Name",
-            "type": "single_line_text",
-            "template": {}
-          }
-        },
-        {
-          "id": "fsGE8P9aY3G",
-          "sdkName": "themeCss",
-          "definition": {
-            "name": "Theme Css",
+            "name": "Offer Items",
             "type": "long_text",
             "template": {}
           }
         },
         {
-          "id": "f351FHvxNyv",
-          "sdkName": "isHost",
+          "id": "fjKSTcjkunq",
+          "sdkName": "returnItems",
           "definition": {
-            "name": "Is Host",
+            "name": "Return Items",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fvAfS3S4J22",
+          "sdkName": "status",
+          "definition": {
+            "name": "Status",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "wysR",
+                  "label": "Pending",
+                  "color": "purple"
+                },
+                {
+                  "value": "p6Le",
+                  "label": "Accepted",
+                  "color": "orange"
+                },
+                {
+                  "value": "ueuz",
+                  "label": "Declined",
+                  "color": "blue"
+                },
+                {
+                  "value": "qr4i",
+                  "label": "Cancelled",
+                  "color": "gray"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "fxjLTqPPERU",
+          "sdkName": "appliedByFrom",
+          "definition": {
+            "name": "Applied By From",
             "type": "checkbox",
             "template": {}
           }
         },
         {
-          "id": "foTM7nLaMYN",
-          "sdkName": "endsAt",
+          "id": "fpGXBDrWUCv",
+          "sdkName": "appliedByTo",
           "definition": {
-            "name": "Ends At",
-            "type": "datetime",
-            "template": {
-              "timezone": "",
-              "dateFormat": "local",
-              "timeFormat": "12h",
-              "displayTimeZone": false
-            }
+            "name": "Applied By To",
+            "type": "checkbox",
+            "template": {}
           }
         },
         {
-          "id": "frZ6oP5rE1v",
-          "sdkName": "joinedAt",
+          "id": "fhNQcUNLxHB",
+          "sdkName": "created",
           "definition": {
-            "name": "Joined At",
+            "name": "Created",
             "type": "created_at",
             "template": {
               "timezone": "",

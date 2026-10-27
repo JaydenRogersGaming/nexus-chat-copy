@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import TitleBadge from './TitleBadge';
+import ReportMessageButton from './ReportMessageButton';
 import { useApp } from '../contexts/AppContext';
 import { EMOJI_LIST, OWNER_EMAIL, censorMessage } from '../lib/gameData';
 import * as DB from '../lib/storage';
@@ -194,6 +195,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
                 <Pencil className="w-3.5 h-3.5" />
               </button>
             )}
+            {!isOwn && <ReportMessageButton messageId={msg.id} senderEmail={msg.senderEmail} content={msg.content} />}
             <button onClick={() => onReply?.(msg)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Reply">
               <Reply className="w-3.5 h-3.5" />
             </button>
