@@ -761,7 +761,7 @@ export default function AdminPage() {
                 <h3 className="font-semibold">💬 Chat Word Filter</h3>
                 <span className="text-[10px] text-muted-foreground">{wordsSaved === 'saving' ? 'Saving…' : wordsSaved === 'saved' ? '✓ Auto-saved' : 'Auto-saves as you type'}</span>
               </div>
-              <p className="text-xs text-muted-foreground">Extra words blocked in chat (one per line or comma-separated). Saying one censors it and auto-mutes for 10 min.</p>
+              <p className="text-xs text-muted-foreground">Only the words in this list are blocked (one per line or comma-separated) — it starts with the default list, so delete any you don't want. Whole words only, so "class" won't trip "ass". Saying one censors it and auto-mutes for 10 min.</p>
               <textarea value={chatWordsText} onChange={e => setChatWordsText(e.target.value)} rows={4} placeholder={'word1\nword2'}
                 className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>

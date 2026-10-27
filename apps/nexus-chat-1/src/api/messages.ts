@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { createEndpoint } from 'zitejs/backend';
 import { zite } from 'zitejs/db';
-import { censorMessage } from '../lib/gameData';
 
 const messageSchema = z.object({
   id: z.string(),
@@ -43,14 +42,14 @@ export default createEndpoint({
       if ((rec.senderEmail || '').toLowerCase() !== (context.user?.email || '').toLowerCase()) {
         throw new Error('You can only edit your own messages');
       }
-      await zite.chatMessages.update({ id: rec.id, record: { content: input.uncensored ? text : censorMessage(text).censored, edited: true, uncensored: !!input.uncensored } });
+      await zite.chatMessages.update({ id: rec.id, record: { content: text, edited: true, uncensored: !!input.uncensored } });
       return { messages: [] };
     }
     if (input.action === 'send' && input.message) {
       const m = input.message;
       await zite.chatMessages.create({ record: {
         messageId: m.id, roomId: m.chatRoomId, senderEmail: m.senderEmail, senderName: m.senderName,
-        content: (m.content.startsWith('[gif]') || m.uncensored) ? m.content : censorMessage(m.content).censored, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
+        content: m.content, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
         senderTitleEffect: m.senderTitleEffect, senderNameColor: m.senderNameColor,
         reactionsJson: JSON.stringify(m.reactions || {}), replyToJson: m.replyTo ? JSON.stringify(m.replyTo) : null,
         deleted: false, uncensored: !!m.uncensored, sentAt: new Date().toISOString(),

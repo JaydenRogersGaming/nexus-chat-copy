@@ -13,7 +13,7 @@ import { usePresence } from '../hooks/useOnlineUsers';
 type NameSuggestion = { email: string; name: string; profilePic?: string; nameColor?: string };
 import * as DB from '../lib/storage';
 import { mergeMessages } from '../lib/messageOrder';
-import { isOwnerEmail, censorMessage } from '../lib/gameData';
+import { isOwnerEmail } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import { getAllTypingStyles } from '../lib/cosmetics';
 import { useDebouncedCallback } from 'use-debounce';
@@ -342,7 +342,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     const isGif = text.startsWith('[gif]');
     // Owner is always immune; immune people skip the word filter entirely
     const immune = isOwner || DB.isMuteImmune(profile.email);
-    const base = (isGif || immune) ? { censored: text, hadProfanity: false } : censorMessage(text);
+    const base = { censored: text, hadProfanity: false };
     const customHit = !isGif && !immune && DB.hasCustomBadWord(base.censored);
     const censored = customHit ? DB.censorCustom(base.censored) : base.censored;
     const hadProfanity = base.hadProfanity || customHit;
@@ -445,7 +445,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     try {
       const history = messages.slice(-15).map(m => ({ name: m.senderName, content: m.content }));
       const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/^\/chatrobot\b/i, '').replace(/@(jaydenchatbot|jayden|nexusbot)/ig, '').trim() || 'hi', history });
-      postBot(censorMessage(reply).censored);
+      postBot(DB.censorCustom(reply));
     } catch { postBot("Beep boop… my brain lagged 🤖 try again in a sec!"); }
   }
 

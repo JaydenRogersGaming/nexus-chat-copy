@@ -6,7 +6,7 @@ import TitleBadge from './TitleBadge';
 import ReportMessageButton from './ReportMessageButton';
 import TranslatedText from './TranslatedText';
 import { useApp } from '../contexts/AppContext';
-import { EMOJI_LIST, isOwnerEmail, ownerLabel, censorMessage } from '../lib/gameData';
+import { EMOJI_LIST, isOwnerEmail, ownerLabel } from '../lib/gameData';
 import * as DB from '../lib/storage';
 import { getRoleTextStyle, textStyleCss } from '../lib/personalize';
 import { cn } from '@project/components/lib/utils';
@@ -189,7 +189,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             </div>
           ) : isGif
             ? <img src={msg.content.slice(5)} alt="GIF" className="rounded-lg max-w-[240px] max-h-60 object-contain" loading="lazy" />
-            : <TranslatedText style={textStyleCss(getRoleTextStyle(senderRole))} text={msg.uncensored ? msg.content : censorMessage(msg.content).censored} lang={profile?.language || 'en'} auto={!isOwn && !!profile?.language && profile.language !== 'en'} />}
+            : <TranslatedText style={textStyleCss(getRoleTextStyle(senderRole))} text={msg.content} lang={profile?.language || 'en'} auto={!isOwn && !!profile?.language && profile.language !== 'en'} />}
           {/* Action buttons */}
           {!editing && <div className="absolute -top-1 right-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex gap-0.5 bg-card border border-border rounded-lg px-1 py-0.5 shadow-lg">
             {isOwn && !isGif && (

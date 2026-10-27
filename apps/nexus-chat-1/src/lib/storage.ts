@@ -1,3 +1,4 @@
+import { BAD_WORDS } from './gameData';
 import { bans as bansApi } from 'zitejs/api';
 import { isOwnerEmail, ownerLabel } from './gameData';
 
@@ -634,15 +635,19 @@ export function toggleMuteImmune(email: string): boolean {
 }
 
 // ── Chat word filter (custom words, auto-saved) ───────────────
-export function getChatWords(): string[] { return g<string[]>('chatWords') || []; }
+// The admin list is the ONLY source of blocked words. Starts with the default list; remove any you don't want.
+export function getChatWords(): string[] { return g<string[]>('chatWords') ?? [...BAD_WORDS]; }
+const escapeRe = (w: string) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Whole-word match only: "ass" blocks "ass" but not "class" or "pass". */
+const wordRe = (w: string, flags: string) => new RegExp('(?<![\\p{L}\\p{N}])' + escapeRe(w) + '(?![\\p{L}\\p{N}])', flags + 'u');
 export function setChatWords(words: string[]) { s('chatWords', [...new Set(words.map(w => w.trim().toLowerCase()).filter(Boolean))]); }
 export function hasCustomBadWord(text: string): boolean {
   const t = text.toLowerCase();
-  return getChatWords().some(w => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(t));
+  return getChatWords().some(w => wordRe(w, 'i').test(t));
 }
 export function censorCustom(text: string): string {
   let out = text;
-  for (const w of getChatWords()) out = out.replace(new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), m => '#'.repeat(m.length));
+  for (const w of getChatWords()) out = out.replace(wordRe(w, 'gi'), m => '#'.repeat(m.length));
   return out;
 }
 

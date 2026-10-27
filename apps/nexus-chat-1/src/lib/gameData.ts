@@ -71,7 +71,7 @@ export const ACHIEVEMENTS: Achievement[] = [
 export const EMOJI_LIST = ['👍','❤️','😂','😮','😢','😡','🔥','🎉','💎','👑','✨','💀','🤝','👀','🙏'];
 
 // ── Profanity Filter ──────────────────────────────────────────
-const BAD_WORDS = [
+export const BAD_WORDS = [
   'fuck','shit','ass','bitch','damn','dick','pussy','cock','cunt',
   'bastard','slut','whore','nigger','nigga','fag','faggot','retard',
   'stfu','wtf','lmfao','milf','dilf',
