@@ -25,6 +25,7 @@ import { Store } from 'lucide-react';
 import * as P from '../lib/personalize';
 import { isOwnerEmail } from '../lib/gameData';
 import HolidayDecor from './HolidayDecor';
+import { HOLIDAYS, variantFor, windowFor } from '../lib/holidays';
 import EventShop from './EventShop';
 import { useActiveEvent } from '../hooks/useActiveEvent';
 
@@ -253,7 +254,12 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background" style={bgCss ? { background: bgCss } : myBg ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : undefined}>
-      {holidayEvent && <HolidayDecor event={holidayEvent} />}
+      {(() => {
+        const m = /^ev-([a-z0-9]+)-(\d{4})/.exec(bgId);
+        const h = m && HOLIDAYS.find(x => x.key === m[1]);
+        if (h) { const y = Number(m![2]); return <HolidayDecor event={{ holiday: h, year: y, variant: variantFor(h, y), ...windowFor(h, y) }} />; }
+        return holidayEvent ? <HolidayDecor event={holidayEvent} /> : null;
+      })()}
       <button onClick={() => setTradesOpen(true)} title="Trade items"
         className="fixed bottom-4 right-4 z-40 h-11 px-4 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center gap-2 text-sm font-semibold hover:brightness-110 transition">
         <ArrowLeftRight className="h-4 w-4" />Trade

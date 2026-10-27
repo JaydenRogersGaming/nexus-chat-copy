@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import StaffModTools from './StaffModTools';
+import StaffReportUser from './StaffReportUser';
 
 const TITLE_GIVERS = ['owner', 'co-owner', 'admin'];
 
@@ -68,6 +69,7 @@ export default function StaffUserActions({ email, name, onDone }: { email: strin
         ? <EditAccount email={email} onDone={onDone} />
         : <Button size="sm" variant="outline" className="w-full h-8 text-xs gap-1.5" onClick={() => setEditing(true)}><UserCog className="w-3.5 h-3.5" /> Edit account</Button>
       )}
+      {(isRealOwner || TITLE_GIVERS.includes(profile?.role || '')) && <StaffReportUser email={email} name={name} />}
       {(isRealOwner || ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'].includes(profile?.role || '')) && <StaffModTools email={email} name={name} />}
       {isRealOwner && (
         <Button size="sm" variant="outline" className="w-full h-8 text-xs gap-1.5" onClick={() => { impersonate(email); toast.success(`Now signed in as ${name}`); onDone(); }}>

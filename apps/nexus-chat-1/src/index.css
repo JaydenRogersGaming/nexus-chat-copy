@@ -165,3 +165,18 @@
 .holiday-burst { animation: holiday-burst 4.5s ease-out infinite; mask-image: radial-gradient(circle, #000 0 55%, transparent 70%); }
 @keyframes holiday-hop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
 .holiday-hop { animation: holiday-hop 1.4s ease-in-out infinite; display: inline-block; }
+
+/* Limited typing effects */
+.limited-typing { display: inline-block; font-weight: 600; text-shadow: 0 0 8px currentColor; }
+@keyframes lt-flicker { 0%,100% { opacity: 1; } 8% { opacity: .3; } 10% { opacity: 1; } 52% { opacity: .5; } 54% { opacity: 1; } }
+.lt-flicker { animation: lt-flicker 2.4s infinite; }
+@keyframes lt-shimmer { 0% { filter: brightness(1); } 50% { filter: brightness(1.8); } 100% { filter: brightness(1); } }
+.lt-shimmer { animation: lt-shimmer 1.8s ease-in-out infinite; }
+@keyframes lt-beat { 0%,100% { transform: scale(1); } 20% { transform: scale(1.06); } 40% { transform: scale(1); } 60% { transform: scale(1.04); } }
+.lt-beat { animation: lt-beat 1.3s ease-in-out infinite; transform-origin: left center; }
+@keyframes lt-sparkle { 0%,100% { text-shadow: 0 0 4px currentColor; } 50% { text-shadow: 0 0 14px currentColor, 0 0 24px currentColor; } }
+.lt-sparkle { animation: lt-sparkle 1.2s ease-in-out infinite; }
+@keyframes lt-sway { 0%,100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+.lt-sway { animation: lt-sway 2.2s ease-in-out infinite; transform-origin: left center; }
+@keyframes lt-hop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.lt-hop { animation: lt-hop 1s ease-in-out infinite; }
