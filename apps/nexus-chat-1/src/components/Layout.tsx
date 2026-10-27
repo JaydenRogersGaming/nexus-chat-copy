@@ -252,7 +252,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background" style={myBg ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : bgCss ? { background: bgCss } : undefined}>
+    <div className="flex h-screen overflow-hidden bg-background" style={bgCss ? { background: bgCss } : myBg ? { background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${myBg}) center / cover no-repeat fixed` } : undefined}>
       {holidayEvent && <HolidayDecor event={holidayEvent} />}
       <button onClick={() => setTradesOpen(true)} title="Trade items"
         className="fixed bottom-4 right-4 z-40 h-11 px-4 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center gap-2 text-sm font-semibold hover:brightness-110 transition">
