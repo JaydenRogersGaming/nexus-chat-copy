@@ -9,6 +9,8 @@ import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
 import { DiceGame, RouletteGame, HigherLowerGame, WheelGame, Settle } from '../components/CasinoGames';
+import DailyLottery from '../components/DailyLottery';
+import WeeklyTitles from '../components/WeeklyTitles';
 
 const SLOTS = ['💎','🎰','🍒','🍋','⭐','💀','🎲','👑','🌙','🔥'];
 
@@ -158,6 +160,11 @@ export default function GamblePage() {
             ⚠️ {RIG_LABELS[rig]}
           </div>
         )}
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3 mb-6">
+        <DailyLottery />
+        <WeeklyTitles />
       </div>
 
       {/* Stats Bar */}

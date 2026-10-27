@@ -10,8 +10,8 @@ import { OWNER_EMAIL } from '../lib/gameData';
 
 const FOCUS = ['Games', 'Chat features', 'Making money with gems', 'Staff tools', 'Customization', 'Events'];
 
-type Kind = 'features' | 'roles' | 'events' | 'tabs';
-const KINDS: [Kind, string][] = [['features', '✨ Features'], ['roles', '🛡️ New roles'], ['events', '🎃 Theme events'], ['tabs', '🗂️ New tabs']];
+type Kind = 'features' | 'roles' | 'events' | 'tabs' | 'future' | 'titles' | 'typing';
+const KINDS: [Kind, string][] = [['features', '✨ Features'], ['roles', '🛡️ New roles'], ['tabs', '🗂️ New tabs'], ['future', '🚀 Future roadmap'], ['events', '🎃 Theme events'], ['titles', '🏷️ Titles'], ['typing', '⌨️ Typing effects']];
 
 export default function IdeasPage() {
   const { user } = useAuth();

@@ -7,6 +7,7 @@ import { Switch } from '@project/components/ui/switch';
 import { useApp } from '../contexts/AppContext';
 import { useUpload } from 'zitejs/upload';
 import TitleBadge from './TitleBadge';
+import ItemSwitcher from './ItemSwitcher';
 import * as DB from '../lib/storage';
 import { Camera, Trophy, Globe, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -171,6 +172,9 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
               ))}
             </div>
           </div>
+
+          {/* Theme + typing effect switcher (original + limited) */}
+          <div className="rounded-xl border border-border p-3"><ItemSwitcher showTitles={false} /></div>
 
           {/* Language */}
           <div>

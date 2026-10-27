@@ -2,6 +2,7 @@ import { formatGems, INFINITE_GEMS } from '../lib/formatGems';
 import { useState, useEffect } from 'react';
 import ServerBanPanel from '../components/ServerBanPanel';
 import OwnerThemesTab from '../components/OwnerThemesTab';
+import OwnerTypingTab from '../components/OwnerTypingTab';
 import OwnerEventsTab from '../components/OwnerEventsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import { Button } from '@project/components/ui/button';
@@ -482,6 +483,7 @@ export default function AdminPage() {
         {isOwner && (
           <TabsContent value="themes" className="space-y-4">
             <OwnerThemesTab />
+            <OwnerTypingTab />
           </TabsContent>
         )}
         {isOwner && (

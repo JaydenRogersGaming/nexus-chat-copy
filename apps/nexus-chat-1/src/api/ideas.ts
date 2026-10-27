@@ -12,13 +12,16 @@ const KINDS = {
   roles: `new staff or community ROLES to add alongside the existing ones (${ROLES}). For each, the description says what the role can do and who should get it.`,
   events: `new THEMED EVENTS (seasonal or one-off, like a holiday week) with a limited shop. For each, describe the vibe, decorations and 1-2 limited items (theme, typing effect, title or song).`,
   tabs: `new sidebar TABS / pages to add to the app. For each, describe what the page shows and what users do there. Never suggest a tab it already has.`,
+  future: `a ROADMAP of bigger things to do in the future (next 1-6 months): growth, community, monetization with gems, polish and safety. Put a rough timeframe at the start of each description.`,
+  titles: `new collectible TITLES (short name shown next to a username) with a rarity and how to earn them.`,
+  typing: `new TYPING EFFECTS (animated styles for chat text, e.g. glitch, rainbow wave). Describe exactly how the animation looks.`,
 } as const;
 
 export default createEndpoint({
   description: 'Suggests new feature, role, event or tab ideas for the Nexus chat app',
   inputSchema: z.object({
     focus: z.string().max(200).optional(),
-    kind: z.enum(['features', 'roles', 'events', 'tabs']).optional(),
+    kind: z.enum(['features', 'roles', 'events', 'tabs', 'future', 'titles', 'typing']).optional(),
   }),
   outputSchema: z.object({
     ideas: z.array(z.object({ emoji: z.string(), title: z.string(), description: z.string(), effort: z.string() })),

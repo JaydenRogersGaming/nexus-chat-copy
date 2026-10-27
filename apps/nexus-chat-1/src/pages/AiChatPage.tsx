@@ -123,7 +123,7 @@ export default function AiChatPage() {
           <span className="text-xs text-muted-foreground">Chat + Image Gen</span>
         </div>
         <div className="flex gap-1.5">
-          {isOwner && <AiIdeasButton />}
+          <AiIdeasButton />
           <AiTitleMaker />
           <Button size="sm" variant="outline" onClick={newChat}>
             <Plus className="w-3.5 h-3.5 mr-1" /> New

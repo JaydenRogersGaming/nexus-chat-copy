@@ -25,6 +25,7 @@ import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _StaffToolsEp } from '../src/api/staffTools';
 import type { default as _TournamentsEp } from '../src/api/tournaments';
 import type { default as _TradesEp } from '../src/api/trades';
+import type { default as _TranslateEp } from '../src/api/translate';
 import type { default as _TypingEp } from '../src/api/typing';
 import type { default as _VideoRoomsEp } from '../src/api/videoRooms';
 
@@ -143,6 +144,11 @@ export type TradesInputType = NonNullable<_TradesCfg['inputSchema']> extends { _
 export type TradesOutputType = Awaited<ReturnType<_TradesCfg['execute']>>;
 export const trades = createCaller<TradesInputType, TradesOutputType>('trades');
 
+type _TranslateCfg = typeof _TranslateEp;
+export type TranslateInputType = NonNullable<_TranslateCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_TranslateCfg['execute']>[0]['input'];
+export type TranslateOutputType = Awaited<ReturnType<_TranslateCfg['execute']>>;
+export const translate = createCaller<TranslateInputType, TranslateOutputType>('translate');
+
 type _TypingCfg = typeof _TypingEp;
 export type TypingInputType = NonNullable<_TypingCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_TypingCfg['execute']>[0]['input'];
 export type TypingOutputType = Awaited<ReturnType<_TypingCfg['execute']>>;
@@ -178,6 +184,7 @@ export const api = {
   staffTools,
   tournaments,
   trades,
+  translate,
   typing,
   videoRooms,
 };

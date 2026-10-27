@@ -42,5 +42,35 @@ export const TYPING_STYLES: TypingStyle[] = [
   { id: 'type-king', name: '👑 Royal', cost: 1500, text: 'is preparing a royal decree 👑', className: 'animate-pulse', color: '#facc15' },
 ];
 
-/** Every typing style including limited holiday ones. */
-export function getAllTypingStyles(): TypingStyle[] { return [...TYPING_STYLES, ...allLimitedTyping()]; }
+/** Owner-made typing effects (saved like custom themes). */
+export type CustomTyping = TypingStyle & { inShop: boolean };
+export function getCustomTyping(): CustomTyping[] {
+  try { return JSON.parse(localStorage.getItem('hub:customTyping') || '[]'); } catch { return []; }
+}
+export function saveCustomTyping(list: CustomTyping[]) {
+  localStorage.setItem('hub:customTyping', JSON.stringify(list));
+  window.dispatchEvent(new Event(THEMES_EVENT));
+}
+export function getShopTypingStyles(): TypingStyle[] { return [...TYPING_STYLES, ...getCustomTyping().filter(t => t.inShop)]; }
+
+/** Every typing style including owner-made and limited holiday ones. */
+export function getAllTypingStyles(): TypingStyle[] { return [...TYPING_STYLES, ...getCustomTyping(), ...allLimitedTyping()]; }
+
+// ── Weekly rotating titles ──────────────────────────────────
+export type WeeklyTitle = { name: string; effect: string; color: string; cost: number };
+const TITLE_POOL: WeeklyTitle[] = [
+  { name: 'Night Owl', effect: 'glow', color: '#818cf8', cost: 800 }, { name: 'Speed Demon', effect: 'fire', color: '#f97316', cost: 1200 },
+  { name: 'Chill Vibes', effect: 'none', color: '#5eead4', cost: 500 }, { name: 'Meme Lord', effect: 'rainbow', color: '#f472b6', cost: 1500 },
+  { name: 'Gem Hoarder', effect: 'glow', color: '#22d3ee', cost: 2000 }, { name: 'Legend', effect: 'rainbow', color: '#facc15', cost: 5000 },
+  { name: 'Pixel Artist', effect: 'none', color: '#a78bfa', cost: 700 }, { name: 'Lucky Star', effect: 'glow', color: '#fde047', cost: 1000 },
+  { name: 'Shadow', effect: 'none', color: '#64748b', cost: 600 }, { name: 'Storm Chaser', effect: 'fire', color: '#60a5fa', cost: 1300 },
+  { name: 'Sweet Tooth', effect: 'none', color: '#fb7185', cost: 500 }, { name: 'Galaxy Brain', effect: 'rainbow', color: '#c084fc', cost: 2500 },
+  { name: 'Early Bird', effect: 'glow', color: '#fbbf24', cost: 700 }, { name: 'Wildcard', effect: 'fire', color: '#ef4444', cost: 1800 },
+  { name: 'Frostbite', effect: 'glow', color: '#bae6fd', cost: 900 }, { name: 'Vibe Check', effect: 'rainbow', color: '#34d399', cost: 1100 },
+];
+export function weekNumber(d = new Date()) { return Math.floor((d.getTime() / 86400000 + 4) / 7); }
+/** 3 titles for the current week; changes every Monday-ish. */
+export function getWeeklyTitles(d = new Date()): WeeklyTitle[] {
+  const w = weekNumber(d);
+  return [0, 1, 2].map(i => TITLE_POOL[(w * 3 + i * 5) % TITLE_POOL.length]);
+}
