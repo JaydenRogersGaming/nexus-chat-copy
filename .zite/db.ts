@@ -644,6 +644,20 @@ export type WatchPartyViewersRecordInput = {
   lastSeenMs: string | number | null;
 };
 
+/** A record in the "Chat Settings" table, as it is read back. */
+export type ChatSettingsRecordType = {
+  id: string;
+  /** Primary field. "Key" */
+  key?: string;
+  value?: string;
+};
+
+/** What you may write when creating or updating a record in the "Chat Settings" table. */
+export type ChatSettingsRecordInput = {
+  key: string | null;
+  value: string | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -677,6 +691,7 @@ export const zite = {
   watchParties: createTableClient<WatchPartiesRecordType, WatchPartiesRecordInput>('WatchParties'), // "Watch Parties"
   watchPartyMessages: createTableClient<WatchPartyMessagesRecordType, WatchPartyMessagesRecordInput>('WatchPartyMessages'), // "Watch Party Messages"
   watchPartyViewers: createTableClient<WatchPartyViewersRecordType, WatchPartyViewersRecordInput>('WatchPartyViewers'), // "Watch Party Viewers"
+  chatSettings: createTableClient<ChatSettingsRecordType, ChatSettingsRecordInput>('ChatSettings'), // "Chat Settings"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

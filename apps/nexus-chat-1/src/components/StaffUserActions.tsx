@@ -72,6 +72,7 @@ export default function StaffUserActions({ email, name, onDone }: { email: strin
       )}
       {(isRealOwner || canGuard || TITLE_GIVERS.includes(profile?.role || '')) && <StaffReportUser email={email} name={name} />}
       {(isRealOwner || ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'].includes(profile?.role || '')) && <StaffModTools email={email} name={name} />}
+      {canGuard && <StaffModTools email={email} name={name} warnOnly />}
       {isRealOwner && (
         <Button size="sm" variant="outline" className="w-full h-8 text-xs gap-1.5" onClick={() => { impersonate(email); toast.success(`Now signed in as ${name}`); onDone(); }}>
           <LogIn className="w-3.5 h-3.5" /> Sign in as {name}

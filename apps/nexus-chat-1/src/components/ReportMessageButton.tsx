@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Flag } from 'lucide-react';
 import { toast } from 'sonner';
-import { reports } from 'zitejs/api';
+import { reports, staffTools } from 'zitejs/api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@project/components/ui/dialog';
 import { Button } from '@project/components/ui/button';
 import { Textarea } from '@project/components/ui/textarea';
@@ -9,7 +9,7 @@ import { Textarea } from '@project/components/ui/textarea';
 const CATEGORIES = ['Harassment / bullying', 'Spam', 'Hate speech', 'Inappropriate content', 'Scam', 'Other'];
 
 /** Flag button on a chat message that files an incident report for staff. */
-export default function ReportMessageButton({ messageId, senderEmail, content }: { messageId: string; senderEmail: string; content: string }) {
+export default function ReportMessageButton({ messageId, senderEmail, content, canHold = false }: { messageId: string; senderEmail: string; content: string; canHold?: boolean }) {
   const [open, setOpen] = useState(false);
   const [cat, setCat] = useState('');
   const [details, setDetails] = useState('');
@@ -29,6 +29,16 @@ export default function ReportMessageButton({ messageId, senderEmail, content }:
     finally { setBusy(false); }
   }
 
+  async function hold() {
+    setBusy(true);
+    try {
+      await staffTools({ action: 'hold', email: senderEmail, messageId, reason: cat ? `${cat}: ${details}` : details });
+      toast.success('Message hidden and sent to mods for review.');
+      setOpen(false); setCat(''); setDetails('');
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not hold message'); }
+    finally { setBusy(false); }
+  }
+
   return (
     <>
       <button onClick={() => setOpen(true)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive transition-colors" title="Report">
@@ -45,7 +55,10 @@ export default function ReportMessageButton({ messageId, senderEmail, content }:
             {CATEGORIES.map(c => <button key={c} onClick={() => setCat(c)} className={`px-2.5 py-1 rounded-lg border text-xs transition ${cat === c ? 'border-destructive bg-destructive/15 font-semibold' : 'border-border text-muted-foreground hover:bg-secondary'}`}>{c}</button>)}
           </div>
           <Textarea placeholder="What happened? (optional)" value={details} onChange={e => setDetails(e.target.value)} maxLength={1000} />
-          <DialogFooter><Button variant="destructive" disabled={!cat || busy} onClick={send}>Send report</Button></DialogFooter>
+          <DialogFooter className="gap-2">
+            {canHold && <Button variant="outline" disabled={busy} onClick={hold}>🛡️ Hide & send to mods</Button>}
+            <Button variant="destructive" disabled={!cat || busy} onClick={send}>Send report</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

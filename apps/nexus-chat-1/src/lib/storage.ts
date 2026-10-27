@@ -628,7 +628,8 @@ export function getDailyRolesFor(email: string): CalendarEvent[] {
 
 // ── Auto-mute immunity ────────────────────────────────────────
 export function getMuteImmune(): string[] { return g<string[]>('muteImmune') || []; }
-export function isMuteImmune(email: string) { return getMuteImmune().includes(email); }
+export function isMuteImmune(email: string) { const e = email.toLowerCase(); return getMuteImmune().some(x => x.toLowerCase() === e); }
+export function setMuteImmune(list: string[]) { s('muteImmune', list.map(x => x.toLowerCase())); }
 export function toggleMuteImmune(email: string): boolean {
   const l = getMuteImmune(); const on = !l.includes(email);
   s('muteImmune', on ? [...l, email] : l.filter(e => e !== email)); return on;

@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 const QUICK = ['Spamming', 'Be respectful', 'Inappropriate language', 'Off-topic'];
 
-export default function StaffModTools({ email, name }: { email: string; name: string }) {
+export default function StaffModTools({ email, name, warnOnly = false }: { email: string; name: string; warnOnly?: boolean }) {
   const [reason, setReason] = useState('');
   const [hours, setHours] = useState('24');
   const [busy, setBusy] = useState<'warn' | 'del' | null>(null);
@@ -53,7 +53,7 @@ export default function StaffModTools({ email, name }: { email: string; name: st
           {busy === 'warn' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertTriangle className="w-3.5 h-3.5" />}Warn
         </Button>
       </div>
-      <div className="flex gap-1.5">
+      {!warnOnly && <div className="flex gap-1.5">
         <Select value={hours} onValueChange={setHours}>
           <SelectTrigger className="h-8 text-xs flex-1"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -66,7 +66,7 @@ export default function StaffModTools({ email, name }: { email: string; name: st
         <Button size="sm" variant="destructive" className="h-8 text-xs gap-1" disabled={!!busy} onClick={() => setConfirm(true)}>
           {busy === 'del' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}Delete msgs
         </Button>
-      </div>
+      </div>}
       <AlertDialog open={confirm} onOpenChange={setConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>

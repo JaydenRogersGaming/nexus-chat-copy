@@ -1926,6 +1926,32 @@
           }
         }
       ]
+    },
+    {
+      "id": "trTfgoB2fTo",
+      "sdkName": "chatSettings",
+      "name": "Chat Settings",
+      "primaryFieldId": "f9vuHxMPg6s",
+      "fields": [
+        {
+          "id": "f9vuHxMPg6s",
+          "sdkName": "key",
+          "definition": {
+            "name": "Key",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fndjnHZVWAn",
+          "sdkName": "value",
+          "definition": {
+            "name": "Value",
+            "type": "long_text",
+            "template": {}
+          }
+        }
+      ]
     }
   ]
 }

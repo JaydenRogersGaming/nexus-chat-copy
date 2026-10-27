@@ -197,7 +197,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
                 <Pencil className="w-3.5 h-3.5" />
               </button>
             )}
-            {!isOwn && <ReportMessageButton messageId={msg.id} senderEmail={msg.senderEmail} content={msg.content} />}
+            {!isOwn && <ReportMessageButton messageId={msg.id} senderEmail={msg.senderEmail} content={msg.content} canHold={['guardian', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'].includes(profile?.role || '')} />}
             <button onClick={() => onReply?.(msg)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Reply">
               <Reply className="w-3.5 h-3.5" />
             </button>

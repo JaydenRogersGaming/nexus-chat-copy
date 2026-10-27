@@ -27,7 +27,9 @@ import { isOwnerEmail } from '../lib/gameData';
 import HolidayDecor from './HolidayDecor';
 import { HOLIDAYS, variantFor, windowFor } from '../lib/holidays';
 import EventShop from './EventShop';
+import FriendsWatching from './FriendsWatching';
 import { useActiveEvent } from '../hooks/useActiveEvent';
+import { useChatSettingsSync } from '../hooks/useChatSettingsSync';
 
 const CLOAK_PRESETS = [
   { label: 'Google Docs', title: 'Untitled document - Google Docs', favicon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
@@ -217,6 +219,7 @@ export default function Layout() {
   }, [dismissedIds]);
 
   const { profile, impersonating, impersonate } = useApp();
+  useChatSettingsSync();
   const [bgId, setBgId] = useState('');
   useEffect(() => {
     if (!profile) return;
@@ -332,6 +335,7 @@ export default function Layout() {
             </button>
           </div>
         </header>
+        <FriendsWatching />
         <main className="flex-1 overflow-hidden">
           <Outlet />
         </main>

@@ -24,7 +24,7 @@ async function viewersOf(ids: string[]) {
 export default createEndpoint({
   description: 'Creates, joins and syncs watch parties with live chat and reactions',
   inputSchema: z.object({
-    action: z.enum(['list', 'create', 'state', 'control', 'send', 'end']),
+    action: z.enum(['list', 'friends', 'create', 'state', 'control', 'send', 'end']),
     id: z.string().optional(),
     name: z.string().max(60).optional(),
     title: z.string().trim().max(100).optional(),
@@ -47,6 +47,21 @@ export default createEndpoint({
       const { records } = await zite.watchParties.findAll({ filters: { ended: false }, sort: [{ field: 'scheduledFor', direction: 'asc' }], limit: 100 });
       const v = await viewersOf(records.map(r => r.id));
       return { parties: records.map(r => toParty(r, v.get(r.id) || [])), messages: [] };
+    }
+    if (input.action === 'friends') {
+      // Parties a friend is hosting or watching: live now, or scheduled to start within 15 minutes
+      const { rows } = await zite.sql({ query: `SELECT "requesterEmail","addresseeEmail" FROM "Friendships" WHERE "status" = 'Accepted' AND (lower("requesterEmail") = $1 OR lower("addresseeEmail") = $1) LIMIT 1000`, params: [email] });
+      const friends = new Set(rows.map(r => [String(r.requesterEmail).toLowerCase(), String(r.addresseeEmail).toLowerCase()].find(e => e !== email)!));
+      if (!friends.size) return { parties: [], messages: [] };
+      const { records } = await zite.watchParties.findAll({ filters: { ended: false }, limit: 200 });
+      const v = await viewersOf(records.map(r => r.id));
+      const soon = Date.now() + 15 * 60_000;
+      const out = records.map(r => toParty(r, v.get(r.id) || [])).filter(p => {
+        const friendHere = friends.has(p.hostEmail.toLowerCase()) || p.viewers.some(x => friends.has(x.email.toLowerCase()));
+        const startsSoon = new Date(p.scheduledFor).getTime() <= soon;
+        return friendHere && startsSoon && !p.viewers.some(x => x.email.toLowerCase() === email);
+      });
+      return { parties: out, messages: [] };
     }
     if (input.action === 'create') {
       if (!input.title || !input.videoUrl) fail('Add a title and a video link.');

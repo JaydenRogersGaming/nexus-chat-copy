@@ -16,7 +16,7 @@ import { isOwnerEmail, EFFECT_TO_CLASS, TITLE_FONTS } from '../lib/gameData';
 import TitleBadge from '../components/TitleBadge';
 import RoleChip from '../components/RoleChip';
 import { toast } from 'sonner';
-import { roles as rolesApi, RolesOutputType } from 'zitejs/api';
+import { roles as rolesApi, RolesOutputType, chatSettings } from 'zitejs/api';
 
 const ROLE_META: Record<string, { color: string; label: string }> = {
   owner:      { color: 'text-yellow-400',  label: 'Owner' },
@@ -101,9 +101,16 @@ export default function AdminPage() {
   useEffect(() => {
     if (chatWordsText === DB.getChatWords().join('\n')) return;
     setWordsSaved('saving');
-    const t = setTimeout(() => { DB.setChatWords(chatWordsText.split(/[\n,]/)); setWordsSaved('saved'); }, 700);
+    const t = setTimeout(async () => {
+      const words = chatWordsText.split(/[\n,]/);
+      DB.setChatWords(words);
+      try { await chatSettings({ action: 'saveWords', words }); setWordsSaved('saved'); }
+      catch (e) { setWordsSaved('idle'); toast.error(e instanceof Error ? e.message : 'Could not save word list'); }
+    }, 700);
     return () => clearTimeout(t);
   }, [chatWordsText]);
+  // Load the shared list + immunity from the server
+  useEffect(() => { chatSettings({ action: 'get' }).then(r => { if (r.words) { DB.setChatWords(r.words); setChatWordsText(r.words.join('\n')); } DB.setMuteImmune(r.immune); setImmune(r.immune); }).catch(() => {}); }, []);
   // Name filter: auto-add after you stop typing
   useEffect(() => {
     const w = newBannedName.trim();
@@ -772,9 +779,9 @@ export default function AdminPage() {
                 <Input value={immuneSearch} onChange={e => setImmuneSearch(e.target.value)} placeholder="Search name or email…" />
                 <div className="max-h-56 overflow-y-auto border border-border rounded-lg divide-y divide-border">
                   {signedUp.filter(u => { const q = immuneSearch.toLowerCase(); return !q || u.email.toLowerCase().includes(q) || u.name.toLowerCase().includes(q); }).map(u => {
-                    const on = immune.includes(u.email);
+                    const on = immune.some(x => x.toLowerCase() === u.email.toLowerCase());
                     return (
-                      <button key={u.email} type="button" onClick={() => { const now = DB.toggleMuteImmune(u.email); setImmune(DB.getMuteImmune()); toast.success(now ? `🛡️ ${u.name} is now immune` : `${u.name} is no longer immune`); }}
+                      <button key={u.email} type="button" onClick={async () => { const now = !immune.some(x => x.toLowerCase() === u.email.toLowerCase()); try { const r = await chatSettings({ action: 'setImmune', email: u.email, immune: now }); DB.setMuteImmune(r.immune); setImmune(r.immune); toast.success(now ? `🛡️ ${u.name} is now immune` : `${u.name} is no longer immune`); } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not update'); } }}
                         className={`w-full flex items-center justify-between px-3 py-2 text-left text-xs hover:bg-secondary/50 ${on ? 'bg-primary/10' : ''}`}>
                         <span><span className="font-semibold">{u.name}</span> <span className="text-muted-foreground">{u.email}</span></span>
                         <span className={on ? 'text-primary font-bold' : 'text-muted-foreground'}>{on ? '🛡️ Immune' : 'Not immune'}</span>

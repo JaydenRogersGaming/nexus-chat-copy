@@ -9,7 +9,8 @@ const warningSchema = z.object({ id: z.string(), reason: z.string(), fromEmail: 
 export default createEndpoint({
   description: 'Staff warnings and bulk deletion of a user\'s recent messages',
   inputSchema: z.object({
-    action: z.enum(['warn', 'myWarnings', 'ack', 'bulkDelete']),
+    action: z.enum(['warn', 'myWarnings', 'ack', 'bulkDelete', 'hold']),
+    messageId: z.string().optional(),
     email: z.string().optional(),
     reason: z.string().optional(),
     warningId: z.string().optional(),
@@ -38,8 +39,26 @@ export default createEndpoint({
     const target = (input.email || '').toLowerCase().trim();
     if (!target) bad('Pick a user');
     if (target === me) bad("You can't do that to yourself");
-    const actor = await requirePerm(me, 'users.restrict');
-    if (level(await loadActor(target)) >= level(actor)) deny('You can only act on users below your rank.');
+    const self = await loadActor(me);
+    const tgt = await loadActor(target);
+    if ((input.action === 'warn' || input.action === 'hold') && self.chatRole === 'guardian') {
+      // Guardians may warn / hold messages from regular members only
+      if (level(tgt) > 0 || ['helper', 'guardian', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'].includes(tgt.chatRole)) deny('Guardians can only act on regular members.');
+    } else {
+      const actor = await requirePerm(me, 'users.restrict');
+      if (level(tgt) >= level(actor)) deny('You can only act on users below your rank.');
+    }
+
+    if (input.action === 'hold') {
+      if (!input.messageId) bad('Pick a message');
+      const { rows } = await zite.sql({ query: `SELECT "id","content","roomId" FROM "ChatMessages" WHERE "messageId" = $1 AND lower("senderEmail") = $2 LIMIT 1`, params: [input.messageId, target] });
+      const m = rows[0];
+      if (!m) bad('Message not found');
+      await zite.chatMessages.update({ id: String(m.id), record: { deleted: true } as never });
+      await zite.reports.create({ record: { subject: `Held message from ${target}`, targetType: 'Chat Message', targetId: input.messageId!, reason: `Hidden by ${me} for mod review. Room: ${String(m.roomId)}. Message: "${String(m.content ?? '').slice(0, 500)}"`, reporterEmail: me, status: 'Open', resolutionNote: null, reviewedBy: null } });
+      await audit(me, 'holdMessage', target, input.messageId!);
+      return { warnings: [], deleted: 1 };
+    }
 
     if (input.action === 'warn') {
       const reason = (input.reason || '').trim();
