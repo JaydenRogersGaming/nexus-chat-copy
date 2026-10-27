@@ -556,6 +556,22 @@ export type ItemOwnersRecordInput = {
   ownerName: string | null;
 };
 
+/** A record in the "User Profiles" table, as it is read back. */
+export type UserProfilesRecordType = {
+  id: string;
+  /** Primary field. "Email" */
+  email?: string;
+  profileData?: string;
+  /** Read-only. "Created". Auto-set when record was created (ISO 8601) */
+  created?: string;
+};
+
+/** What you may write when creating or updating a record in the "User Profiles" table. */
+export type UserProfilesRecordInput = {
+  email: string | null;
+  profileData: string | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -585,6 +601,7 @@ export const zite = {
   tournaments: createTableClient<TournamentsRecordType, TournamentsRecordInput>('Tournaments'), // "Tournaments"
   tournamentEntries: createTableClient<TournamentEntriesRecordType, TournamentEntriesRecordInput>('TournamentEntries'), // "Tournament Entries"
   itemOwners: createTableClient<ItemOwnersRecordType, ItemOwnersRecordInput>('ItemOwners'), // "Item Owners"
+  userProfiles: createTableClient<UserProfilesRecordType, UserProfilesRecordInput>('UserProfiles'), // "User Profiles"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

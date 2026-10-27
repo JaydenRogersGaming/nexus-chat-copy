@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { profileSync } from 'zitejs/api';
 import { useAuth } from 'zitejs/auth';
 import { ACHIEVEMENTS, isOwnerEmail } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
@@ -90,6 +91,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [email]);
 
   useEffect(() => { refreshProfile(); }, [refreshProfile]);
+
+  // One shared profile per email: load the server copy on sign-in (any device),
+  // then keep it updated so other devices never start a duplicate account.
+  const synced = useRef(false);
+  useEffect(() => {
+    if (!email || email !== realEmail) return;
+    synced.current = false;
+    profileSync({ action: 'get' }).then(({ data }) => {
+      if (data) { DB.saveUser({ ...DB.getOrCreateUser(email), ...JSON.parse(data), email }); refreshProfile(); }
+      else { const local = DB.getUser(email); if (local) profileSync({ action: 'save', data: JSON.stringify(local) }).catch(() => {}); }
+      synced.current = true;
+    }).catch(() => { synced.current = true; });
+  }, [email, realEmail]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!profile || !synced.current || profile.email !== realEmail) return;
+    const t = setTimeout(() => { profileSync({ action: 'save', data: JSON.stringify(profile) }).catch(() => {}); }, 1500);
+    return () => clearTimeout(t);
+  }, [profile, realEmail]);
 
   // Check streak on login
   const streakChecked = useRef(false);

@@ -21,6 +21,7 @@ import type { default as _ItemOwnersEp } from '../src/api/itemOwners';
 import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
+import type { default as _ProfileSyncEp } from '../src/api/profileSync';
 import type { default as _ReportsEp } from '../src/api/reports';
 import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _StaffToolsEp } from '../src/api/staffTools';
@@ -125,6 +126,11 @@ export type PresenceInputType = NonNullable<_PresenceCfg['inputSchema']> extends
 export type PresenceOutputType = Awaited<ReturnType<_PresenceCfg['execute']>>;
 export const presence = createCaller<PresenceInputType, PresenceOutputType>('presence');
 
+type _ProfileSyncCfg = typeof _ProfileSyncEp;
+export type ProfileSyncInputType = NonNullable<_ProfileSyncCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ProfileSyncCfg['execute']>[0]['input'];
+export type ProfileSyncOutputType = Awaited<ReturnType<_ProfileSyncCfg['execute']>>;
+export const profileSync = createCaller<ProfileSyncInputType, ProfileSyncOutputType>('profileSync');
+
 type _ReportsCfg = typeof _ReportsEp;
 export type ReportsInputType = NonNullable<_ReportsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ReportsCfg['execute']>[0]['input'];
 export type ReportsOutputType = Awaited<ReturnType<_ReportsCfg['execute']>>;
@@ -186,6 +192,7 @@ export const api = {
   listings,
   messages,
   presence,
+  profileSync,
   reports,
   roles,
   staffTools,

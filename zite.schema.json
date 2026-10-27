@@ -1672,6 +1672,46 @@
           }
         }
       ]
+    },
+    {
+      "id": "tikh9mMr15Q",
+      "sdkName": "userProfiles",
+      "name": "User Profiles",
+      "primaryFieldId": "fkFVHfw1gtV",
+      "fields": [
+        {
+          "id": "fkFVHfw1gtV",
+          "sdkName": "email",
+          "definition": {
+            "name": "Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fqw1w8VSQ6C",
+          "sdkName": "profileData",
+          "definition": {
+            "name": "Profile Data",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fmGTugPHs6Q",
+          "sdkName": "created",
+          "definition": {
+            "name": "Created",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
     }
   ]
 }

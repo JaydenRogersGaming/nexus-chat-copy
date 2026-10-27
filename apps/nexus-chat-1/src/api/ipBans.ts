@@ -29,7 +29,7 @@ export default createEndpoint({
     const { rows: seen } = await zite.sql({
       query: `SELECT s."ipAddress", lower(s."email") AS email, s.updated_at AS "lastSeen", p."role", p."marketRole"
               FROM "UserSightings" s LEFT JOIN "Presence" p ON lower(p."email") = lower(s."email")
-              WHERE coalesce(s."ipAddress",'') <> '' ORDER BY s.updated_at DESC LIMIT 1000`,
+              WHERE coalesce(s."ipAddress",'') <> '' ORDER BY s.updated_at DESC LIMIT 20000`,
     });
     const staffIps = new Set<string>();
     const myIps = new Set<string>();
@@ -81,8 +81,8 @@ export default createEndpoint({
         id: b.id, ip: show(b.ipAddress || ''), reason: b.reason || '', bannedBy: b.bannedBy || '',
         bannedAt: b.bannedAt || '', expiresAt: b.expiresAt || '', active: isBanActive(b.expiresAt),
       })).sort((a, b) => b.bannedAt.localeCompare(a.bannedAt)),
-      sightings: [...byIp.entries()].slice(0, 200).map(([ip, v]) => ({
-        ip: show(ip), emails: [...v.emails].slice(0, 10), lastSeen: v.lastSeen, banned: activeIps.has(ip), staff: staffIps.has(ip),
+      sightings: [...byIp.entries()].map(([ip, v]) => ({
+        ip: show(ip), emails: [...v.emails], lastSeen: v.lastSeen, banned: activeIps.has(ip), staff: staffIps.has(ip),
       })),
     };
   },
