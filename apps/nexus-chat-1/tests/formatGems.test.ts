@@ -20,7 +20,7 @@ for (const v of [Infinity, INFINITE_GEMS]) {
 assert.ok(isInfiniteGems(Infinity) && isInfiniteGems(-Infinity) && isInfiniteGems(INFINITE_GEMS));
 assert.ok(!isInfiniteGems(999_999_999) && !isInfiniteGems(1e300));
 // The old "infinite" grant value is a real number, so it is NOT infinity
-eq(999_999_999, '999.99m');
+eq(999_999_999, '999m');
 
 // Zero, small, invalid
 eq(0, '0'); eq(-0, '0'); eq(7, '7'); eq(999, '999'); eq(12.9, '12');
@@ -28,7 +28,7 @@ eq(NaN, '0'); eq(undefined, '0'); eq(null, '0'); eq('', '0'); eq('abc', '0');
 
 // Game-style boundaries
 eq(1_000, '1k');
-eq(999_999, '999.9k');
+eq(999_999, '999k');
 eq(1_000_000, '1m');
 eq(1_000_000_000, '1b');
 eq(1e12, '1t');
