@@ -10,11 +10,12 @@ import * as DB from '../lib/storage';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import CosmeticShop from './CosmeticShop';
+import LimitedCollection from './LimitedCollection';
 
 type Props = { open: boolean; onClose: () => void };
 
 export default function ShopModal({ open, onClose }: Props) {
-  const { profile, addGems, checkAchievements } = useApp();
+  const { profile, addGems, checkAchievements, updateProfile } = useApp();
   const [buying, setBuying] = useState<string | null>(null);
 
   if (!profile) return null;
@@ -49,11 +50,13 @@ export default function ShopModal({ open, onClose }: Props) {
           </DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="titles" className="mt-2">
-          <TabsList className="grid grid-cols-3 w-full">
+          <TabsList className="grid grid-cols-4 w-full">
             <TabsTrigger value="titles">Titles</TabsTrigger>
             <TabsTrigger value="bg">Backgrounds</TabsTrigger>
             <TabsTrigger value="typing">Typing</TabsTrigger>
+            <TabsTrigger value="limited">✨ Limited</TabsTrigger>
           </TabsList>
+          <TabsContent value="limited"><LimitedCollection /></TabsContent>
           <TabsContent value="bg"><CosmeticShop kind="bg" /></TabsContent>
           <TabsContent value="typing"><CosmeticShop kind="typing" /></TabsContent>
           <TabsContent value="titles">
@@ -72,7 +75,9 @@ export default function ShopModal({ open, onClose }: Props) {
                     <Gem className="w-3.5 h-3.5 text-purple-400" />{item.cost.toLocaleString()}
                   </span>
                   {isOwned
-                    ? <span className="text-xs text-green-400 font-semibold px-2 py-1 bg-green-400/10 rounded-lg">Owned ✓</span>
+                    ? (profile.activeTitle === item.name
+                      ? <Button size="sm" variant="secondary" className="text-xs" onClick={() => updateProfile({ activeTitle: '' })}>Unequip</Button>
+                      : <Button size="sm" variant="outline" className="text-xs" onClick={() => updateProfile({ activeTitle: item.name, activeTitleEffect: item.effect, activeTitleColor: item.color })}>Equip</Button>)
                     : <Button size="sm" disabled={!canAfford || buying === item.name} onClick={() => buy(item)} className="text-xs">{buying === item.name ? '…' : 'Buy'}</Button>
                   }
                 </div>

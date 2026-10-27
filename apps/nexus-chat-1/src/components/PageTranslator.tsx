@@ -22,6 +22,9 @@ export default function PageTranslator({ lang }: { lang: string }) {
     if (!lang || lang === 'en') {
       tracked.forEach(n => { const o = originals.get(n); if (o !== undefined && n.isConnected) n.nodeValue = o; });
       tracked.clear();
+      document.querySelectorAll('[data-tr-placeholder],[data-tr-title],[data-tr-aria-label]').forEach(el => {
+        ['placeholder', 'title', 'aria-label'].forEach(a => { const o = el.getAttribute(`data-tr-${a}`); if (o !== null) el.setAttribute(a, o); });
+      });
       return;
     }
 
@@ -51,10 +54,29 @@ export default function PageTranslator({ lang }: { lang: string }) {
       if (cache[orig.trim()]) apply(n); else pending.add(orig.trim());
     };
 
+    const ATTRS = ['placeholder', 'title', 'aria-label'];
+    const attrEls = new Set<Element>();
+    const visitAttrs = (el: Element) => {
+      if (el.closest('[data-no-translate]')) return;
+      ATTRS.forEach(a => {
+        const v = el.getAttribute(a); if (!v) return;
+        const ok = `data-tr-${a}`;
+        let orig = el.getAttribute(ok);
+        if (orig === null || (v !== orig && v !== cache[orig.trim()])) { orig = v; el.setAttribute(ok, v); }
+        if (!shouldTranslate(orig)) return;
+        attrEls.add(el);
+        const tr = cache[orig.trim()];
+        if (tr) { if (v !== tr) { applying = true; el.setAttribute(a, tr); applying = false; } } else pending.add(orig.trim());
+      });
+    };
     const scan = (root: Node) => {
       if (root.nodeType === Node.TEXT_NODE) { visit(root as Text); return; }
+      if (root.nodeType !== Node.ELEMENT_NODE) return;
       const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       while (w.nextNode()) visit(w.currentNode as Text);
+      const el = root as Element;
+      visitAttrs(el);
+      el.querySelectorAll('[placeholder],[title],[aria-label]').forEach(visitAttrs);
     };
 
     const flush = async () => {
@@ -66,6 +88,7 @@ export default function PageTranslator({ lang }: { lang: string }) {
         batch.forEach((b, i) => { cache[b] = translations[i]; });
         localStorage.setItem(cacheKey, JSON.stringify(cache));
         tracked.forEach(n => n.isConnected ? apply(n) : tracked.delete(n));
+        attrEls.forEach(el => el.isConnected ? visitAttrs(el) : attrEls.delete(el));
       } catch { /* keep English if translation fails */ }
       if (pending.size) timer = window.setTimeout(flush, 300);
     };
@@ -77,11 +100,12 @@ export default function PageTranslator({ lang }: { lang: string }) {
       if (applying) return;
       muts.forEach(m => {
         if (m.type === 'characterData') scan(m.target);
+        else if (m.type === 'attributes') visitAttrs(m.target as Element);
         m.addedNodes.forEach(scan);
       });
       if (pending.size) schedule();
     });
-    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS });
     return () => { obs.disconnect(); clearTimeout(timer); };
   }, [lang]);
 

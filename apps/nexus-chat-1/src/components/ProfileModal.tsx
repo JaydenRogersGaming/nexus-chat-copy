@@ -181,7 +181,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
             <Label className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" />Language</Label>
             <select
               value={language}
-              onChange={e => setLanguage(e.target.value)}
+              onChange={e => { setLanguage(e.target.value); updateProfile({ language: e.target.value }); }}
               className="mt-1 w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {LANGUAGES.map(l => (
