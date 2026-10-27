@@ -30,6 +30,7 @@ import type { default as _TradesEp } from '../src/api/trades';
 import type { default as _TranslateEp } from '../src/api/translate';
 import type { default as _TypingEp } from '../src/api/typing';
 import type { default as _VideoRoomsEp } from '../src/api/videoRooms';
+import type { default as _WatchPartyEp } from '../src/api/watchParty';
 
 type _AdminUsersCfg = typeof _AdminUsersEp;
 export type AdminUsersInputType = NonNullable<_AdminUsersCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AdminUsersCfg['execute']>[0]['input'];
@@ -171,6 +172,11 @@ export type VideoRoomsInputType = NonNullable<_VideoRoomsCfg['inputSchema']> ext
 export type VideoRoomsOutputType = Awaited<ReturnType<_VideoRoomsCfg['execute']>>;
 export const videoRooms = createCaller<VideoRoomsInputType, VideoRoomsOutputType>('videoRooms');
 
+type _WatchPartyCfg = typeof _WatchPartyEp;
+export type WatchPartyInputType = NonNullable<_WatchPartyCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_WatchPartyCfg['execute']>[0]['input'];
+export type WatchPartyOutputType = Awaited<ReturnType<_WatchPartyCfg['execute']>>;
+export const watchParty = createCaller<WatchPartyInputType, WatchPartyOutputType>('watchParty');
+
 
 export const api = {
   adminUsers,
@@ -201,4 +207,5 @@ export const api = {
   translate,
   typing,
   videoRooms,
+  watchParty,
 };

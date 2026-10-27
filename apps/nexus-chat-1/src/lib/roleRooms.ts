@@ -12,6 +12,7 @@ export const ROLE_ROOMS: { role: string; name: string; badgeOnly?: boolean }[] =
   { role: 'senior-mod', name: '🟣 Senior Mod Room' },
   { role: 'mod', name: '🔵 Mod Room' },
   { role: 'helper', name: '🟢 Helper Room', badgeOnly: true },
+  { role: 'guardian', name: '🛡️ Guardian Room', badgeOnly: true },
   { role: 'vip', name: '💖 VIP Lounge', badgeOnly: true },
 ];
 

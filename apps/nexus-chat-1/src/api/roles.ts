@@ -5,7 +5,7 @@ import { zite } from 'zitejs/db';
 type RoleUser = { email: string; name: string; role: string };
 const NO_USERS: RoleUser[] = [];
 import { isOwnerEmail } from '../lib/permissions';
-const ROLES = ['user', 'vip', 'helper', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'] as const;
+const ROLES = ['user', 'vip', 'helper', 'guardian', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'] as const;
 const RANK: Record<string, number> = { user: 0, vip: 1, helper: 2, mod: 3, 'senior-mod': 4, admin: 5, 'co-owner': 6, owner: 7 };
 
 async function roleOf(email: string): Promise<string> {

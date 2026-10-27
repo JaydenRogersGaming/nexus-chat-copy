@@ -30,6 +30,7 @@ function getRoleInfo(role: string): RoleInfo | null {
     case 'senior-mod': return { label: 'Sr. Mod', color: '#a855f7', icon: <Shield className="w-2.5 h-2.5" />,      rank: 1 };
     case 'mod':       return { label: 'Mod',       color: '#44aaff', icon: <Shield className="w-2.5 h-2.5" />,      rank: 1 };
     case 'helper':    return { label: 'Helper',    color: '#22c55e', icon: <Shield className="w-2.5 h-2.5" />,      rank: 0 };
+    case 'guardian':  return { label: 'Guardian',  color: '#14b8a6', icon: <Shield className="w-2.5 h-2.5" />,      rank: 0 };
     case 'vip':       return { label: 'VIP',       color: '#ec4899', icon: <Star className="w-2.5 h-2.5" />,        rank: 0 };
     default:          return null;
   }

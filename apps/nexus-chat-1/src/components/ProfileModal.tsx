@@ -9,6 +9,7 @@ import { useUpload } from 'zitejs/upload';
 import TitleBadge from './TitleBadge';
 import ItemSwitcher from './ItemSwitcher';
 import * as DB from '../lib/storage';
+import { allLimitedBadges } from '../lib/holidays';
 import { Camera, Trophy, Globe, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -64,7 +65,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
       setSelectedTitleColor(profile.activeTitleColor || '');
       setLanguage(profile.language || 'en');
     }
-  }, [open, profile]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps -- only reset when opened, so picks aren't wiped
 
   if (!profile) return null;
 
@@ -78,7 +79,9 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
       return { name: t, effect: shop?.effect || 'none', color: shop?.color || '#aaaaaa' };
     }),
     ...(ownedTitles.includes('Best Friend') ? [{ name: 'Best Friend', effect: 'rainbow', color: '#ff69b4' }] : []),
+    ...(() => { const items = new Set(DB.getUserItems(profile.email)); return allLimitedBadges().filter(b => items.has(b.id)).map(b => ({ name: `${b.emoji} ${b.name}`, effect: 'glow', color: b.color })); })(),
   ];
+  if (selectedTitle && !allTitles.some(t => t.name === selectedTitle)) allTitles.push({ name: selectedTitle, effect: selectedTitleEffect || 'none', color: selectedTitleColor || '#aaaaaa' });
 
   async function handlePicUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file) return;

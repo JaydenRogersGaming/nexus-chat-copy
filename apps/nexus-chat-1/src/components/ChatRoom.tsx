@@ -24,6 +24,7 @@ const ROLE_OPTIONS = [
   { id: 'user', label: '👤 User', desc: 'Regular member' },
   { id: 'vip', label: '💖 VIP', desc: 'Special supporter badge' },
   { id: 'helper', label: '🟢 Helper', desc: 'Helps new people out' },
+  { id: 'guardian', label: '🛡️ Guardian', desc: 'Watches chats for safety and positivity, and steps in to support members' },
   { id: 'mod', label: '🔵 Mod', desc: 'Delete user messages, mute' },
   { id: 'senior-mod', label: '🟣 Senior Mod', desc: 'Lead moderator' },
   { id: 'admin', label: '🔴 Admin', desc: 'Titles, bugs, delete mod messages' },

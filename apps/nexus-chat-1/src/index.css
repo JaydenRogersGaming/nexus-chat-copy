@@ -180,3 +180,6 @@
 .lt-sway { animation: lt-sway 2.2s ease-in-out infinite; transform-origin: left center; }
 @keyframes lt-hop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 .lt-hop { animation: lt-hop 1s ease-in-out infinite; }
+
+@keyframes wp-float { 0% { transform: translateY(0) scale(.8); opacity: 1; } 100% { transform: translateY(-180px) scale(1.3); opacity: 0; } }
+.wp-float { animation: wp-float 2.4s ease-out forwards; }

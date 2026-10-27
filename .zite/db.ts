@@ -572,6 +572,78 @@ export type UserProfilesRecordInput = {
   profileData: string | null;
 };
 
+/** A record in the "Watch Parties" table, as it is read back. */
+export type WatchPartiesRecordType = {
+  id: string;
+  /** Primary field. "Title" */
+  title?: string;
+  videoUrl?: string;
+  hostEmail?: string;
+  hostName?: string;
+  /** "Scheduled For". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  scheduledFor?: string;
+  playing?: boolean;
+  /** "Position Seconds". 1 decimal places, format: local (e.g. 1,000,000.50) */
+  positionSeconds?: number;
+  /** "Synced At Ms". 0 decimal places, format: local (e.g. 1,000,000.50) */
+  syncedAtMs?: number;
+  ended?: boolean;
+};
+
+/** What you may write when creating or updating a record in the "Watch Parties" table. */
+export type WatchPartiesRecordInput = {
+  title: string | null;
+  videoUrl: string | null;
+  hostEmail: string | null;
+  hostName: string | null;
+  scheduledFor: string | Date | null;
+  playing: string | boolean | null;
+  positionSeconds: string | number | null;
+  syncedAtMs: string | number | null;
+  ended: string | boolean | null;
+};
+
+/** A record in the "Watch Party Messages" table, as it is read back. */
+export type WatchPartyMessagesRecordType = {
+  id: string;
+  /** Primary field. "Text" */
+  text?: string;
+  partyId?: string;
+  senderEmail?: string;
+  senderName?: string;
+  isReaction?: boolean;
+  /** Read-only. "Sent At". Auto-set when record was created (ISO 8601) */
+  sentAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Watch Party Messages" table. */
+export type WatchPartyMessagesRecordInput = {
+  text: string | null;
+  partyId: string | null;
+  senderEmail: string | null;
+  senderName: string | null;
+  isReaction: string | boolean | null;
+};
+
+/** A record in the "Watch Party Viewers" table, as it is read back. */
+export type WatchPartyViewersRecordType = {
+  id: string;
+  /** Primary field. "Email" */
+  email?: string;
+  partyId?: string;
+  name?: string;
+  /** "Last Seen Ms". 0 decimal places, format: local (e.g. 1,000,000.50) */
+  lastSeenMs?: number;
+};
+
+/** What you may write when creating or updating a record in the "Watch Party Viewers" table. */
+export type WatchPartyViewersRecordInput = {
+  email: string | null;
+  partyId: string | null;
+  name: string | null;
+  lastSeenMs: string | number | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -602,6 +674,9 @@ export const zite = {
   tournamentEntries: createTableClient<TournamentEntriesRecordType, TournamentEntriesRecordInput>('TournamentEntries'), // "Tournament Entries"
   itemOwners: createTableClient<ItemOwnersRecordType, ItemOwnersRecordInput>('ItemOwners'), // "Item Owners"
   userProfiles: createTableClient<UserProfilesRecordType, UserProfilesRecordInput>('UserProfiles'), // "User Profiles"
+  watchParties: createTableClient<WatchPartiesRecordType, WatchPartiesRecordInput>('WatchParties'), // "Watch Parties"
+  watchPartyMessages: createTableClient<WatchPartyMessagesRecordType, WatchPartyMessagesRecordInput>('WatchPartyMessages'), // "Watch Party Messages"
+  watchPartyViewers: createTableClient<WatchPartyViewersRecordType, WatchPartyViewersRecordInput>('WatchPartyViewers'), // "Watch Party Viewers"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

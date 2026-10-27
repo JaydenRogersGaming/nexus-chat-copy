@@ -46,7 +46,8 @@ export default function StaffUserActions({ email, name, onDone }: { email: strin
   const canGive = isRealOwner || TITLE_GIVERS.includes(profile?.role || '');
   const canEdit = isRealOwner || profile?.role === 'owner' || DB.hasPerm(profile, 'editusers');
   const canMod = isRealOwner || ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'].includes(profile?.role || '');
-  if ((!canGive && !canEdit && !canMod) || email === profile?.email) return null;
+  const canGuard = profile?.role === 'guardian';
+  if ((!canGive && !canEdit && !canMod && !canGuard) || email === profile?.email) return null;
 
   function give() {
     const t = title.trim();
@@ -69,7 +70,7 @@ export default function StaffUserActions({ email, name, onDone }: { email: strin
         ? <EditAccount email={email} onDone={onDone} />
         : <Button size="sm" variant="outline" className="w-full h-8 text-xs gap-1.5" onClick={() => setEditing(true)}><UserCog className="w-3.5 h-3.5" /> Edit account</Button>
       )}
-      {(isRealOwner || TITLE_GIVERS.includes(profile?.role || '')) && <StaffReportUser email={email} name={name} />}
+      {(isRealOwner || canGuard || TITLE_GIVERS.includes(profile?.role || '')) && <StaffReportUser email={email} name={name} />}
       {(isRealOwner || ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'].includes(profile?.role || '')) && <StaffModTools email={email} name={name} />}
       {isRealOwner && (
         <Button size="sm" variant="outline" className="w-full h-8 text-xs gap-1.5" onClick={() => { impersonate(email); toast.success(`Now signed in as ${name}`); onDone(); }}>

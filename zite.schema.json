@@ -1712,6 +1712,220 @@
           }
         }
       ]
+    },
+    {
+      "id": "tuPKQQXTWGT",
+      "sdkName": "watchParties",
+      "name": "Watch Parties",
+      "primaryFieldId": "fx8Mi2BsBKU",
+      "fields": [
+        {
+          "id": "fx8Mi2BsBKU",
+          "sdkName": "title",
+          "definition": {
+            "name": "Title",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fa6X6ES7hHr",
+          "sdkName": "videoUrl",
+          "definition": {
+            "name": "Video Url",
+            "type": "url",
+            "template": {}
+          }
+        },
+        {
+          "id": "f8DAgWHrz12",
+          "sdkName": "hostEmail",
+          "definition": {
+            "name": "Host Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fp2gZUtMehb",
+          "sdkName": "hostName",
+          "definition": {
+            "name": "Host Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fx6JuWiyd99",
+          "sdkName": "scheduledFor",
+          "definition": {
+            "name": "Scheduled For",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        },
+        {
+          "id": "fmFNPbJKhep",
+          "sdkName": "playing",
+          "definition": {
+            "name": "Playing",
+            "type": "checkbox",
+            "template": {}
+          }
+        },
+        {
+          "id": "fduLugXqtjG",
+          "sdkName": "positionSeconds",
+          "definition": {
+            "name": "Position Seconds",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 1
+            }
+          }
+        },
+        {
+          "id": "ft2nrShGPPL",
+          "sdkName": "syncedAtMs",
+          "definition": {
+            "name": "Synced At Ms",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 0
+            }
+          }
+        },
+        {
+          "id": "fqT95Ba8fXD",
+          "sdkName": "ended",
+          "definition": {
+            "name": "Ended",
+            "type": "checkbox",
+            "template": {}
+          }
+        }
+      ]
+    },
+    {
+      "id": "to5X381Fith",
+      "sdkName": "watchPartyMessages",
+      "name": "Watch Party Messages",
+      "primaryFieldId": "ftYzWKhMbqH",
+      "fields": [
+        {
+          "id": "ftYzWKhMbqH",
+          "sdkName": "text",
+          "definition": {
+            "name": "Text",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpAsxjuL2qP",
+          "sdkName": "partyId",
+          "definition": {
+            "name": "Party Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fivke9XiQqo",
+          "sdkName": "senderEmail",
+          "definition": {
+            "name": "Sender Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "f2E5xuVBtvZ",
+          "sdkName": "senderName",
+          "definition": {
+            "name": "Sender Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fo4ht7FKi3S",
+          "sdkName": "isReaction",
+          "definition": {
+            "name": "Is Reaction",
+            "type": "checkbox",
+            "template": {}
+          }
+        },
+        {
+          "id": "ftxecD6a5Sy",
+          "sdkName": "sentAt",
+          "definition": {
+            "name": "Sent At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tpEgQjs6n88",
+      "sdkName": "watchPartyViewers",
+      "name": "Watch Party Viewers",
+      "primaryFieldId": "fv7QkmSGofA",
+      "fields": [
+        {
+          "id": "fv7QkmSGofA",
+          "sdkName": "email",
+          "definition": {
+            "name": "Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "figtVNKLkbH",
+          "sdkName": "partyId",
+          "definition": {
+            "name": "Party Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "f5dUK4sEE9s",
+          "sdkName": "name",
+          "definition": {
+            "name": "Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fjkLjDdJT8n",
+          "sdkName": "lastSeenMs",
+          "definition": {
+            "name": "Last Seen Ms",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 0
+            }
+          }
+        }
+      ]
     }
   ]
 }

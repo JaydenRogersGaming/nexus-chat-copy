@@ -22,6 +22,7 @@ function getRoleBadge(role: string) {
     case 'senior-mod': return { label: 'Senior Mod', color: '#a855f7', icon: <Shield className="w-3 h-3" /> };
     case 'mod':      return { label: 'Mod',      color: '#44aaff', icon: <Shield className="w-3 h-3" /> };
     case 'helper':   return { label: 'Helper',   color: '#22c55e', icon: <Shield className="w-3 h-3" /> };
+    case 'guardian': return { label: 'Guardian', color: '#14b8a6', icon: <Shield className="w-3 h-3" /> };
     case 'vip':      return { label: 'VIP',      color: '#ec4899', icon: <Star className="w-3 h-3" /> };
     default:         return null;
   }

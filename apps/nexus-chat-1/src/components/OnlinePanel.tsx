@@ -18,7 +18,7 @@ const ROLE_COLOR: Record<string, string> = {
   user: 'text-muted-foreground',
 };
 
-const STAFF = ['owner', 'co-owner', 'admin', 'senior-mod', 'mod', 'helper'];
+const STAFF = ['owner', 'co-owner', 'admin', 'senior-mod', 'mod', 'guardian', 'helper'];
 
 const rank = (r: string) => { const i = STAFF.indexOf(r); return i < 0 ? STAFF.length : i; };
 

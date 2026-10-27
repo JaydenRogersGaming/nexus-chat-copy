@@ -12,7 +12,7 @@ export type UserProfile = {
   activeTitle: string;
   activeTitleEffect: string;
   activeTitleColor: string;
-  role: 'owner' | 'co-owner' | 'admin' | 'senior-mod' | 'mod' | 'helper' | 'vip' | 'user';
+  role: 'owner' | 'co-owner' | 'admin' | 'senior-mod' | 'mod' | 'helper' | 'guardian' | 'vip' | 'user';
   customRole?: string;
   customRoleColor?: string;
   customRoleColor2?: string;
