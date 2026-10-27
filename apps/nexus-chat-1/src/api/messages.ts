@@ -1,6 +1,19 @@
 import { z } from 'zod';
 import { createEndpoint } from 'zitejs/backend';
 import { zite } from 'zitejs/db';
+import { filterText } from '../lib/wordFilter';
+import { BAD_WORDS, isOwnerEmail } from '../lib/gameData';
+
+/** The shared word list + immunity list live in Chat Settings. The server is the one place filtering happens. */
+async function applyFilter(email: string, text: string): Promise<{ text: string; immune: boolean }> {
+  const e = email.toLowerCase();
+  const { records } = await zite.chatSettings.findAll({ limit: 10 });
+  const read = (k: string): string[] | null => { const v = records.find(r => r.key === k)?.value; if (!v) return null; try { return JSON.parse(v); } catch { return null; } };
+  const immuneList = (read('immune') || []).map(x => x.toLowerCase());
+  const immune = isOwnerEmail(e) || immuneList.includes(e);
+  if (immune || text.startsWith('[gif]')) return { text, immune };
+  return { text: filterText(text, read('words') ?? BAD_WORDS).text, immune: false };
+}
 
 const messageSchema = z.object({
   id: z.string(),
@@ -42,17 +55,19 @@ export default createEndpoint({
       if ((rec.senderEmail || '').toLowerCase() !== (context.user?.email || '').toLowerCase()) {
         throw new Error('You can only edit your own messages');
       }
-      await zite.chatMessages.update({ id: rec.id, record: { content: text, edited: true, uncensored: !!input.uncensored } });
+      const f = await applyFilter(context.user?.email || '', text);
+      await zite.chatMessages.update({ id: rec.id, record: { content: f.text, edited: true, uncensored: f.immune } });
       return { messages: [] };
     }
     if (input.action === 'send' && input.message) {
       const m = input.message;
+      const f = await applyFilter(context.user?.email || m.senderEmail, m.content);
       await zite.chatMessages.create({ record: {
         messageId: m.id, roomId: m.chatRoomId, senderEmail: m.senderEmail, senderName: m.senderName,
-        content: m.content, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
+        content: f.text, senderTitle: m.senderTitle, senderTitleColor: m.senderTitleColor,
         senderTitleEffect: m.senderTitleEffect, senderNameColor: m.senderNameColor,
         reactionsJson: JSON.stringify(m.reactions || {}), replyToJson: m.replyTo ? JSON.stringify(m.replyTo) : null,
-        deleted: false, uncensored: !!m.uncensored, sentAt: new Date().toISOString(),
+        deleted: false, uncensored: f.immune, sentAt: new Date().toISOString(),
       } });
       return { messages: [] };
     }

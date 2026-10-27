@@ -359,7 +359,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     const msg: DB.Message = {
       id: crypto.randomUUID(), chatRoomId: room.id,
       senderEmail: profile.email, senderName: profile.name,
-      content: censored, reactions: {}, deleted: false, uncensored: immune,
+      content: text, reactions: {}, deleted: false, uncensored: immune, // server applies the shared filter
       senderTitle: profile.activeTitle, senderTitleEffect: profile.activeTitleEffect,
       senderTitleColor: profile.activeTitleColor, senderNameColor: profile.nameColor,
       replyTo: replyingTo ? { id: replyingTo.id, senderName: replyingTo.senderName, content: replyingTo.content.slice(0, 80) } : undefined,
