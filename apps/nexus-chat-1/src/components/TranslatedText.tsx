@@ -27,10 +27,23 @@ function translateBatched(lang: string, text: string) {
   return new Promise<string>(resolve => { queue.push({ lang, text, resolve }); if (!timer) timer = setTimeout(flush, 250); });
 }
 
+const COMMON_EN = new Set('i you he she it we they the a an and or but is are was were be am to of in on at for with my your me so not no yes yeah lol ok okay hi hey hello what why how who when where this that do does did can will just like im its dont gonna wanna good bad u ur sup bro thanks ty np idk omg wow nice cool fr'.split(' '));
+/** Cheap guess so we only call the translator for messages that aren't already English. */
+export function looksForeign(text: string): boolean {
+  const t = text.replace(/https?:\/\/\S+|@\w+|\[gif\]\S*/g, '');
+  const letters = t.match(/\p{L}/gu) || [];
+  if (!letters.length) return false;
+  const nonLatin = letters.filter(c => !/[a-zA-Z]/.test(c)).length;
+  if (nonLatin / letters.length > 0.15) return true;
+  const words = t.toLowerCase().match(/[a-z']+/g) || [];
+  if (words.length < 3) return false;
+  return !words.some(w => COMMON_EN.has(w.replace(/'/g, '')));
+}
+
 /** Shows a chat message; auto-translates into `lang` (non-English) and lets anyone flip between original/translation. */
 export default function TranslatedText({ text, lang, auto, style }: { text: string; lang: string; auto: boolean; style?: React.CSSProperties }) {
   const target = lang || 'en';
-  const [on, setOn] = useState(auto);
+  const [on, setOn] = useState(auto && (target !== 'en' || looksForeign(text)));
   const [tr, setTr] = useState<string | null>(cache.get(`${target}|${text}`) ?? null);
   useEffect(() => {
     if (!on || tr || !text.trim()) return;

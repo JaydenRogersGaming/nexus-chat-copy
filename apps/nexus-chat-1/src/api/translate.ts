@@ -16,7 +16,7 @@ export default createEndpoint({
       temperature: 0,
       response_format: { type: 'json_object' },
       messages: [
-        { role: 'system', content: `Translate each UI string of a chat app into the language with code "${input.lang}", using that language's own script/alphabet. Keep emoji, numbers, @mentions, URLs and placeholders unchanged. Keep it short and natural. Reply as JSON {"t":[...]} with exactly ${input.texts.length} strings in the same order.` },
+        { role: 'system', content: `Translate each UI string of a chat app into the language with code "${input.lang}", using that language's own script/alphabet. Keep emoji, numbers, @mentions, URLs and placeholders unchanged. Keep it short and natural. If a string is already in that language, return it unchanged. Reply as JSON {"t":[...]} with exactly ${input.texts.length} strings in the same order.` },
         { role: 'user', content: JSON.stringify(input.texts) },
       ],
     });
