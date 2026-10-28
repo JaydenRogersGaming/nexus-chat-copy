@@ -662,6 +662,37 @@ export type ChatSettingsRecordInput = {
   value: string | null;
 };
 
+/** A record in the "Custom Limited Items" table, as it is read back. */
+export type CustomLimitedItemsRecordType = {
+  id: string;
+  /** Primary field. "Name" */
+  name?: string;
+  kind?: "Title" | "Typing Effect" | "Background" | string;
+  emoji?: string;
+  color?: string;
+  color2?: string;
+  effect?: string;
+  typingText?: string;
+  /** "Cost". 0 decimal places, format: local (e.g. 1,000,000.50) */
+  cost?: number;
+  holidayKey?: string;
+  active?: boolean;
+};
+
+/** What you may write when creating or updating a record in the "Custom Limited Items" table. */
+export type CustomLimitedItemsRecordInput = {
+  name: string | null;
+  kind: "Title" | "Typing Effect" | "Background" | string | null;
+  emoji: string | null;
+  color: string | null;
+  color2: string | null;
+  effect: string | null;
+  typingText: string | null;
+  cost: string | number | null;
+  holidayKey: string | null;
+  active: string | boolean | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -696,6 +727,7 @@ export const zite = {
   watchPartyMessages: createTableClient<WatchPartyMessagesRecordType, WatchPartyMessagesRecordInput>('WatchPartyMessages'), // "Watch Party Messages"
   watchPartyViewers: createTableClient<WatchPartyViewersRecordType, WatchPartyViewersRecordInput>('WatchPartyViewers'), // "Watch Party Viewers"
   chatSettings: createTableClient<ChatSettingsRecordType, ChatSettingsRecordInput>('ChatSettings'), // "Chat Settings"
+  customLimitedItems: createTableClient<CustomLimitedItemsRecordType, CustomLimitedItemsRecordInput>('CustomLimitedItems'), // "Custom Limited Items"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

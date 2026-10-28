@@ -28,7 +28,7 @@ export function saveCustomThemes(list: CustomTheme[]) {
   window.dispatchEvent(new Event(THEMES_EVENT));
 }
 /** Every background: built-in + owner-made themes. */
-export function getAllBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes(), ...allLimitedThemes()]; }
+export function getAllBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes(), ...ownerLimited.bg, ...allLimitedThemes()]; }
 /** Backgrounds that appear for sale in the shop. */
 export function getShopBgThemes(): BgTheme[] { return [...BG_THEMES, ...getCustomThemes().filter(t => t.inShop)]; }
 
@@ -54,7 +54,14 @@ export function saveCustomTyping(list: CustomTyping[]) {
 export function getShopTypingStyles(): TypingStyle[] { return [...TYPING_STYLES, ...getCustomTyping().filter(t => t.inShop)]; }
 
 /** Every typing style including owner-made and limited holiday ones. */
-export function getAllTypingStyles(): TypingStyle[] { return [...TYPING_STYLES, ...getCustomTyping(), ...allLimitedTyping()]; }
+export function getAllTypingStyles(): TypingStyle[] { return [...TYPING_STYLES, ...getCustomTyping(), ...ownerLimited.typing, ...allLimitedTyping()]; }
+
+/** Owner-made limited items loaded from the server (so equipped ones render everywhere). */
+export const ownerLimited: { bg: BgTheme[]; typing: TypingStyle[] } = { bg: [], typing: [] };
+export function setOwnerLimited(bg: BgTheme[], typing: TypingStyle[]) {
+  ownerLimited.bg = bg; ownerLimited.typing = typing;
+  window.dispatchEvent(new Event(THEMES_EVENT));
+}
 
 // ── Weekly rotating titles ──────────────────────────────────
 export type WeeklyTitle = { name: string; effect: string; color: string; cost: number };

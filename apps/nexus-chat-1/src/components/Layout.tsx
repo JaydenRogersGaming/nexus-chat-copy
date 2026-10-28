@@ -30,6 +30,7 @@ import EventShop from './EventShop';
 import FriendsWatching from './FriendsWatching';
 import { useActiveEvent } from '../hooks/useActiveEvent';
 import { useChatSettingsSync } from '../hooks/useChatSettingsSync';
+import { useOwnerLimited } from '../hooks/useOwnerLimited';
 
 const CLOAK_PRESETS = [
   { label: 'Google Docs', title: 'Untitled document - Google Docs', favicon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
@@ -219,6 +220,7 @@ export default function Layout() {
   }, [dismissedIds]);
 
   const { profile, impersonating, impersonate } = useApp();
+  useOwnerLimited(); // loads owner-made limited items so equipped ones render
   useChatSettingsSync();
   const [bgId, setBgId] = useState('');
   useEffect(() => {

@@ -6,7 +6,33 @@ import { cn } from '@project/components/lib/utils';
 
 const SEARCH_ENGINES = [
   { id: 'google', label: 'Google', icon: '🔍', homeUrl: 'https://www.google.com/webhp?igu=1', searchUrl: 'https://www.google.com/search?igu=1&q=' },
+  { id: 'youtube', label: 'YouTube', icon: '▶️', homeUrl: 'https://www.youtube.com/embed?listType=search&list=music', searchUrl: 'https://www.youtube.com/embed?listType=search&list=' },
+  { id: 'bing', label: 'Bing', icon: '🅱️', homeUrl: 'https://www.bing.com/', searchUrl: 'https://www.bing.com/search?q=' },
+  { id: 'ddg', label: 'DuckDuckGo', icon: '🦆', homeUrl: 'https://html.duckduckgo.com/html/', searchUrl: 'https://html.duckduckgo.com/html/?q=' },
+  { id: 'wiki', label: 'Wikipedia', icon: '📚', homeUrl: 'https://en.m.wikipedia.org/', searchUrl: 'https://en.m.wikipedia.org/w/index.php?search=' },
 ];
+
+/** Quick-launch sites. `embed` ones load inside Nexus; the rest block framing so they open in a new tab. */
+const QUICK_SITES = [
+  { label: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/embed?listType=search&list=trending', embed: true },
+  { label: 'Wikipedia', icon: '📚', url: 'https://en.m.wikipedia.org/', embed: true },
+  { label: 'OpenStreetMap', icon: '🗺️', url: 'https://www.openstreetmap.org/export/embed.html?bbox=-125,24,-66,50', embed: true },
+  { label: 'Archive.org', icon: '🏛️', url: 'https://archive.org/', embed: true },
+  { label: 'Desmos', icon: '📈', url: 'https://www.desmos.com/calculator', embed: true },
+  { label: 'Scratch', icon: '🐱', url: 'https://scratch.mit.edu/', embed: false },
+  { label: 'Spotify', icon: '🎧', url: 'https://open.spotify.com/', embed: false },
+  { label: 'Twitch', icon: '🎮', url: 'https://www.twitch.tv/', embed: false },
+  { label: 'Reddit', icon: '👽', url: 'https://www.reddit.com/', embed: false },
+  { label: 'Gmail', icon: '✉️', url: 'https://mail.google.com/', embed: false },
+  { label: 'Google Docs', icon: '📝', url: 'https://docs.google.com/', embed: false },
+  { label: 'GitHub', icon: '🐙', url: 'https://github.com/', embed: false },
+];
+
+/** Turns YouTube watch/short links into embeddable player URLs. */
+function toEmbeddable(u: string) {
+  const m = u.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1` : u;
+}
 
 export default function BrowserPage() {
   const [engine, setEngine] = useState(SEARCH_ENGINES[0]);
@@ -33,7 +59,7 @@ export default function BrowserPage() {
     const target = isUrl
       ? (val.startsWith('http') ? val : `https://${val}`)
       : `${engine.searchUrl}${encodeURIComponent(val)}`;
-    navigate(target);
+    navigate(toEmbeddable(target));
   }
 
   function goBack() {
@@ -67,7 +93,7 @@ export default function BrowserPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Search engine tabs */}
-      <div className="flex items-center gap-1 px-3 pt-3 pb-1">
+      <div className="flex items-center gap-1 px-3 pt-3 pb-1 overflow-x-auto">
         {SEARCH_ENGINES.map(se => (
           <button
             key={se.id}
@@ -120,6 +146,17 @@ export default function BrowserPage() {
             <ExternalLink className="w-4 h-4" />
           </Button>
         </form>
+      </div>
+
+      {/* Quick launch */}
+      <div className="flex gap-1.5 overflow-x-auto px-3 py-2 border-b border-border bg-card/50">
+        {QUICK_SITES.map(s => (
+          <button key={s.label} onClick={() => (s.embed ? navigate(s.url) : window.open(s.url, '_blank', 'noopener'))}
+            title={s.embed ? `Open ${s.label} here` : `${s.label} blocks embedding — opens in a new tab`}
+            className="shrink-0 flex items-center gap-1 rounded-full border border-border bg-secondary/50 px-2.5 py-1 text-[11px] hover:bg-secondary">
+            <span>{s.icon}</span>{s.label}{!s.embed && <ExternalLink className="w-3 h-3 opacity-60" />}
+          </button>
+        ))}
       </div>
 
       {/* Browser frame */}

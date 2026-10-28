@@ -15,6 +15,8 @@ import { setMusic, getMusic } from '../lib/personalize';
 import ShopMusic from './shop/ShopMusic';
 import CountryPicker from './shop/CountryPicker';
 import ShopItemCard, { ShopRow } from './shop/ShopItemCard';
+import OwnerLimitedEditor from './shop/OwnerLimitedEditor';
+import { useOwnerLimited, bgCss } from '../hooks/useOwnerLimited';
 
 type Props = { event: ActiveEvent; open: boolean; onOpenChange: (o: boolean) => void };
 
@@ -39,7 +41,9 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   const variant = variantFor(themeH, event.year);
   const [stats, setStats] = useState<Record<string, { count: number; firstEmail: string; firstName: string }>>({});
   const [refreshing, setRefreshing] = useState(false);
-  const ids = [theme.id, typing.id, badge.id].join(',');
+  const { items: ownerItems, mutate } = useOwnerLimited();
+  const shownOwnerItems = ownerItems.filter(i => i.active && (!i.holidayKey || i.holidayKey === event.holiday.key));
+  const ids = [theme.id, typing.id, badge.id, ...shownOwnerItems.map(i => `own-${i.id}`)].join(',');
   useEffect(() => {
     if (!open) return;
     itemOwners({ action: 'stats', itemIds: ids.split(',') })
@@ -89,6 +93,19 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
       sub: <p className="text-[11px] text-muted-foreground">{song.genre} · {song.mood}{song.lyrics ? ` · “${song.lyrics[1]}”` : ''}</p>,
       on: getMusic().url === song.url, use: () => { setMusic({ ...getMusic(), url: song.url }); toast.success('Added to your songs — open the 🎵 music player to play it'); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); } },
   ];
+  for (const i of shownOwnerItems) {
+    const id = `own-${i.id}`;
+    if (i.kind === 'Background') rows.push({ id, label: '👑 Owner Exclusive Background', name: `${i.emoji} ${i.name}`, cost: i.cost,
+      preview: <div className={box} style={{ background: bgCss(i) }} />, on: eq.bg === id, use: () => equip({ bg: eq.bg === id ? '' : id }) });
+    else if (i.kind === 'Typing Effect') rows.push({ id, label: '👑 Owner Exclusive Typing', name: `${i.emoji} ${i.name}`, cost: i.cost,
+      preview: <div className={`${box} bg-background text-3xl`}>{i.emoji}</div>,
+      sub: <p className={`text-xs rounded-lg bg-background/60 px-2 py-1.5 ${i.effect === 'rainbow' ? 'title-rainbow' : i.effect === 'pulse' ? 'animate-pulse' : ''}`} style={{ color: i.color }}>You {i.typingText} {i.emoji}</p>,
+      on: eq.typing === id, use: () => equip({ typing: eq.typing === id ? '' : id }) });
+    else rows.push({ id, label: '👑 Owner Exclusive Title', name: `${i.emoji} ${i.name}`, cost: i.cost,
+      preview: <div className={`${box} text-3xl`} style={{ background: `linear-gradient(135deg,${i.color}55,${i.color2}55)` }}>{i.emoji}</div>,
+      on: profile.activeTitle === `${i.emoji} ${i.name}`,
+      use: () => { updateProfile({ activeTitle: `${i.emoji} ${i.name}`, activeTitleColor: i.color, activeTitleEffect: i.effect === 'none' ? '' : i.effect }); bump(n => n + 1); } });
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -125,6 +142,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
             <ShopItemCard key={r.id} row={r} index={i} accent={accent} tierName={tier.name} owned={owned.includes(r.id)} stat={stats[r.id]} me={me}
               onBuy={() => { if (pay(r.id, r.cost, r.name)) r.use(); }} />
           ))}
+          {isRealOwner && <OwnerLimitedEditor items={ownerItems} holidayKey={event.holiday.key} mutate={mutate} />}
           <p className="sm:col-span-2 text-center text-[11px] text-muted-foreground pt-1">Limited items never come back once the event ends.</p>
         </div>
       </DialogContent>

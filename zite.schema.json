@@ -1970,6 +1970,128 @@
           }
         }
       ]
+    },
+    {
+      "id": "t8tz26NhHev",
+      "sdkName": "customLimitedItems",
+      "name": "Custom Limited Items",
+      "primaryFieldId": "fvP8uxy9jgY",
+      "fields": [
+        {
+          "id": "fvP8uxy9jgY",
+          "sdkName": "name",
+          "definition": {
+            "name": "Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fbLme32zJg3",
+          "sdkName": "kind",
+          "definition": {
+            "name": "Kind",
+            "type": "single_select",
+            "template": {
+              "options": [
+                {
+                  "value": "f8Va",
+                  "label": "Title",
+                  "color": "purple"
+                },
+                {
+                  "value": "oUUC",
+                  "label": "Typing Effect",
+                  "color": "orange"
+                },
+                {
+                  "value": "reV8",
+                  "label": "Background",
+                  "color": "blue"
+                }
+              ],
+              "disableColors": false
+            }
+          }
+        },
+        {
+          "id": "f24ouTTEjwF",
+          "sdkName": "emoji",
+          "definition": {
+            "name": "Emoji",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fceqaXdxq4d",
+          "sdkName": "color",
+          "definition": {
+            "name": "Color",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "ftZM6pLLqXb",
+          "sdkName": "color2",
+          "definition": {
+            "name": "Color 2",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fwCxSRPjm1t",
+          "sdkName": "effect",
+          "definition": {
+            "name": "Effect",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fiBupFBXCEa",
+          "sdkName": "typingText",
+          "definition": {
+            "name": "Typing Text",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fp2XkY1GB6a",
+          "sdkName": "cost",
+          "definition": {
+            "name": "Cost",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 0
+            }
+          }
+        },
+        {
+          "id": "fjGuZrtSbAh",
+          "sdkName": "holidayKey",
+          "definition": {
+            "name": "Holiday Key",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fdiKsESYDZu",
+          "sdkName": "active",
+          "definition": {
+            "name": "Active",
+            "type": "checkbox",
+            "template": {
+              "defaultValue": true
+            }
+          }
+        }
+      ]
     }
   ]
 }
