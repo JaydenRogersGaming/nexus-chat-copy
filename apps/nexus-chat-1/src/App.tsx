@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import TournamentPage from './pages/TournamentPage';
 import WatchPartyPage from './pages/WatchPartyPage';
 import VideoRoomsPage from './pages/VideoRoomsPage';
@@ -19,6 +18,7 @@ import AiChatPage from './pages/AiChatPage';
 import BrowserPage from './pages/BrowserPage';
 import CalendarPage from './pages/CalendarPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import VipPage from './pages/VipPage';
 import BanScreen from './components/BanScreen';
 import { useServerBan } from './hooks/useServerBan';
 import MatrixRain from './components/MatrixRain';
@@ -29,7 +29,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const settings = DB.getAppSettings();
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
-  useEffect(() => { if (!isLoading && !user) loginWithRedirect(); }, [isLoading, user]);
   const serverBan = useServerBan(!!user);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
@@ -82,6 +81,7 @@ export default function App() {
               <Route path="tournament"   element={<TournamentPage />} />
               <Route path="watch"        element={<WatchPartyPage />} />
               <Route path="watch/:id"    element={<WatchPartyPage />} />
+              <Route path="vip"          element={<VipPage />} />
               <Route path="draw"         element={<Navigate to="/art" replace />} />
             </Route>
           </Routes>

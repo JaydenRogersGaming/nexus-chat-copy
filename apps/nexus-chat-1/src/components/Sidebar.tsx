@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { logout } from 'zitejs/auth';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard } from 'lucide-react';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -14,6 +14,7 @@ type Props = { onProfileClick: () => void };
 
 const NAV = [
   { to: '/chat',         icon: MessageSquare, label: 'Chat' },
+  { to: '/vip',          icon: Crown,         label: 'VIP' },
   { to: '/video',        icon: Video,         label: 'Video Rooms' },
   { to: '/art',          icon: Brush,         label: 'Art Studio' },
   { to: '/emoji-maker',  icon: Smile,         label: 'Emoji Mixer' },

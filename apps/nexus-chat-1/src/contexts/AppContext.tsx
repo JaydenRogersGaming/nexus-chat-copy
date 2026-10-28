@@ -5,6 +5,7 @@ import { ACHIEVEMENTS, isOwnerEmail } from '../lib/gameData';
 import { checkBadges } from '../lib/badges';
 import * as DB from '../lib/storage';
 import { isInfiniteGems } from '../lib/formatGems';
+import { vipBonus } from '../lib/vip';
 import { toast } from 'sonner';
 import { roles as rolesApi } from 'zitejs/api';
 
@@ -136,9 +137,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const addGems = useCallback((amount: number) => {
+  const addGems = useCallback((rawAmount: number) => {
     setProfile(prev => {
       if (!prev) return prev;
+      // VIPs earn +25% on rewards (spending is unaffected)
+      const amount = rawAmount > 0 ? Math.round(rawAmount * vipBonus(prev.email)) : rawAmount;
       if (!Number.isFinite(amount)) return prev;
       const base = DB.getUser(prev.email) || prev;
       // Infinite gems stay infinite — spending or earning doesn't change them.
