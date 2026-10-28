@@ -128,8 +128,8 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
 
   if (myHidden) return (
     <div className={cn('flex mb-2', isOwn ? 'justify-end' : 'justify-start')}>
-      <button onClick={toggleMine} className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-dashed border-border text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-        <EyeOff className="w-3 h-3" /> Hidden message from {msg.senderName} · <span className="font-semibold">Show</span>
+      <button onDoubleClick={toggleMine} onClick={() => toast('Double-click to show this message')} title="Double-click to show" className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-dashed border-border text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors select-none">
+        <EyeOff className="w-3 h-3" /> Hidden message from {msg.senderName} · <span className="font-semibold">Double-click to show</span>
       </button>
     </div>
   );
