@@ -90,13 +90,10 @@ const LIMITED_TYPING_FX: Record<Holiday['decor'], string> = { spooky: 'lt-flicke
 const FX_POOL = ['lt-flicker', 'lt-shimmer', 'lt-beat', 'lt-sparkle', 'lt-sway', 'lt-hop'];
 
 /** Each refresh climbs a rarity tier, so newer drops are fancier (and pricier). */
-export const TIERS = [
-  { name: 'Rare', mult: 1, glow: '' },
-  { name: 'Epic', mult: 1.5, glow: 'lt-glow' },
-  { name: 'Legendary', mult: 2.2, glow: 'lt-glow' },
-  { name: 'Mythic', mult: 3, glow: 'lt-mythic' },
-] as const;
-export const tierFor = (drop: number) => TIERS[drop === 0 ? 0 : drop <= 2 ? 1 : drop <= 5 ? 2 : 3];
+const TIER_NAMES = ['Rare', 'Epic', 'Legendary', 'Mythic', 'Divine', 'Celestial', 'Cosmic', 'Transcendent', 'Eternal', 'Primordial', 'Infinite', 'Absolute', 'Omniversal', 'Astral', 'Empyrean', 'Exalted', 'Supreme', 'Godlike', 'Immortal', 'Paragon', 'Ascendant', 'Apocalyptic', 'Reality-Bending', 'Multiversal', 'Hyperversal', 'Beyond', 'Unbound', 'Limitless', 'Unfathomable', 'Unknowable', 'Forbidden', 'Cursed', 'Anomalous', 'Singular', 'Unique', 'One-of-One', 'Unrepeatable', 'Lost', 'Forgotten', 'Ancient', 'Primal', 'Arcane', 'Eldritch', 'Occult', 'Otherworldly', 'Ethereal', 'Spectral', 'Phantom', 'Dreambound', 'Voidtouched', 'Abyssal', 'Netherborn', 'Shadowforged', 'Lightforged', 'Starforged', 'Moon-Kissed', 'Sun-Crowned', 'Nebular', 'Galactic', 'Quasar', 'Pulsar', 'Supernova', 'Black-Hole', 'Timeworn', 'Timeless', 'Chronal', 'Fatewoven', 'Destinybound', 'Lawless', 'Paradoxical', 'Impossible', 'Unwritten', 'Uncreated', 'Worldshaper', 'Realmwalker', 'Dimension-Sundered', 'Universe-Born', 'Creation’s First', 'End-of-All', 'Omega', 'Alpha-Omega', 'Godforged', 'Heavenwrought', 'Hellforged', 'Titan-Class', 'Colossal', 'Monumental', 'Monumentally Rare', 'Relic', 'Sacred Relic', 'Crowned Relic', 'Lost Artifact', 'World Relic', 'King’s Treasure', 'Emperor’s Treasure', 'Sovereign', 'Sovereign’s Choice', 'Unattainable', 'Priceless', 'Beyond Price', 'Unclassified', 'Unranked'];
+/** Each refresh climbs one rarity tier, so newer drops are fancier (and pricier). */
+export const TIERS = TIER_NAMES.map((name, i) => ({ name, mult: Math.round((1 + i * 0.35) * 100) / 100, glow: i === 0 ? '' : i < 3 ? 'lt-glow' : 'lt-mythic' }));
+export const tierFor = (drop: number) => TIERS[Math.min(drop, TIERS.length - 1)];
 
 function seeded(str: string) {
   let h = 2166136261;
@@ -154,7 +151,7 @@ export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'
 
 /** Every limited item that could ever exist (for rendering owned items after the event ends). */
 function allYears() { const y = new Date().getFullYear(); return Array.from({ length: 6 }, (_, i) => y - 3 + i); }
-const DROPS = Array.from({ length: 16 }, (_, i) => i);
+const DROPS = Array.from({ length: 104 }, (_, i) => i);
 export function allLimitedThemes(): BgTheme[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).theme))); }
 export function allLimitedTyping(): TypingStyle[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).typing))); }
 export function allLimitedBadges(): LimitedBadge[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).badge))); }
