@@ -79,8 +79,11 @@ export function getActiveEvent(overrides: Override[], now = new Date()): ActiveE
 
 // ── Limited items: unique ids per holiday + year, so each year's set is gone forever after ──
 export type LimitedBadge = { id: string; name: string; emoji: string; color: string; cost: number };
-const DROP_NAMES = ['', 'Remix', 'Neon', 'Glow', 'Shadow', 'Prism', 'Frost', 'Blaze', 'Cosmic', 'Retro', 'Royal', 'Aurora', 'Galaxy', 'Crystal', 'Phantom', 'Solar'];
-const DROP_TYPING = ['', 'is remixing the vibe', 'is glowing up', 'is shining bright', 'is lurking in the shadows', 'is splitting light', 'is freezing the chat', 'is on fire', 'is out of this world', 'is going retro', 'is making a royal entrance', 'is dancing in the aurora', 'is orbiting the chat', 'is crystallizing', 'is haunting the chat', 'is blazing like the sun'];
+const THEME_NOUNS = ['Skyline', 'Realm', 'Dreamscape', 'Vortex', 'Horizon', 'Sanctuary', 'Nebula', 'Kingdom', 'Mirage', 'Citadel', 'Abyss', 'Paradise'];
+const TYPING_NOUNS = ['Whisper', 'Echo', 'Pulse', 'Spark', 'Trail', 'Aura', 'Rhythm', 'Signal'];
+const BADGE_NOUNS = ['Crest', 'Sigil', 'Emblem', 'Medal', 'Crown', 'Relic', 'Seal', 'Star'];
+const DROP_NAMES = ['', 'Velvet', 'Neon', 'Glow', 'Shadow', 'Prism', 'Frost', 'Blaze', 'Cosmic', 'Retro', 'Royal', 'Aurora', 'Galaxy', 'Crystal', 'Phantom', 'Solar'];
+const DROP_TYPING = ['', 'is stirring up magic', 'is glowing up', 'is shining bright', 'is lurking in the shadows', 'is splitting light', 'is freezing the chat', 'is on fire', 'is out of this world', 'is going retro', 'is making a royal entrance', 'is dancing in the aurora', 'is orbiting the chat', 'is crystallizing', 'is haunting the chat', 'is blazing like the sun'];
 const BONUS_EMOJI = ['💎', '👑', '🌟', '🔮', '⚡', '🌈', '🪐', '🦄', '🐉', '🌌', '🏆', '🔥'];
 
 const LIMITED_TYPING_FX: Record<Holiday['decor'], string> = { spooky: 'lt-flicker', snow: 'lt-shimmer', hearts: 'lt-beat', fireworks: 'lt-sparkle', confetti: 'lt-sparkle', leaves: 'lt-sway', clover: 'lt-shimmer', eggs: 'lt-hop' };
@@ -120,7 +123,10 @@ export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'
   const hue = Math.round((year * 47) % 60) - 30 + drop * 37 + Math.round(rnd() * 20);
   const [c1, c2, c3] = v.colors.map((c, i) => shiftHue(c, i === 0 ? hue / 3 : hue, drop * 0.06));
   const sfx = drop ? `-d${drop}` : '';
-  const tag = drop ? ` ${DROP_NAMES[drop % DROP_NAMES.length]}` : '';
+  const pick = <T,>(arr: readonly T[], skip = 0) => arr[(Math.floor(rnd() * arr.length) + skip) % arr.length];
+  const adj = drop ? DROP_NAMES[1 + ((drop + year) % (DROP_NAMES.length - 1))] : '';
+  const tag = adj ? ` ${adj}` : '';
+  const yearTyping = DROP_TYPING[1 + ((drop * 3 + year) % (DROP_TYPING.length - 1))];
   const ang = Math.round(rnd() * 360);
   const patterns = [
     `radial-gradient(circle at 80% 10%, ${c3}55 0%, transparent 45%), linear-gradient(${ang}deg, ${c1} 0%, ${c2} 60%, ${c1} 100%)`,
@@ -133,12 +139,12 @@ export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'
   // Higher tiers unlock the fancier patterns
   const pIdx = drop === 0 ? (year % 2) : Math.min(patterns.length - 1, 1 + Math.floor(rnd() * Math.min(patterns.length - 1, 2 + drop)));
   const cost = (base: number) => Math.round(base * tier.mult / 50) * 50;
-  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${year} · ${tier.name}`, cost: cost(1500), css: patterns[pIdx] };
+  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${pick(THEME_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(1500), css: patterns[pIdx] };
   const fx = drop === 0 ? LIMITED_TYPING_FX[h.decor] : FX_POOL[Math.floor(rnd() * FX_POOL.length)];
   const particle = drop >= 3 ? BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)] : v.particles[(drop + year) % v.particles.length];
-  const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${year} · ${tier.name}`, cost: cost(800), text: `${drop ? DROP_TYPING[drop % DROP_TYPING.length] : v.typing} ${particle}${drop >= 6 ? particle : ''}`, className: `limited-typing ${fx} ${tier.glow}`.trim(), color: c3 };
+  const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${pick(TYPING_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(800), text: `${drop ? yearTyping : v.typing} ${particle}${drop >= 6 ? particle : ''}`, className: `limited-typing ${fx} ${tier.glow}`.trim(), color: c3 };
   const emoji = drop >= 3 ? `${v.badgeEmoji}${BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)]}` : v.badgeEmoji;
-  const badge: LimitedBadge = { id: `evb-${h.key}-${year}${sfx}`, name: `${h.name}${tag} ${year}`, emoji, color: c3, cost: cost(1000) };
+  const badge: LimitedBadge = { id: `evb-${h.key}-${year}${sfx}`, name: `${h.name}${tag} ${pick(BADGE_NOUNS, year)} ${year}`, emoji, color: c3, cost: cost(1000) };
   return { theme, typing, badge, tier };
 }
 
