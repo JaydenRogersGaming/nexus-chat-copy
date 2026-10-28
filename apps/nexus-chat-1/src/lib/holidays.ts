@@ -135,12 +135,16 @@ export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'
     `radial-gradient(${c3}88 1px, transparent 1.5px) 0 0/22px 22px, radial-gradient(${c3}44 1px, transparent 1.5px) 11px 11px/22px 22px, linear-gradient(${ang}deg, ${c1}, ${c2})`,
     `repeating-linear-gradient(${ang}deg, ${c3}14 0 12px, transparent 12px 28px), linear-gradient(${ang + 90}deg, ${c1}, ${c2} 70%, ${c3}66)`,
     `radial-gradient(circle at 30% 30%, ${c3}77, transparent 35%), radial-gradient(circle at 70% 60%, ${c2}cc, transparent 45%), radial-gradient(circle at 50% 100%, ${c3}55, transparent 50%), ${c1}`,
+    `repeating-conic-gradient(from ${ang}deg at 50% 50%, ${c1} 0 15deg, ${c2} 15deg 30deg), radial-gradient(circle, ${c3}66, transparent 70%)`,
+    `linear-gradient(135deg, ${c3}33 25%, transparent 25%) 0 0/40px 40px, linear-gradient(225deg, ${c3}33 25%, transparent 25%) 0 0/40px 40px, linear-gradient(${ang}deg, ${c1}, ${c2})`,
+    `repeating-radial-gradient(circle at 50% 50%, ${c1} 0 14px, ${c2} 14px 28px, ${c3}88 28px 30px)`,
+    `linear-gradient(${ang}deg, ${c3}00 40%, ${c3}aa 50%, ${c3}00 60%), linear-gradient(${ang + 45}deg, ${c1}, ${c2}, ${c1})`,
   ];
-  // Higher tiers unlock the fancier patterns
-  const pIdx = drop === 0 ? (year % 2) : Math.min(patterns.length - 1, 1 + Math.floor(rnd() * Math.min(patterns.length - 1, 2 + drop)));
+  // Every refresh lands on a different pattern than the one before it
+  const pIdx = drop === 0 ? (year % 2) : (drop * 5 + year) % patterns.length;
   const cost = (base: number) => Math.round(base * tier.mult / 50) * 50;
   const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${pick(THEME_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(1500), css: patterns[pIdx] };
-  const fx = drop === 0 ? LIMITED_TYPING_FX[h.decor] : FX_POOL[Math.floor(rnd() * FX_POOL.length)];
+  const fx = drop === 0 ? LIMITED_TYPING_FX[h.decor] : FX_POOL[(drop + year) % FX_POOL.length];
   const particle = drop >= 3 ? BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)] : v.particles[(drop + year) % v.particles.length];
   const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${pick(TYPING_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(800), text: `${drop ? yearTyping : v.typing} ${particle}${drop >= 6 ? particle : ''}`, className: `limited-typing ${fx} ${tier.glow}`.trim(), color: c3 };
   const emoji = drop >= 3 ? `${v.badgeEmoji}${BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)]}` : v.badgeEmoji;
