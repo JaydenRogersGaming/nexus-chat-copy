@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Save } from 'lucide-react';
+import { Save, Wand2, Loader2 } from 'lucide-react';
+import { aiVipStyle } from 'zitejs/api';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { Label } from '@project/components/ui/label';
@@ -36,6 +37,7 @@ export default function VipStyleStudio() {
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <div className="space-y-5">
+        <AiDesigner onApply={v => setS(p => ({ ...p, ...v }))} />
         <div>
           <Label>Color presets</Label>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -82,6 +84,26 @@ export default function VipStyleStudio() {
         <Button onClick={save} className="gap-2"><Save className="w-4 h-4" /> Save style</Button>
       </div>
       <Preview s={s} name={s.nickname || profile.name} pic={profile.profilePic} />
+    </div>
+  );
+}
+
+function AiDesigner({ onApply }: { onApply: (v: Partial<Vip.VipStyle>) => void }) {
+  const [vibe, setVibe] = useState('');
+  const [busy, setBusy] = useState(false);
+  const run = async () => {
+    setBusy(true);
+    try { onApply(await aiVipStyle({ vibe })); toast.success('AI look applied — tweak it, then Save'); }
+    catch { toast.error('AI designer failed, try again'); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="rounded-xl border border-primary/40 bg-primary/5 p-3">
+      <Label className="flex items-center gap-1.5"><Wand2 className="w-4 h-4 text-primary" /> AI style designer</Label>
+      <div className="flex gap-2 mt-2">
+        <Input value={vibe} maxLength={200} onChange={e => setVibe(e.target.value)} onKeyDown={e => e.key === 'Enter' && !busy && run()} placeholder="e.g. cyberpunk dragon, cozy autumn, galaxy queen" />
+        <Button onClick={run} disabled={busy} className="gap-1.5">{busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />} Design</Button>
+      </div>
     </div>
   );
 }

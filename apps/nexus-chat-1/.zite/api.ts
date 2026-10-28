@@ -6,6 +6,7 @@ import type { default as _AdminUsersEp } from '../src/api/adminUsers';
 import type { default as _AiBadgeEp } from '../src/api/aiBadge';
 import type { default as _AiThemeEp } from '../src/api/aiTheme';
 import type { default as _AiTitleEp } from '../src/api/aiTitle';
+import type { default as _AiVipStyleEp } from '../src/api/aiVipStyle';
 import type { default as _AuditLogEp } from '../src/api/auditLog';
 import type { default as _BansEp } from '../src/api/bans';
 import type { default as _ChatEp } from '../src/api/chat';
@@ -52,6 +53,11 @@ type _AiTitleCfg = typeof _AiTitleEp;
 export type AiTitleInputType = NonNullable<_AiTitleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiTitleCfg['execute']>[0]['input'];
 export type AiTitleOutputType = Awaited<ReturnType<_AiTitleCfg['execute']>>;
 export const aiTitle = createCaller<AiTitleInputType, AiTitleOutputType>('aiTitle');
+
+type _AiVipStyleCfg = typeof _AiVipStyleEp;
+export type AiVipStyleInputType = NonNullable<_AiVipStyleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiVipStyleCfg['execute']>[0]['input'];
+export type AiVipStyleOutputType = Awaited<ReturnType<_AiVipStyleCfg['execute']>>;
+export const aiVipStyle = createCaller<AiVipStyleInputType, AiVipStyleOutputType>('aiVipStyle');
 
 type _AuditLogCfg = typeof _AuditLogEp;
 export type AuditLogInputType = NonNullable<_AuditLogCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AuditLogCfg['execute']>[0]['input'];
@@ -189,6 +195,7 @@ export const api = {
   aiBadge,
   aiTheme,
   aiTitle,
+  aiVipStyle,
   auditLog,
   bans,
   chat,
