@@ -140,7 +140,12 @@ export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'
   // Every refresh lands on a different pattern than the one before it
   const pIdx = drop === 0 ? (year % 2) : (drop * 5 + year) % patterns.length;
   const cost = (base: number) => Math.round(base * tier.mult / 50) * 50;
-  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${pick(THEME_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(1500), css: patterns[pIdx] };
+  const motifs = [h.emoji, ...v.particles].slice(0, 4);
+  const sz = 140 - Math.min(60, drop);
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${sz}' height='${sz}'><g font-size='${Math.round(sz / 5)}' opacity='${Math.min(0.55, 0.28 + drop * 0.004)}'>` +
+    motifs.map((m, i) => `<text x='${(i % 2) * sz / 2 + sz / 8}' y='${Math.floor(i / 2) * sz / 2 + sz / 3}' transform='rotate(${(i * 23 + ang) % 40 - 20} ${(i % 2) * sz / 2 + sz / 4} ${Math.floor(i / 2) * sz / 2 + sz / 4})'>${m}</text>`).join('') + `</g></svg>`;
+  const motifLayer = `url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0/${sz}px ${sz}px`;
+  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${pick(THEME_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(1500), css: `${motifLayer}, ${patterns[pIdx]}` };
   const fx = drop === 0 ? LIMITED_TYPING_FX[h.decor] : FX_POOL[(drop + year) % FX_POOL.length];
   const particle = drop >= 3 ? BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)] : v.particles[(drop + year) % v.particles.length];
   const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${pick(TYPING_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(800), text: `${drop ? yearTyping : v.typing} ${particle}${drop >= 6 ? particle : ''}`, className: `limited-typing ${fx} ${tier.glow}`.trim(), color: c3 };
