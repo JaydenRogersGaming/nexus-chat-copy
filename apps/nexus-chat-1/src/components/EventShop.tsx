@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/compo
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { COSMETICS_EVENT } from './SettingsExtras';
-import { ActiveEvent, limitedItems } from '../lib/holidays';
+import { ActiveEvent, limitedItems, tierFor } from '../lib/holidays';
 import { holidaySong, resolveSongUrl } from '../lib/holidaySongs';
 import { setMusic, getMusic } from '../lib/personalize';
 
@@ -27,7 +27,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   const [, bump] = useState(0);
   const { overrides } = useActiveEvent();
   const drop = overrides.find(o => o.holidayKey === event.holiday.key)?.shopDrop ?? 0;
-  const { theme, typing, badge } = limitedItems(event, drop);
+  const { theme, typing, badge, tier } = limitedItems(event, drop);
   const [stats, setStats] = useState<Record<string, { count: number; firstEmail: string; firstName: string }>>({});
   const [refreshing, setRefreshing] = useState(false);
   const ids = [theme.id, typing.id, badge.id].join(',');
@@ -40,12 +40,12 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   const song = holidaySong(event.holiday.key, event.year);
   const owned = DB.getUserItems(profile.email);
   const eq = DB.getEquipped(profile.email);
-  const [c1, c2, c3] = event.variant.colors;
+  const c1 = event.variant.colors[0], c2 = event.variant.colors[1], c3 = typing.color;
   const me = profile.email.toLowerCase();
 
   const refreshShop = async () => {
     setRefreshing(true);
-    try { await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key }); window.dispatchEvent(new Event(EVENTS_CHANGED)); toast.success('🔄 Limited shop refreshed with new items!'); }
+    try { await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key }); window.dispatchEvent(new Event(EVENTS_CHANGED)); toast.success(`🔄 New ${tierFor(drop + 1).name} drop is live!`); }
     catch (e) { toast.error(e instanceof Error ? e.message : 'Could not refresh'); }
     finally { setRefreshing(false); }
   };
@@ -64,7 +64,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
     { id: theme.id, label: 'Limited Theme', name: theme.name, cost: theme.cost, preview: <div className="w-14 h-10 rounded-lg border border-border" style={{ background: theme.css }} />,
       on: eq.bg === theme.id, use: () => equip({ bg: eq.bg === theme.id ? '' : theme.id }) },
     { id: typing.id, label: 'Limited Typing Effect', name: typing.name, cost: typing.cost, preview: <div className="w-14 h-10 rounded-lg border border-border bg-background flex items-center justify-center text-lg">{event.variant.badgeEmoji}</div>,
-      sub: <p className="text-[11px] animate-pulse" style={{ color: typing.color }}>You {typing.text}</p>, on: eq.typing === typing.id, use: () => equip({ typing: eq.typing === typing.id ? '' : typing.id }) },
+      sub: <p className={`text-[11px] ${typing.className}`} style={{ color: typing.color }}>You {typing.text}</p>, on: eq.typing === typing.id, use: () => equip({ typing: eq.typing === typing.id ? '' : typing.id }) },
     { id: badge.id, label: 'Limited Badge', name: `${badge.emoji} ${badge.name}`, cost: badge.cost, preview: <div className="w-14 h-10 rounded-lg border border-border flex items-center justify-center text-2xl" style={{ background: `${c3}22` }}>{badge.emoji}</div>,
       on: profile.activeTitle === `${badge.emoji} ${badge.name}`, use: wearBadge },
     { id: song.id, label: 'Limited Song', name: song.name, cost: song.cost,
@@ -97,7 +97,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
               <div key={r.id} className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
                 {r.preview}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: c3 }}>{r.label}</p>
+                  <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: c3 }}>{r.label} · {tier.name}</p>
                   <p className="text-sm font-semibold truncate">{r.name}</p>
                   {r.sub}
                   {stats[r.id] && (

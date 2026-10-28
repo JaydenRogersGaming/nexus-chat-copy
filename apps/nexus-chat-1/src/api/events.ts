@@ -33,7 +33,7 @@ export default createEndpoint({
     }
     if (input.action === 'refreshShop') {
       const cur = await zite.eventOverrides.findOne({ filters: { holidayKey: input.holidayKey! } });
-      const next = ((cur?.shopDrop ?? 0) % 10) + 1; // up to 10 drops per event, then cycles
+      const next = ((cur?.shopDrop ?? 0) % 15) + 1; // up to 15 drops per event (rarer each time), then cycles
       await zite.eventOverrides.bulkCreate({ matchOn: ['holidayKey'], records: [{ holidayKey: input.holidayKey!, shopDrop: next }] });
     }
     const { records } = await zite.eventOverrides.findAll({ limit: 100 });

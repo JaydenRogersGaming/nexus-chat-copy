@@ -79,28 +79,72 @@ export function getActiveEvent(overrides: Override[], now = new Date()): ActiveE
 
 // ── Limited items: unique ids per holiday + year, so each year's set is gone forever after ──
 export type LimitedBadge = { id: string; name: string; emoji: string; color: string; cost: number };
-const DROP_NAMES = ['', 'Remix', 'Neon', 'Glow', 'Shadow', 'Prism', 'Frost', 'Blaze', 'Cosmic', 'Retro', 'Royal'];
-const DROP_TYPING = ['', 'is remixing the vibe', 'is glowing up', 'is shining bright', 'is lurking in the shadows', 'is splitting light', 'is freezing the chat', 'is on fire', 'is out of this world', 'is going retro', 'is making a royal entrance'];
+const DROP_NAMES = ['', 'Remix', 'Neon', 'Glow', 'Shadow', 'Prism', 'Frost', 'Blaze', 'Cosmic', 'Retro', 'Royal', 'Aurora', 'Galaxy', 'Crystal', 'Phantom', 'Solar'];
+const DROP_TYPING = ['', 'is remixing the vibe', 'is glowing up', 'is shining bright', 'is lurking in the shadows', 'is splitting light', 'is freezing the chat', 'is on fire', 'is out of this world', 'is going retro', 'is making a royal entrance', 'is dancing in the aurora', 'is orbiting the chat', 'is crystallizing', 'is haunting the chat', 'is blazing like the sun'];
+const BONUS_EMOJI = ['💎', '👑', '🌟', '🔮', '⚡', '🌈', '🪐', '🦄', '🐉', '🌌', '🏆', '🔥'];
 
 const LIMITED_TYPING_FX: Record<Holiday['decor'], string> = { spooky: 'lt-flicker', snow: 'lt-shimmer', hearts: 'lt-beat', fireworks: 'lt-sparkle', confetti: 'lt-sparkle', leaves: 'lt-sway', clover: 'lt-shimmer', eggs: 'lt-hop' };
+const FX_POOL = ['lt-flicker', 'lt-shimmer', 'lt-beat', 'lt-sparkle', 'lt-sway', 'lt-hop'];
+
+/** Each refresh climbs a rarity tier, so newer drops are fancier (and pricier). */
+export const TIERS = [
+  { name: 'Rare', mult: 1, glow: '' },
+  { name: 'Epic', mult: 1.5, glow: 'lt-glow' },
+  { name: 'Legendary', mult: 2.2, glow: 'lt-glow' },
+  { name: 'Mythic', mult: 3, glow: 'lt-mythic' },
+] as const;
+export const tierFor = (drop: number) => TIERS[drop === 0 ? 0 : drop <= 2 ? 1 : drop <= 5 ? 2 : 3];
+
+function seeded(str: string) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+  return () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+}
+/** Rotate a hex color's hue so every year gets its own palette. */
+function shiftHue(hex: string, deg: number, satBoost = 0) {
+  const n = parseInt(hex.slice(1), 16); let r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; let hh = 0, ss = 0;
+  if (mx !== mn) { const d = mx - mn; ss = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); hh = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; hh *= 60; }
+  hh = (hh + deg + 360) % 360; ss = Math.min(1, ss + satBoost);
+  const k = (m: number) => (m + hh / 30) % 12, a = ss * Math.min(l, 1 - l);
+  const f = (m: number) => Math.round((l - a * Math.max(-1, Math.min(k(m) - 3, 9 - k(m), 1))) * 255).toString(16).padStart(2, '0');
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
 
 /** drop = how many times the owner refreshed this event's limited shop (0 = original items). */
 export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'>, drop = 0) {
   const { holiday: h, year, variant: v } = e;
-  const cols = v.colors;
-  const [c1, c2, c3] = drop ? [cols[(drop) % 3], cols[(drop + 1) % 3], cols[(drop + 2) % 3]] : cols;
+  const rnd = seeded(`${h.key}-${year}-${drop}`);
+  const tier = tierFor(drop);
+  // Year shifts the palette (same holiday looks different every year); drops push it further + more saturated
+  const hue = Math.round((year * 47) % 60) - 30 + drop * 37 + Math.round(rnd() * 20);
+  const [c1, c2, c3] = v.colors.map((c, i) => shiftHue(c, i === 0 ? hue / 3 : hue, drop * 0.06));
   const sfx = drop ? `-d${drop}` : '';
   const tag = drop ? ` ${DROP_NAMES[drop % DROP_NAMES.length]}` : '';
-  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${year}`, cost: 1500, css: `radial-gradient(circle at ${drop ? 20 : 80}% 10%, ${c3}55 0%, transparent 45%), linear-gradient(${160 + drop * 20}deg, ${c1} 0%, ${c2} 60%, ${c1} 100%)` };
-  const fx = LIMITED_TYPING_FX[h.decor];
-  const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${year}`, cost: 800, text: `${drop ? DROP_TYPING[drop % DROP_TYPING.length] : v.typing} ${v.particles[drop % v.particles.length]}`, className: `limited-typing ${fx}`, color: c3 };
-  const badge: LimitedBadge = { id: `evb-${h.key}-${year}${sfx}`, name: `${h.name}${tag} ${year}`, emoji: v.badgeEmoji, color: c3, cost: 1000 };
-  return { theme, typing, badge };
+  const ang = Math.round(rnd() * 360);
+  const patterns = [
+    `radial-gradient(circle at 80% 10%, ${c3}55 0%, transparent 45%), linear-gradient(${ang}deg, ${c1} 0%, ${c2} 60%, ${c1} 100%)`,
+    `radial-gradient(ellipse at 20% 0%, ${c3}66 0%, transparent 50%), radial-gradient(ellipse at 90% 100%, ${c2}aa 0%, transparent 55%), ${c1}`,
+    `conic-gradient(from ${ang}deg at 50% 120%, ${c1}, ${c2}, ${c3}55, ${c2}, ${c1})`,
+    `radial-gradient(${c3}88 1px, transparent 1.5px) 0 0/22px 22px, radial-gradient(${c3}44 1px, transparent 1.5px) 11px 11px/22px 22px, linear-gradient(${ang}deg, ${c1}, ${c2})`,
+    `repeating-linear-gradient(${ang}deg, ${c3}14 0 12px, transparent 12px 28px), linear-gradient(${ang + 90}deg, ${c1}, ${c2} 70%, ${c3}66)`,
+    `radial-gradient(circle at 30% 30%, ${c3}77, transparent 35%), radial-gradient(circle at 70% 60%, ${c2}cc, transparent 45%), radial-gradient(circle at 50% 100%, ${c3}55, transparent 50%), ${c1}`,
+  ];
+  // Higher tiers unlock the fancier patterns
+  const pIdx = drop === 0 ? (year % 2) : Math.min(patterns.length - 1, 1 + Math.floor(rnd() * Math.min(patterns.length - 1, 2 + drop)));
+  const cost = (base: number) => Math.round(base * tier.mult / 50) * 50;
+  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${year} · ${tier.name}`, cost: cost(1500), css: patterns[pIdx] };
+  const fx = drop === 0 ? LIMITED_TYPING_FX[h.decor] : FX_POOL[Math.floor(rnd() * FX_POOL.length)];
+  const particle = drop >= 3 ? BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)] : v.particles[(drop + year) % v.particles.length];
+  const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${year} · ${tier.name}`, cost: cost(800), text: `${drop ? DROP_TYPING[drop % DROP_TYPING.length] : v.typing} ${particle}${drop >= 6 ? particle : ''}`, className: `limited-typing ${fx} ${tier.glow}`.trim(), color: c3 };
+  const emoji = drop >= 3 ? `${v.badgeEmoji}${BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)]}` : v.badgeEmoji;
+  const badge: LimitedBadge = { id: `evb-${h.key}-${year}${sfx}`, name: `${h.name}${tag} ${year}`, emoji, color: c3, cost: cost(1000) };
+  return { theme, typing, badge, tier };
 }
 
 /** Every limited item that could ever exist (for rendering owned items after the event ends). */
 function allYears() { const y = new Date().getFullYear(); return Array.from({ length: 6 }, (_, i) => y - 3 + i); }
-const DROPS = Array.from({ length: 11 }, (_, i) => i);
+const DROPS = Array.from({ length: 16 }, (_, i) => i);
 export function allLimitedThemes(): BgTheme[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).theme))); }
 export function allLimitedTyping(): TypingStyle[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).typing))); }
 export function allLimitedBadges(): LimitedBadge[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).badge))); }
