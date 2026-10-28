@@ -31,12 +31,13 @@ const messageSchema = z.object({
   timestamp: z.number(),
   edited: z.boolean().optional(),
   uncensored: z.boolean().optional(),
+  hidden: z.boolean().optional(),
 });
 
 export default createEndpoint({
   description: 'Sends, lists, reacts to and deletes shared chat messages',
   inputSchema: z.object({
-    action: z.enum(['getMessages', 'send', 'react', 'delete', 'clear', 'edit']),
+    action: z.enum(['getMessages', 'send', 'react', 'delete', 'clear', 'edit', 'hide', 'unhide']),
     content: z.string().optional(),
     roomId: z.string().optional(),
     limit: z.number().optional(),
@@ -47,6 +48,14 @@ export default createEndpoint({
   }),
   outputSchema: z.object({ messages: z.array(messageSchema) }),
   execute: async ({ input, context }) => {
+    const viewerIsOwner = isOwnerEmail((context.user?.email || '').toLowerCase());
+    if ((input.action === 'hide' || input.action === 'unhide') && input.messageId) {
+      if (!viewerIsOwner) throw new Error('Only the owner can hide messages');
+      const rec = await zite.chatMessages.findOne({ filters: { messageId: input.messageId } });
+      if (!rec) throw new Error('Message not found');
+      await zite.chatMessages.update({ id: rec.id, record: { hidden: input.action === 'hide' } });
+      return { messages: [] };
+    }
     if (input.action === 'edit' && input.messageId) {
       const text = (input.content || '').trim();
       if (!text) throw new Error('Message cannot be empty');
@@ -92,7 +101,7 @@ export default createEndpoint({
 
     const limit = Math.min(input.limit ?? 200, 500);
     const { rows } = await zite.sql({
-      query: `SELECT * FROM (SELECT "messageId","roomId","senderEmail","senderName","content","senderTitle","senderTitleColor","senderTitleEffect","senderNameColor","reactionsJson","replyToJson","deleted","edited","uncensored","sentAt" FROM "ChatMessages" WHERE "roomId" = $1 ORDER BY "sentAt" DESC, "messageId" DESC LIMIT ${limit}) t ORDER BY "sentAt" ASC, "messageId" ASC`,
+      query: `SELECT * FROM (SELECT "messageId","roomId","senderEmail","senderName","content","senderTitle","senderTitleColor","senderTitleEffect","senderNameColor","reactionsJson","replyToJson","deleted","edited","uncensored","hidden","sentAt" FROM "ChatMessages" WHERE "roomId" = $1${viewerIsOwner ? '' : ' AND COALESCE("hidden", false) = false'} ORDER BY "sentAt" DESC, "messageId" DESC LIMIT ${limit}) t ORDER BY "sentAt" ASC, "messageId" ASC`,
       params: [input.roomId ?? 'global'],
     });
     const parse = <T,>(v: unknown, fb: T): T => { try { return v ? JSON.parse(String(v)) : fb; } catch { return fb; } };
@@ -108,6 +117,7 @@ export default createEndpoint({
         timestamp: r.sentAt ? new Date(String(r.sentAt)).getTime() : 0,
         edited: Boolean(r.edited),
         uncensored: Boolean(r.uncensored),
+        hidden: Boolean(r.hidden),
       })),
     };
   },

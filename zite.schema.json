@@ -373,6 +373,15 @@
             "type": "checkbox",
             "template": {}
           }
+        },
+        {
+          "id": "f1uxGxCTCPg",
+          "sdkName": "hidden",
+          "definition": {
+            "name": "Hidden",
+            "type": "checkbox",
+            "template": {}
+          }
         }
       ]
     },

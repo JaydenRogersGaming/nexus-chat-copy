@@ -155,6 +155,7 @@ export type ChatMessagesRecordType = {
   sentAt?: string;
   edited?: boolean;
   uncensored?: boolean;
+  hidden?: boolean;
 };
 
 /** What you may write when creating or updating a record in the "Chat Messages" table. */
@@ -174,6 +175,7 @@ export type ChatMessagesRecordInput = {
   sentAt: string | Date | null;
   edited: string | boolean | null;
   uncensored: string | boolean | null;
+  hidden: string | boolean | null;
 };
 
 /** A record in the "Bans" table, as it is read back. */

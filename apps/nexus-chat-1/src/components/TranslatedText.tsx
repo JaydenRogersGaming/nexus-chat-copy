@@ -41,9 +41,11 @@ export function looksForeign(text: string): boolean {
 }
 
 /** Shows a chat message; auto-translates into `lang` (non-English) and lets anyone flip between original/translation. */
-export default function TranslatedText({ text, lang, auto, style }: { text: string; lang: string; auto: boolean; style?: React.CSSProperties }) {
-  const target = lang || 'en';
-  const [on, setOn] = useState(auto && (target !== 'en' || looksForeign(text)));
+export default function TranslatedText({ text, auto, style }: { text: string; lang?: string; auto: boolean; style?: React.CSSProperties }) {
+  const target = 'en';
+  // Only messages that aren't already English get translated
+  const foreign = looksForeign(text);
+  const [on, setOn] = useState(auto && foreign);
   const [tr, setTr] = useState<string | null>(cache.get(`${target}|${text}`) ?? null);
   useEffect(() => {
     if (!on || tr || !text.trim()) return;
@@ -55,10 +57,10 @@ export default function TranslatedText({ text, lang, auto, style }: { text: stri
   return (
     <span data-no-translate>
       <span style={style}>{showing ? tr : text}</span>
-      <button type="button" onClick={() => setOn(o => !o)} title={showing ? 'Show original' : 'Translate'}
+      {foreign && <button type="button" onClick={() => setOn(o => !o)} title={showing ? 'Show original' : 'Translate'}
         className="ml-1.5 inline-flex items-center gap-0.5 align-middle text-[10px] text-muted-foreground hover:text-primary opacity-60 hover:opacity-100">
         <Languages className="w-3 h-3" />{showing ? 'original' : on && !tr ? '…' : ''}
-      </button>
+      </button>}
     </span>
   );
 }

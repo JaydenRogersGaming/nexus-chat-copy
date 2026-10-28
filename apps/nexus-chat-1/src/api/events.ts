@@ -33,7 +33,7 @@ export default createEndpoint({
     }
     if (input.action === 'refreshShop') {
       const cur = await zite.eventOverrides.findOne({ filters: { holidayKey: input.holidayKey! } });
-      const next = ((cur?.shopDrop ?? 0) % 103) + 1; // up to 103 drops (one per rarity tier) per event (rarer each time), then cycles
+      const next = ((cur?.shopDrop ?? 0) + 1) % 102; // climbs one rarity per refresh, then loops back to the start per event (rarer each time), then cycles
       await zite.eventOverrides.bulkCreate({ matchOn: ['holidayKey'], records: [{ holidayKey: input.holidayKey!, shopDrop: next }] });
     }
     const { records } = await zite.eventOverrides.findAll({ limit: 100 });

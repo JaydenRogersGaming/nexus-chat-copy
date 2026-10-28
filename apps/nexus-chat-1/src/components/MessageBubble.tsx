@@ -1,6 +1,6 @@
 import RoleChip from './RoleChip';
 import { useState } from 'react';
-import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck, Pencil } from 'lucide-react';
+import { Trash2, Smile, Crown, ShieldCheck, Shield, Star, Reply, BadgeCheck, Pencil, EyeOff, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import TitleBadge from './TitleBadge';
 import ReportMessageButton from './ReportMessageButton';
@@ -93,6 +93,13 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
   const deleteStyle = profile ? getDeleteStyle(profile.role) : '';
 
   if (msg.deleted) return null;
+  const viewerIsOwner = isOwnerEmail(profile?.email) || profile?.role === 'owner';
+  if (msg.hidden && !viewerIsOwner) return null;
+  function toggleHidden() {
+    messagesApi({ action: msg.hidden ? 'unhide' : 'hide', messageId: msg.id })
+      .then(() => { toast.success(msg.hidden ? 'Message is visible again' : 'Message hidden from everyone'); onDeleted(); })
+      .catch(e => toast.error(e instanceof Error ? e.message : 'Could not update message'));
+  }
 
   function handleReact(emoji: string) {
     if (!profile) return;
@@ -171,7 +178,8 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
         )}
 
         {/* Bubble */}
-        <div className={cn('msg-bubble px-4 py-2.5 text-sm relative', isOwn ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-secondary text-foreground rounded-bl-sm')}>
+        <div className={cn('msg-bubble px-4 py-2.5 text-sm relative', msg.hidden && 'opacity-50 ring-1 ring-dashed ring-muted-foreground', isOwn ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-secondary text-foreground rounded-bl-sm')}>
+          {msg.hidden && <div className="text-[10px] font-semibold flex items-center gap-1 mb-1 opacity-80"><EyeOff className="w-3 h-3" /> Hidden — only you can see this</div>}
           {editing ? (
             <div className="flex flex-col gap-1.5 min-w-[220px]">
               <textarea
@@ -204,6 +212,11 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             <button onClick={() => setShowEmoji(v => !v)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
               <Smile className="w-3.5 h-3.5" />
             </button>
+            {viewerIsOwner && (
+              <button onClick={toggleHidden} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title={msg.hidden ? 'Unhide message' : 'Hide message'}>
+                {msg.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
+            )}
             {canDelete && (
               <button
                 onClick={() => { messagesApi({ action: 'delete', messageId: msg.id }).then(onDeleted).catch(() => {}); }}

@@ -70,6 +70,7 @@ export type Message = {
   timestamp: number;
   edited?: boolean;
   uncensored?: boolean;
+  hidden?: boolean;
 };
 
 export type ChatRoom = {
