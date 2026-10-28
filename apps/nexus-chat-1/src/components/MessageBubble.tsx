@@ -224,20 +224,21 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
               </button>
             )}
             {!isOwn && <ReportMessageButton messageId={msg.id} senderEmail={msg.senderEmail} content={msg.content} canHold={['guardian', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'].includes(profile?.role || '')} />}
-            <button onClick={toggleMine} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Hide for me">
-              <EyeOff className="w-3.5 h-3.5" />
-            </button>
+            {msg.hidden && viewerIsOwner ? (
+              <button onClick={toggleHidden} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Unhide for everyone">
+                <Eye className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button onClick={toggleMine} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Hide">
+                <EyeOff className="w-3.5 h-3.5" />
+              </button>
+            )}
             <button onClick={() => onReply?.(msg)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Reply">
               <Reply className="w-3.5 h-3.5" />
             </button>
             <button onClick={() => setShowEmoji(v => !v)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
               <Smile className="w-3.5 h-3.5" />
             </button>
-            {viewerIsOwner && (
-              <button onClick={toggleHidden} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title={msg.hidden ? 'Unhide message' : 'Hide message'}>
-                {msg.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              </button>
-            )}
             {canDelete && (
               <button
                 onClick={() => { messagesApi({ action: 'delete', messageId: msg.id }).then(onDeleted).catch(() => {}); }}
