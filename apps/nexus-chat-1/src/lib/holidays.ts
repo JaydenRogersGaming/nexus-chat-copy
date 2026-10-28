@@ -145,7 +145,20 @@ export function limitedItems(e: Pick<ActiveEvent, 'holiday' | 'year' | 'variant'
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${sz}' height='${sz}'><g font-size='${Math.round(sz / 5)}' opacity='${Math.min(0.55, 0.28 + drop * 0.004)}'>` +
     motifs.map((m, i) => `<text x='${(i % 2) * sz / 2 + sz / 8}' y='${Math.floor(i / 2) * sz / 2 + sz / 3}' transform='rotate(${(i * 23 + ang) % 40 - 20} ${(i % 2) * sz / 2 + sz / 4} ${Math.floor(i / 2) * sz / 2 + sz / 4})'>${m}</text>`).join('') + `</g></svg>`;
   const motifLayer = `url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0/${sz}px ${sz}px`;
-  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${pick(THEME_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(1500), css: `${motifLayer}, ${patterns[pIdx]}` };
+  // Holiday scene: a skyline/hill silhouette along the bottom with the holiday's big props standing on it
+  const SCENES: Record<Holiday['decor'], string[]> = {
+    spooky: ['🏚️', '🎃', '🦇', '👻', '🕸️', '🌕'], snow: ['🎄', '⛄', '🎁', '🦌', '🏠', '⭐'], hearts: ['💝', '🌹', '💌', '🧸', '💘', '🌙'],
+    fireworks: ['🎆', '🏙️', '🎇', '🥂', '🗽', '✨'], confetti: ['🎉', '🎈', '🎂', '🎁', '🎊', '⭐'], leaves: ['🍂', '🦃', '🌽', '🥧', '🍁', '🌕'],
+    clover: ['🍀', '🌈', '🪙', '🎩', '🍀', '☀️'], eggs: ['🐣', '🥚', '🐰', '🌷', '🧺', '☀️'],
+  };
+  const props = SCENES[h.decor] ?? [h.emoji];
+  const W = 800, H = 260;
+  const hill = `M0 ${H} L0 ${170 + Math.round(rnd() * 30)} Q200 ${120 + Math.round(rnd() * 40)} 400 ${165} T800 ${150 + Math.round(rnd() * 30)} L800 ${H} Z`;
+  const scene = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${H}' preserveAspectRatio='xMidYMax slice'><path d='${hill}' fill='${c1}' opacity='0.9'/><path d='${hill}' transform='translate(0 30)' fill='#000' opacity='0.35'/>` +
+    `<text x='${640 + (drop % 5) * 20}' y='70' font-size='70' opacity='0.85'>${props[5]}</text>` +
+    props.slice(0, 5).map((p, i) => `<text x='${40 + i * 150 + ((drop * 37 + i * 13) % 50)}' y='${195 - (i % 2) * 15}' font-size='${i === 0 ? 90 : 60}'>${p}</text>`).join('') + `</svg>`;
+  const sceneLayer = `url("data:image/svg+xml,${encodeURIComponent(scene)}") bottom center/100% auto no-repeat`;
+  const theme: BgTheme = { id: `ev-${h.key}-${year}${sfx}`, name: `${h.emoji} ${v.name}${tag} ${pick(THEME_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(1500), css: `${sceneLayer}, ${motifLayer}, ${patterns[pIdx]}` };
   const fx = drop === 0 ? LIMITED_TYPING_FX[h.decor] : FX_POOL[(drop + year) % FX_POOL.length];
   const particle = drop >= 3 ? BONUS_EMOJI[Math.floor(rnd() * BONUS_EMOJI.length)] : v.particles[(drop + year) % v.particles.length];
   const typing: TypingStyle = { id: `evt-${h.key}-${year}${sfx}`, name: `${v.badgeEmoji} ${h.name}${tag} ${pick(TYPING_NOUNS, year)} ${year} · ${tier.name}`, cost: cost(800), text: `${drop ? yearTyping : v.typing} ${particle}${drop >= 6 ? particle : ''}`, className: `limited-typing ${fx} ${tier.glow}`.trim(), color: c3 };

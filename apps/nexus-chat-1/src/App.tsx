@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from 'zitejs/auth';
+import { useEffect } from 'react';
+import { useAuth, loginWithRedirect } from 'zitejs/auth';
 import TournamentPage from './pages/TournamentPage';
 import WatchPartyPage from './pages/WatchPartyPage';
 import VideoRoomsPage from './pages/VideoRoomsPage';
@@ -28,6 +29,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const settings = DB.getAppSettings();
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
+  useEffect(() => { if (!isLoading && !user) loginWithRedirect(); }, [isLoading, user]);
   const serverBan = useServerBan(!!user);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
