@@ -20,6 +20,9 @@ type Props = {
   onViewProfile?: (email: string) => void;
 };
 
+const MY_HIDDEN = 'nexus_my_hidden_msgs';
+const getMyHidden = (): Set<string> => { try { return new Set(JSON.parse(localStorage.getItem(MY_HIDDEN) || '[]')); } catch { return new Set(); } };
+
 type RoleInfo = { label: string; color: string; icon: React.ReactNode; rank: number };
 
 function getRoleInfo(role: string): RoleInfo | null {
@@ -64,6 +67,13 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
   const isOwn = profile?.email === msg.senderEmail;
+  const [myHidden, setMyHidden] = useState(() => getMyHidden().has(msg.id));
+  function toggleMine() {
+    const s = getMyHidden();
+    if (s.has(msg.id)) s.delete(msg.id); else s.add(msg.id);
+    localStorage.setItem(MY_HIDDEN, JSON.stringify([...s]));
+    setMyHidden(s.has(msg.id));
+  }
   const isGif = /^\[gif\]https:\/\/[^\s]+$/.test(msg.content);
 
   async function saveEdit() {
@@ -115,6 +125,14 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
   }
 
   const reactionEntries = Object.entries(msg.reactions).filter(([, u]) => u.length > 0);
+
+  if (myHidden) return (
+    <div className={cn('flex mb-2', isOwn ? 'justify-end' : 'justify-start')}>
+      <button onClick={toggleMine} className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-dashed border-border text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+        <EyeOff className="w-3 h-3" /> Hidden message from {msg.senderName} · <span className="font-semibold">Show</span>
+      </button>
+    </div>
+  );
 
   return (
     <div id={`msg-${msg.id}`} className={cn('flex mb-3 group transition-shadow', isOwn ? 'justify-end' : 'justify-start')}>
@@ -206,6 +224,9 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
               </button>
             )}
             {!isOwn && <ReportMessageButton messageId={msg.id} senderEmail={msg.senderEmail} content={msg.content} canHold={['guardian', 'mod', 'senior-mod', 'admin', 'co-owner', 'owner'].includes(profile?.role || '')} />}
+            <button onClick={toggleMine} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Hide for me">
+              <EyeOff className="w-3.5 h-3.5" />
+            </button>
             <button onClick={() => onReply?.(msg)} className="p-0.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Reply">
               <Reply className="w-3.5 h-3.5" />
             </button>
