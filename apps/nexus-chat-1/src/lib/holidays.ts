@@ -203,3 +203,16 @@ const DROPS = Array.from({ length: 104 }, (_, i) => i);
 export function allLimitedThemes(): BgTheme[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).theme))); }
 export function allLimitedTyping(): TypingStyle[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).typing))); }
 export function allLimitedBadges(): LimitedBadge[] { return HOLIDAYS.flatMap(h => allYears().flatMap(y => DROPS.map(dr => limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr).badge))); }
+/** Owned limited items bucketed per holiday (one pass, so the collection stays fast). */
+export function ownedLimitedByHoliday(owned: Set<string>) {
+  return HOLIDAYS.map(h => {
+    const themes: BgTheme[] = [], typing: TypingStyle[] = [], badges: LimitedBadge[] = [];
+    for (const y of allYears()) for (const dr of DROPS) {
+      const it = limitedItems({ holiday: h, year: y, variant: variantFor(h, y) }, dr);
+      if (owned.has(it.theme.id)) themes.push(it.theme);
+      if (owned.has(it.typing.id)) typing.push(it.typing);
+      if (owned.has(it.badge.id)) badges.push(it.badge);
+    }
+    return { key: h.key, name: h.name, emoji: h.emoji, themes, typing, badges, count: themes.length + typing.length + badges.length };
+  }).filter(g => g.count > 0);
+}
