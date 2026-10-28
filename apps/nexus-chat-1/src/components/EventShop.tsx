@@ -1,33 +1,42 @@
-import { useEffect, useState } from 'react';
-import { Gem, Clock, RefreshCw, Crown, Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Clock, RefreshCw, CalendarDays, Flag } from 'lucide-react';
 import { itemOwners, events as eventsApi } from 'zitejs/api';
 import { useActiveEvent, EVENTS_CHANGED } from '../hooks/useActiveEvent';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Button } from '@project/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { COSMETICS_EVENT } from './SettingsExtras';
-import { ActiveEvent, limitedItems, tierFor } from '../lib/holidays';
-import { holidaySong, resolveSongUrl } from '../lib/holidaySongs';
+import { ActiveEvent, HOLIDAYS, Holiday, appliesTo, limitedItems, tierFor, variantFor } from '../lib/holidays';
+import { holidaySong } from '../lib/holidaySongs';
 import { setMusic, getMusic } from '../lib/personalize';
-
-let previewAudio: HTMLAudioElement | null = null;
-function preview(url: string) {
-  if (previewAudio && !previewAudio.paused) { previewAudio.pause(); previewAudio = null; return; }
-  previewAudio = new Audio(resolveSongUrl(url)); previewAudio.volume = 0.5; previewAudio.play().catch(() => {});
-  setTimeout(() => previewAudio?.pause(), 10000);
-}
+import ShopMusic from './shop/ShopMusic';
+import CountryPicker from './shop/CountryPicker';
+import ShopItemCard, { ShopRow } from './shop/ShopItemCard';
 
 type Props = { event: ActiveEvent; open: boolean; onOpenChange: (o: boolean) => void };
+
+/** Which holiday's look the shop uses: a live national day always wins; otherwise the theme picked on the last refresh. */
+function resolveTheme(event: ActiveEvent, shopTheme: string | null | undefined): Holiday {
+  if (event.holiday.countries) return event.holiday;
+  return HOLIDAYS.find(h => h.key === shopTheme) ?? event.holiday;
+}
+
+function safeItems(e: ActiveEvent, h: Holiday, drop: number) {
+  try { return { holiday: h, ...limitedItems({ holiday: h, year: e.year, variant: variantFor(h, e.year) }, drop) }; }
+  catch { return { holiday: e.holiday, ...limitedItems(e, drop) }; } // fall back to the event's own theme
+}
 
 export default function EventShop({ event, open, onOpenChange }: Props) {
   const { profile, addGems, updateProfile, isRealOwner } = useApp();
   const [, bump] = useState(0);
-  const { overrides } = useActiveEvent();
-  const drop = overrides.find(o => o.holidayKey === event.holiday.key)?.shopDrop ?? 0;
-  const { theme, typing, badge, tier } = limitedItems(event, drop);
+  const { overrides, country } = useActiveEvent();
+  const ov = overrides.find(o => o.holidayKey === event.holiday.key);
+  const drop = ov?.shopDrop ?? 0;
+  const { holiday: themeH, theme, typing, badge, tier } = useMemo(() => safeItems(event, resolveTheme(event, ov?.shopTheme), drop), [event, ov?.shopTheme, drop]);
+  const variant = variantFor(themeH, event.year);
   const [stats, setStats] = useState<Record<string, { count: number; firstEmail: string; firstName: string }>>({});
   const [refreshing, setRefreshing] = useState(false);
   const ids = [theme.id, typing.id, badge.id].join(',');
@@ -37,16 +46,24 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
       .then(r => setStats(Object.fromEntries(r.stats.map(s => [s.itemId, s])))).catch(() => {});
   }, [open, ids]);
   if (!profile) return null;
-  const song = holidaySong(event.holiday.key, event.year);
+  const song = holidaySong(themeH.key, event.year);
   const owned = DB.getUserItems(profile.email);
   const eq = DB.getEquipped(profile.email);
-  const c1 = event.variant.colors[0], c2 = event.variant.colors[1], c3 = typing.color;
+  const accent = typing.color;
   const me = profile.email.toLowerCase();
+  const isNational = !!event.holiday.countries;
 
   const refreshShop = async () => {
     setRefreshing(true);
-    try { await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key }); window.dispatchEvent(new Event(EVENTS_CHANGED)); toast.success(`🔄 New ${tierFor(drop + 1).name} drop is live!`); }
-    catch (e) { toast.error(e instanceof Error ? e.message : 'Could not refresh'); }
+    // National day stays pinned; otherwise rotate to a random different holiday the user can see
+    const pool = HOLIDAYS.filter(h => appliesTo(h, country) && h.key !== themeH.key);
+    const next = isNational || !pool.length ? event.holiday.key : pool[Math.floor(Math.random() * pool.length)].key;
+    try {
+      await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key, shopTheme: next });
+      window.dispatchEvent(new Event(EVENTS_CHANGED));
+      const h = HOLIDAYS.find(x => x.key === next);
+      toast.success(`🔄 New ${tierFor((drop + 1) % 102).name} drop — ${h?.emoji ?? ''} ${h?.name ?? ''} theme!`);
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not refresh'); }
     finally { setRefreshing(false); }
   };
 
@@ -60,59 +77,55 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   const equip = (patch: { bg?: string; typing?: string }) => { DB.setEquipped(profile.email, patch); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); };
   const wearBadge = () => { updateProfile({ activeTitle: `${badge.emoji} ${badge.name}`, activeTitleColor: badge.color, activeTitleEffect: 'glow' }); bump(n => n + 1); };
 
-  const rows = [
-    { id: theme.id, label: 'Limited Theme', name: theme.name, cost: theme.cost, preview: <div className="w-14 h-10 rounded-lg border border-border" style={{ background: theme.css }} />,
+  const box = 'w-20 h-16 rounded-xl border border-white/15 overflow-hidden flex items-center justify-center';
+  const rows: ShopRow[] = [
+    { id: theme.id, label: 'Limited Background', name: theme.name, cost: theme.cost, preview: <div className={box} style={{ background: theme.css }} />,
       on: eq.bg === theme.id, use: () => equip({ bg: eq.bg === theme.id ? '' : theme.id }) },
-    { id: typing.id, label: 'Limited Typing Effect', name: typing.name, cost: typing.cost, preview: <div className="w-14 h-10 rounded-lg border border-border bg-background flex items-center justify-center text-lg">{event.variant.badgeEmoji}</div>,
-      sub: <p className={`text-[11px] ${typing.className}`} style={{ color: typing.color }}>You {typing.text}</p>, on: eq.typing === typing.id, use: () => equip({ typing: eq.typing === typing.id ? '' : typing.id }) },
-    { id: badge.id, label: 'Limited Badge', name: `${badge.emoji} ${badge.name}`, cost: badge.cost, preview: <div className="w-14 h-10 rounded-lg border border-border flex items-center justify-center text-2xl" style={{ background: `${c3}22` }}>{badge.emoji}</div>,
+    { id: typing.id, label: 'Limited Typing Effect', name: typing.name, cost: typing.cost, preview: <div className={`${box} bg-background text-3xl`}>{variant.badgeEmoji}</div>,
+      sub: <p className={`text-xs rounded-lg bg-background/60 px-2 py-1.5 ${typing.className}`} style={{ color: typing.color }}>You {typing.text}</p>, on: eq.typing === typing.id, use: () => equip({ typing: eq.typing === typing.id ? '' : typing.id }) },
+    { id: badge.id, label: 'Limited Badge', name: `${badge.emoji} ${badge.name}`, cost: badge.cost, preview: <div className={`${box} text-4xl`} style={{ background: `${accent}22` }}>{badge.emoji}</div>,
       on: profile.activeTitle === `${badge.emoji} ${badge.name}`, use: wearBadge },
-    { id: song.id, label: 'Limited Song', name: song.name, cost: song.cost,
-      preview: <button onClick={() => preview(song.url)} title="Preview" className="w-14 h-10 rounded-lg border border-border flex items-center justify-center text-xl hover:scale-105 transition-transform" style={{ background: `${c3}22` }}>🎵</button>,
-      sub: <div className="text-[11px] text-muted-foreground space-y-0.5">
-        <p>{song.genre} · {song.mood} · {song.instruments}</p>
-        {song.lyrics && <p className="italic">“{song.lyrics[1]}”</p>}
-        <p>Tap 🎵 to preview · plays in your music player</p>
-      </div>,
+    { id: song.id, label: 'Limited Song', name: song.name, cost: song.cost, preview: <div className={`${box} text-3xl`} style={{ background: `${accent}22` }}>🎵</div>,
+      sub: <p className="text-[11px] text-muted-foreground">{song.genre} · {song.mood}{song.lyrics ? ` · “${song.lyrics[1]}”` : ''}</p>,
       on: getMusic().url === song.url, use: () => { setMusic({ ...getMusic(), url: song.url }); toast.success('Added to your songs — open the 🎵 music player to play it'); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); } },
   ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg overflow-hidden p-0">
-        <div className="p-5 text-white" style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}>
-          <DialogHeader><DialogTitle className="text-xl">{event.holiday.emoji} {event.holiday.name} {event.year} — {event.variant.name}</DialogTitle></DialogHeader>
-          <p className="text-sm opacity-80">{event.variant.tagline}</p>
-          <p className="text-xs mt-2 flex items-center gap-1" style={{ color: c3 }}><Clock className="w-3 h-3" />Ends {formatDistanceToNow(event.end, { addSuffix: true })} — these items never come back</p>
-          {isRealOwner && (
-            <Button size="sm" variant="secondary" className="mt-3 gap-1.5 h-7 text-xs" disabled={refreshing} onClick={refreshShop}>
-              <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} /> Refresh shop (new drop{drop ? ` · #${drop}` : ''})
-            </Button>
-          )}
+      <DialogContent className="max-w-3xl w-[calc(100vw-1.5rem)] max-h-[90vh] overflow-y-auto p-0 border-white/10 gap-0">
+        {/* Themed hero */}
+        <div className="relative px-5 pt-6 pb-5 sm:px-7 text-white" style={{ background: theme.css }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/75" />
+          <div className="relative space-y-3">
+            <DialogHeader className="text-left space-y-1">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{isNational ? 'National Day Event' : 'Limited Holiday Shop'} · {tier.name}</p>
+              <DialogTitle className="text-2xl sm:text-3xl font-black leading-tight drop-shadow">{themeH.emoji} {themeH.name} — {variant.name}</DialogTitle>
+              <DialogDescription className="text-white/80 text-sm">{variant.tagline}</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/85">
+              <span className="flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />{event.holiday.emoji} {event.holiday.name} · {format(event.day, 'EEEE, MMM d, yyyy')}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />Ends {formatDistanceToNow(event.end, { addSuffix: true })}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <ShopMusic songUrl={song.url} title={song.name} open={open} />
+              <CountryPicker country={country} />
+              {isRealOwner && (
+                <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs" disabled={refreshing} onClick={refreshShop}>
+                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh shop{drop ? ` · #${drop}` : ''}
+                </Button>
+              )}
+            </div>
+            {!country && <p className="text-[11px] text-white/75 flex items-center gap-1"><Flag className="w-3 h-3" />Pick your country to unlock national-day events like Independence Day.</p>}
+            {isNational && isRealOwner && <p className="text-[11px] text-white/75">National day is live — refreshes upgrade items but keep this theme.</p>}
+          </div>
         </div>
-        <div className="p-4 space-y-2">
-          {rows.map(r => {
-            const has = owned.includes(r.id);
-            return (
-              <div key={r.id} className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
-                {r.preview}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: c3 }}>{r.label} · {tier.name}</p>
-                  <p className="text-sm font-semibold truncate">{r.name}</p>
-                  {r.sub}
-                  {stats[r.id] && (
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-2 mt-0.5">
-                      <span className="flex items-center gap-0.5"><Users className="w-3 h-3" />{stats[r.id].count.toLocaleString()} own this</span>
-                      <span className="flex items-center gap-0.5 text-amber-500 font-semibold"><Crown className="w-3 h-3" />{stats[r.id].firstEmail === me ? 'You were first!' : `First: ${stats[r.id].firstName}`}</span>
-                    </p>
-                  )}
-                </div>
-                {has
-                  ? <Button size="sm" variant={r.on ? 'secondary' : 'outline'} onClick={r.use}>{r.on ? 'Equipped ✓' : 'Equip'}</Button>
-                  : <Button size="sm" className="gap-1" onClick={() => pay(r.id, r.cost, r.name) && r.use()}><Gem className="w-3 h-3" />{r.cost.toLocaleString()}</Button>}
-              </div>
-            );
-          })}
+        {/* Items */}
+        <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-background">
+          {rows.map((r, i) => (
+            <ShopItemCard key={r.id} row={r} index={i} accent={accent} tierName={tier.name} owned={owned.includes(r.id)} stat={stats[r.id]} me={me}
+              onBuy={() => { if (pay(r.id, r.cost, r.name)) r.use(); }} />
+          ))}
+          <p className="sm:col-span-2 text-center text-[11px] text-muted-foreground pt-1">Limited items never come back once the event ends.</p>
         </div>
       </DialogContent>
     </Dialog>

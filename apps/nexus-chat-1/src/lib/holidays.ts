@@ -1,7 +1,21 @@
 import type { BgTheme, TypingStyle } from './cosmetics';
 
 export type Variant = { name: string; colors: [string, string, string]; particles: string[]; tagline: string; badgeEmoji: string; typing: string };
-export type Holiday = { key: string; name: string; emoji: string; date: (y: number) => Date; decor: 'spooky' | 'snow' | 'hearts' | 'fireworks' | 'confetti' | 'leaves' | 'clover' | 'eggs'; variants: Variant[] };
+export type Holiday = { key: string; name: string; emoji: string; date: (y: number) => Date; decor: 'spooky' | 'snow' | 'hearts' | 'fireworks' | 'confetti' | 'leaves' | 'clover' | 'eggs'; variants: Variant[]; countries?: string[] };
+
+/** Countries with national-day events. Code → label. */
+export const COUNTRIES: Record<string, string> = {
+  US: '🇺🇸 United States', CA: '🇨🇦 Canada', MX: '🇲🇽 Mexico', BR: '🇧🇷 Brazil', GB: '🇬🇧 United Kingdom', FR: '🇫🇷 France', DE: '🇩🇪 Germany',
+  IN: '🇮🇳 India', PH: '🇵🇭 Philippines', AU: '🇦🇺 Australia', JP: '🇯🇵 Japan',
+};
+const COUNTRY_KEY = 'nexus_country';
+export const getCountry = (): string => { try { return localStorage.getItem(COUNTRY_KEY) || ''; } catch { return ''; } };
+export const COUNTRY_CHANGED = 'nexus-country-changed';
+export const setCountry = (c: string) => { try { localStorage.setItem(COUNTRY_KEY, c); } catch { /* storage blocked */ } window.dispatchEvent(new Event(COUNTRY_CHANGED)); };
+const nat = (key: string, name: string, emoji: string, country: string, m: number, day: number, colors: [string, string, string], particles: string[], badgeEmoji: string, typing: string): Holiday => ({
+  key, name, emoji, countries: [country], date: y => d(y, m, day), decor: 'fireworks',
+  variants: [{ name: `${name} Pride`, colors, particles, tagline: `Happy ${name}!`, badgeEmoji, typing }],
+});
 
 const d = (y: number, m: number, day: number) => new Date(y, m - 1, day);
 const nthWeekday = (y: number, m: number, wd: number, n: number) => { const f = d(y, m, 1); return d(y, m, 1 + ((wd - f.getDay() + 7) % 7) + (n - 1) * 7); };
@@ -30,7 +44,7 @@ export const HOLIDAYS: Holiday[] = [
     { name: 'Pastel Garden', colors: ['#1a1030', '#7c3aed', '#fde68a'], particles: ['🥚', '🐣', '🌷'], tagline: 'Egg hunt season', badgeEmoji: '🐣', typing: 'is hunting for eggs 🥚' },
     { name: 'Bunny Hop', colors: ['#0f1a2a', '#0e7490', '#f9a8d4'], particles: ['🐰', '🌸', '🥕'], tagline: 'Hop hop hooray', badgeEmoji: '🐰', typing: 'is hopping around 🐰' },
   ] },
-  { key: 'july4', name: 'Fourth of July', emoji: '🎇', date: y => d(y, 7, 4), decor: 'fireworks', variants: [
+  { key: 'july4', name: 'Fourth of July', emoji: '🎇', countries: ['US'], date: y => d(y, 7, 4), decor: 'fireworks', variants: [
     { name: 'Star Spangled', colors: ['#0a1030', '#1e3a8a', '#dc2626'], particles: ['🎆', '⭐', '🎇'], tagline: 'Light up the sky', badgeEmoji: '🎆', typing: 'is lighting fireworks 🎇' },
     { name: 'Summer Blast', colors: ['#020617', '#7f1d1d', '#60a5fa'], particles: ['🎇', '🌭', '✨'], tagline: 'Boom boom!', badgeEmoji: '🌭', typing: 'is at the cookout 🌭' },
   ] },
@@ -48,9 +62,19 @@ export const HOLIDAYS: Holiday[] = [
     { name: 'Candy Cane', colors: ['#1a0303', '#991b1b', '#16a34a'], particles: ['🎁', '🎄', '❄️'], tagline: 'Ho ho ho!', badgeEmoji: '🎅', typing: 'is wrapping presents 🎁' },
     { name: 'Northern Lights', colors: ['#02061a', '#064e3b', '#a78bfa'], particles: ['❄️', '🌟', '🦌'], tagline: 'Magic in the air', badgeEmoji: '🦌', typing: 'is riding with reindeer 🦌' },
   ] },
+  nat('canadaday', 'Canada Day', '🍁', 'CA', 7, 1, ['#1a0303', '#b91c1c', '#fef2f2'], ['🍁', '🎆', '🦫'], '🍁', 'is saying sorry, eh 🍁'),
+  nat('mxindependence', 'Mexican Independence Day', '🇲🇽', 'MX', 9, 16, ['#03140a', '#15803d', '#dc2626'], ['🎉', '🌮', '🎺'], '🌮', 'is shouting ¡Viva México! 🎺'),
+  nat('brindependence', 'Brazil Independence Day', '🇧🇷', 'BR', 9, 7, ['#03140a', '#16a34a', '#facc15'], ['⚽', '🎉', '🦜'], '🦜', 'is dancing samba ⚽'),
+  nat('guyfawkes', 'Bonfire Night', '🔥', 'GB', 11, 5, ['#0a0505', '#7c2d12', '#fbbf24'], ['🔥', '🎆', '🎇'], '🔥', 'is lighting a bonfire 🔥'),
+  nat('bastille', 'Bastille Day', '🇫🇷', 'FR', 7, 14, ['#030a1f', '#1d4ed8', '#ef4444'], ['🎆', '🥖', '🗼'], '🗼', 'is grabbing a baguette 🥖'),
+  nat('deunity', 'German Unity Day', '🇩🇪', 'DE', 10, 3, ['#050505', '#991b1b', '#facc15'], ['🎉', '🥨', '🎆'], '🥨', 'is celebrating unity 🥨'),
+  nat('inindependence', 'Indian Independence Day', '🇮🇳', 'IN', 8, 15, ['#140a02', '#ea580c', '#16a34a'], ['🪁', '🎆', '🌸'], '🪁', 'is flying a kite 🪁'),
+  nat('phindependence', 'Philippine Independence Day', '🇵🇭', 'PH', 6, 12, ['#030a1f', '#1d4ed8', '#facc15'], ['☀️', '🎉', '🥭'], '☀️', 'is celebrating Kalayaan ☀️'),
+  nat('australiaday', 'Australia Day', '🇦🇺', 'AU', 1, 26, ['#02081f', '#1e3a8a', '#fbbf24'], ['🦘', '🏖️', '🎆'], '🦘', 'is at a barbie 🦘'),
+  nat('jpfoundation', 'National Foundation Day', '🇯🇵', 'JP', 2, 11, ['#120306', '#be123c', '#fdf2f8'], ['🌸', '🗻', '🎏'], '🌸', 'is watching cherry blossoms 🌸'),
 ];
 
-export type Override = { holidayKey: string; earlyStart: string | null; forceOn: boolean; forceOff: boolean; shopDrop?: number };
+export type Override = { holidayKey: string; earlyStart: string | null; forceOn: boolean; forceOff: boolean; shopDrop?: number; shopTheme?: string | null };
 export type ActiveEvent = { holiday: Holiday; year: number; variant: Variant; start: Date; end: Date; day: Date };
 
 const DAY = 864e5;
@@ -63,14 +87,20 @@ export function windowFor(h: Holiday, year: number, o?: Override) {
   return { day, start, end: new Date(day.getTime() + 8 * DAY) };
 }
 
-export function getActiveEvent(overrides: Override[], now = new Date()): ActiveEvent | null {
+/** National days only show for people who picked that country. Global holidays show for everyone. */
+export const appliesTo = (h: Holiday, country: string) => !h.countries || h.countries.includes(country);
+
+export function getActiveEvent(overrides: Override[], now = new Date(), country = getCountry()): ActiveEvent | null {
   const forced = overrides.find(o => o.forceOn);
+  // National days win over global holidays when both are live
+  const order = [...HOLIDAYS].sort((a, b) => Number(!!b.countries) - Number(!!a.countries));
   for (const year of [now.getFullYear(), now.getFullYear() + 1, now.getFullYear() - 1]) {
-    for (const h of HOLIDAYS) {
+    for (const h of order) {
       const o = overrides.find(x => x.holidayKey === h.key);
       if (o?.forceOff) continue;
-      const w = windowFor(h, year, o);
       const isForced = forced?.holidayKey === h.key && year === now.getFullYear();
+      if (!isForced && !appliesTo(h, country)) continue;
+      const w = windowFor(h, year, o);
       if (isForced || (now >= w.start && now < w.end)) return { holiday: h, year, variant: variantFor(h, year), ...w };
     }
   }

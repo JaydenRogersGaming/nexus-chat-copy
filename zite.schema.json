@@ -1306,6 +1306,15 @@
               "decimalPlaces": 1
             }
           }
+        },
+        {
+          "id": "fdxLAvy28VE",
+          "sdkName": "shopTheme",
+          "definition": {
+            "name": "Shop Theme",
+            "type": "single_line_text",
+            "template": {}
+          }
         }
       ]
     },

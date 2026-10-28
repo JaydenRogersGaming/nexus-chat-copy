@@ -3,7 +3,7 @@ import { createEndpoint, ZiteError } from 'zitejs/backend';
 import { zite } from 'zitejs/db';
 import { isOwnerEmail } from '../lib/permissions';
 
-const ov = z.object({ holidayKey: z.string(), earlyStart: z.string().nullable(), forceOn: z.boolean(), forceOff: z.boolean(), shopDrop: z.number() });
+const ov = z.object({ holidayKey: z.string(), earlyStart: z.string().nullable(), forceOn: z.boolean(), forceOff: z.boolean(), shopDrop: z.number(), shopTheme: z.string().nullable() });
 
 export default createEndpoint({
   description: 'Reads holiday event overrides; the owner can start events early, force them on/off, or refresh the limited shop',
@@ -13,6 +13,8 @@ export default createEndpoint({
     earlyStart: z.string().nullable().optional(),
     forceOn: z.boolean().optional(),
     forceOff: z.boolean().optional(),
+    /** Holiday theme the shop rotates to on refresh (chosen by the client; national days pin it). */
+    shopTheme: z.string().max(40).optional(),
   }),
   outputSchema: z.object({ overrides: z.array(ov) }),
   execute: async ({ input, context }) => {
@@ -33,10 +35,10 @@ export default createEndpoint({
     }
     if (input.action === 'refreshShop') {
       const cur = await zite.eventOverrides.findOne({ filters: { holidayKey: input.holidayKey! } });
-      const next = ((cur?.shopDrop ?? 0) + 1) % 102; // climbs one rarity per refresh, then loops back to the start per event (rarer each time), then cycles
-      await zite.eventOverrides.bulkCreate({ matchOn: ['holidayKey'], records: [{ holidayKey: input.holidayKey!, shopDrop: next }] });
+      const next = ((cur?.shopDrop ?? 0) + 1) % 102; // climbs one rarity per refresh, then loops back to the start
+      await zite.eventOverrides.bulkCreate({ matchOn: ['holidayKey'], records: [{ holidayKey: input.holidayKey!, shopDrop: next, shopTheme: input.shopTheme ?? null }] });
     }
     const { records } = await zite.eventOverrides.findAll({ limit: 100 });
-    return { overrides: records.map(r => ({ holidayKey: r.holidayKey || '', earlyStart: r.earlyStart ? String(r.earlyStart).slice(0, 10) : null, forceOn: !!r.forceOn, forceOff: !!r.forceOff, shopDrop: r.shopDrop ?? 0 })) };
+    return { overrides: records.map(r => ({ holidayKey: r.holidayKey || '', earlyStart: r.earlyStart ? String(r.earlyStart).slice(0, 10) : null, forceOn: !!r.forceOn, forceOff: !!r.forceOff, shopDrop: r.shopDrop ?? 0, shopTheme: r.shopTheme || null })) };
   },
 });

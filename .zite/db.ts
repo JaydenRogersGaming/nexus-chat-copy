@@ -435,6 +435,7 @@ export type EventOverridesRecordType = {
   forceOn?: boolean;
   /** "Shop Drop". 1 decimal places, format: local (e.g. 1,000,000.50) */
   shopDrop?: number;
+  shopTheme?: string;
 };
 
 /** What you may write when creating or updating a record in the "Event Overrides" table. */
@@ -444,6 +445,7 @@ export type EventOverridesRecordInput = {
   forceOff: string | boolean | null;
   forceOn: string | boolean | null;
   shopDrop: string | number | null;
+  shopTheme: string | null;
 };
 
 /** A record in the "Trades" table, as it is read back. */

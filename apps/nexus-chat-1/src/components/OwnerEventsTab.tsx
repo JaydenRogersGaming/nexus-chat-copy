@@ -5,7 +5,7 @@ import { Button } from '@project/components/ui/button';
 import { Switch } from '@project/components/ui/switch';
 import { DatePicker } from '@project/components/ui/date-picker';
 import { events as eventsApi } from 'zitejs/api';
-import { HOLIDAYS, windowFor, variantFor, Override } from '../lib/holidays';
+import { HOLIDAYS, windowFor, variantFor, Override, COUNTRIES } from '../lib/holidays';
 import { useActiveEvent, EVENTS_CHANGED } from '../hooks/useActiveEvent';
 
 export default function OwnerEventsTab() {
@@ -28,7 +28,7 @@ export default function OwnerEventsTab() {
     <div className="space-y-3">
       <div className="p-3 rounded-xl border border-border bg-secondary/30 text-sm">
         {active ? <>Live now: <b>{active.holiday.emoji} {active.holiday.name} {active.year} — {active.variant.name}</b> (ends {format(active.end, 'MMM d')})</> : 'No event is live right now.'}
-        <p className="text-xs text-muted-foreground mt-1">Events start a week before the holiday and end a week after. Each year gets a new look and new limited items.</p>
+        <p className="text-xs text-muted-foreground mt-1">Events start a week before the holiday and end a week after. Each year gets a new look and new limited items. National days only show for people who picked that country (Start now shows it to everyone).</p>
       </div>
       {HOLIDAYS.map(h => {
         let year = now.getFullYear();
@@ -39,7 +39,7 @@ export default function OwnerEventsTab() {
           <div key={h.key} className="p-3 rounded-xl border border-border flex flex-wrap items-center gap-3">
             <span className="text-2xl">{h.emoji}</span>
             <div className="flex-1 min-w-[160px]">
-              <p className="text-sm font-semibold">{h.name} {year}</p>
+              <p className="text-sm font-semibold">{h.name} {year}{h.countries && <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/15 text-primary">{h.countries.map(c => COUNTRIES[c] ?? c).join(', ')} only</span>}</p>
               <p className="text-[11px] text-muted-foreground">{variantFor(h, year).name} · {format(w.start, 'MMM d')} – {format(w.end, 'MMM d')}</p>
             </div>
             <div className="w-40"><DatePicker value={o?.earlyStart ? new Date(o.earlyStart + 'T00:00:00') : undefined} onChange={dt => save(h.key, { earlyStart: dt ? format(dt, 'yyyy-MM-dd') : null })} /></div>
