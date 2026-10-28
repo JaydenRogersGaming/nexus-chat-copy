@@ -57,9 +57,9 @@ export default function TranslatedText({ text, auto, style }: { text: string; la
   return (
     <span data-no-translate>
       <span style={style}>{showing ? tr : text}</span>
-      {foreign && <button type="button" onClick={() => setOn(o => !o)} title={showing ? 'Show original' : 'Translate'}
+      {(foreign || auto) && text.trim() && <button type="button" onClick={() => setOn(o => !o)} title={showing ? 'Show original' : 'Translate to English'}
         className="ml-1.5 inline-flex items-center gap-0.5 align-middle text-[10px] text-muted-foreground hover:text-primary opacity-60 hover:opacity-100">
-        <Languages className="w-3 h-3" />{showing ? 'original' : on && !tr ? '…' : ''}
+        <Languages className="w-3 h-3" />{showing ? 'original' : on && !tr ? '…' : 'translate'}
       </button>}
     </span>
   );
