@@ -9,6 +9,7 @@ import { useApp } from '../contexts/AppContext';
 import { useUpload } from 'zitejs/upload';
 import TitleBadge from './TitleBadge';
 import ItemSwitcher from './ItemSwitcher';
+import CustomBackground from './CustomBackground';
 import * as DB from '../lib/storage';
 import { allLimitedBadges } from '../lib/holidays';
 import { Camera, Trophy, Globe, Trash2 } from 'lucide-react';
@@ -135,6 +136,8 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
               <p className="text-xs text-muted-foreground capitalize">Role: {profile.role}</p>
             </div>
           </div>
+
+          <CustomBackground />
 
           {/* Display Name */}
           <div><Label>Display Name</Label><Input value={name} onChange={e => setName(e.target.value)} className="mt-1" /></div>

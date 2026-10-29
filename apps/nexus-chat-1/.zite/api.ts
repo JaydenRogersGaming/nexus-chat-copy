@@ -14,6 +14,7 @@ import type { default as _ChatEp } from '../src/api/chat';
 import type { default as _ChatBotEp } from '../src/api/chatBot';
 import type { default as _ChatSettingsEp } from '../src/api/chatSettings';
 import type { default as _CustomLimitedEp } from '../src/api/customLimited';
+import type { default as _DailyQuizEp } from '../src/api/dailyQuiz';
 import type { default as _EventsEp } from '../src/api/events';
 import type { default as _FriendsEp } from '../src/api/friends';
 import type { default as _GenerateArtEp } from '../src/api/generateArt';
@@ -97,6 +98,11 @@ type _CustomLimitedCfg = typeof _CustomLimitedEp;
 export type CustomLimitedInputType = NonNullable<_CustomLimitedCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_CustomLimitedCfg['execute']>[0]['input'];
 export type CustomLimitedOutputType = Awaited<ReturnType<_CustomLimitedCfg['execute']>>;
 export const customLimited = createCaller<CustomLimitedInputType, CustomLimitedOutputType>('customLimited');
+
+type _DailyQuizCfg = typeof _DailyQuizEp;
+export type DailyQuizInputType = NonNullable<_DailyQuizCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_DailyQuizCfg['execute']>[0]['input'];
+export type DailyQuizOutputType = Awaited<ReturnType<_DailyQuizCfg['execute']>>;
+export const dailyQuiz = createCaller<DailyQuizInputType, DailyQuizOutputType>('dailyQuiz');
 
 type _EventsCfg = typeof _EventsEp;
 export type EventsInputType = NonNullable<_EventsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_EventsCfg['execute']>[0]['input'];
@@ -227,6 +233,7 @@ export const api = {
   chatBot,
   chatSettings,
   customLimited,
+  dailyQuiz,
   events,
   friends,
   generateArt,

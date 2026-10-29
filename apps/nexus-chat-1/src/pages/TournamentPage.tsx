@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useApp } from '../contexts/AppContext';
 import { ReactionGame, ClickFrenzyGame, SpeedTypingGame } from '../components/tournament/MiniGames';
 import CreateTournament from '../components/tournament/CreateTournament';
+import DailyQuiz from '../components/tournament/DailyQuiz';
 
 type T = TournamentsOutputType['tournaments'][0];
 const STAFF = ['owner', 'co-owner', 'admin', 'senior-mod', 'mod'];
@@ -72,6 +73,8 @@ export default function TournamentPage() {
         </div>
         {isStaff && <Button onClick={() => setCreating(true)} className="gap-1.5"><Plus className="w-4 h-4" />New</Button>}
       </div>
+
+      <DailyQuiz />
 
       {current && !current.ended && (
         <div className="rounded-2xl border border-primary/40 bg-card p-4 space-y-3">
