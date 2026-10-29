@@ -19,7 +19,7 @@ const TITLES: Record<string, string> = {
 type Props = { view: TabView; url: string; onRetry: () => void; onSearch: (q: string) => void; onOpen: (url: string) => void };
 
 export default function BrowserView({ view, url, onRetry, onSearch, onOpen }: Props) {
-  if (view.kind === 'home') return <SearchHome onSearch={onSearch} />;
+  if (view.kind === 'home') return <SearchHome onSearch={onSearch} onOpen={onOpen} />;
   if (view.kind === 'results') return <SearchResults query={view.query} results={view.results} provider={view.provider} onOpen={onOpen} />;
   if (view.kind === 'loading') return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background text-muted-foreground">

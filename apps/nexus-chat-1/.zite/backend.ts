@@ -89,7 +89,7 @@ export interface EndpointConfig<TInput = unknown, TOutput = unknown, TStream ext
   execute: (
     params: {
       input: ZiteEndpointInput<TInput, TTrigger>;
-      /** Durable steps: step.run(name, fn) runs fn once per logical run — its result is saved before anything after it executes, and a resumed run replays completed steps from their saved results. Provided by the platform; never define a local stand-in. */
+      /** Durable steps: step.run(name, fn) runs fn once per logical run — its result is saved before anything after it executes, and a resumed run replays completed steps from their saved results. In a run fired by a schedule, webhook or trigger, step.sleep(name, "2d") pauses the run and a failed step is tried again. Provided by the platform; never define a local stand-in. */
       step: ZiteStep;
       context: TSchedule extends ZiteSchedule ? ZiteRequestContext | ZiteScheduledContext : TWebhook extends ZiteWebhook ? ZiteRequestContext | ZiteScheduledContext : TTrigger extends ZiteTrigger ? ZiteRequestContext | ZiteScheduledContext : ZiteRequestContext;
     } & (TStream extends true ? { stream: ZiteStreamInterface } : {}) & (TTrigger extends ZiteTrigger ? { trigger?: ZiteTriggerContext<TTrigger> } : {}),

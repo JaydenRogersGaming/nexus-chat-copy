@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import WhatsNew from './WhatsNew';
-import { logout } from 'zitejs/auth';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -21,7 +20,6 @@ const NAV = [
   { to: '/emoji-maker',  icon: Smile,         label: 'Emoji Mixer' },
   { to: '/gamble',       icon: Dices,         label: 'Casino' },
   { to: '/leaderboard',  icon: Trophy,        label: 'Leaderboard' },
-  { to: '/hpclicker',    icon: Heart,         label: 'HP Clicker' },
   { to: '/tournament',   icon: Trophy,        label: 'Tournament' },
   { to: '/watch',        icon: Clapperboard,  label: 'Watch Party' },
   { to: '/aichat',        icon: Bot,           label: 'AI Assistant' },
@@ -98,10 +96,7 @@ export default function Sidebar({ onProfileClick }: Props) {
         </button>
       )}
       <WhatsNew />
-      <button onClick={() => logout()}
-        className="mx-3 mb-3 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-        <LogOut className="w-3.5 h-3.5" /> Sign out
-      </button>
+      <p className="px-4 pb-3 text-[10px] text-muted-foreground text-center">© 2026–2050 Nexus Hub. All rights reserved.</p>
     </aside>
   );
 }

@@ -7,6 +7,7 @@ import type { default as _AiBadgeEp } from '../src/api/aiBadge';
 import type { default as _AiThemeEp } from '../src/api/aiTheme';
 import type { default as _AiTitleEp } from '../src/api/aiTitle';
 import type { default as _AiVipStyleEp } from '../src/api/aiVipStyle';
+import type { default as _AiWebsiteEp } from '../src/api/aiWebsite';
 import type { default as _AuditLogEp } from '../src/api/auditLog';
 import type { default as _BansEp } from '../src/api/bans';
 import type { default as _ChatEp } from '../src/api/chat';
@@ -61,6 +62,11 @@ type _AiVipStyleCfg = typeof _AiVipStyleEp;
 export type AiVipStyleInputType = NonNullable<_AiVipStyleCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiVipStyleCfg['execute']>[0]['input'];
 export type AiVipStyleOutputType = Awaited<ReturnType<_AiVipStyleCfg['execute']>>;
 export const aiVipStyle = createCaller<AiVipStyleInputType, AiVipStyleOutputType>('aiVipStyle');
+
+type _AiWebsiteCfg = typeof _AiWebsiteEp;
+export type AiWebsiteInputType = NonNullable<_AiWebsiteCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiWebsiteCfg['execute']>[0]['input'];
+export type AiWebsiteOutputType = Awaited<ReturnType<_AiWebsiteCfg['execute']>>;
+export const aiWebsite = createCaller<AiWebsiteInputType, AiWebsiteOutputType>('aiWebsite');
 
 type _AuditLogCfg = typeof _AuditLogEp;
 export type AuditLogInputType = NonNullable<_AuditLogCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AuditLogCfg['execute']>[0]['input'];
@@ -214,6 +220,7 @@ export const api = {
   aiTheme,
   aiTitle,
   aiVipStyle,
+  aiWebsite,
   auditLog,
   bans,
   chat,

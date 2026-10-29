@@ -12,8 +12,7 @@
 //     operators: contains, not, in, notIn, lt, lte, gt, gte
 //       `not: null` means "is set". An empty `in: []` matches nothing; an
 //       empty `notIn: []` applies no filter.
-//     sort is currently IGNORED here — it is stripped before the request.
-//       (it does work on zite.auth.findAllUsers). Order in SQL instead.
+//     sort: [{ field: "fieldName", direction: "asc" | "desc" }]
 //     limit defaults to 500, max 2000; offset is a row count (a number)
 //     a filter value of `undefined` is REJECTED (it would query unfiltered
 //       and match an arbitrary record). Check the value first.

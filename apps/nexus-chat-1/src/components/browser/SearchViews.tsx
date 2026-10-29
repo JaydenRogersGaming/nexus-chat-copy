@@ -5,11 +5,22 @@ import { Button } from '@project/components/ui/button';
 
 export type Result = { title: string; url: string; snippet: string; source: string };
 
-export function SearchHome({ onSearch }: { onSearch: (q: string) => void }) {
+export const GAMES = [
+  { id: 'nexus:game/hpclicker', label: 'HP Clicker', emoji: '❤️', desc: 'Click, upgrade, prestige' },
+];
+const LINKS = [
+  { url: 'https://en.wikipedia.org/wiki/Special:Random', label: 'Random Wiki', emoji: '📚' },
+  { url: 'https://www.nasa.gov/', label: 'NASA', emoji: '🚀' },
+  { url: 'https://developer.mozilla.org/', label: 'MDN Web Docs', emoji: '💻' },
+  { url: 'https://www.gutenberg.org/', label: 'Free Books', emoji: '📖' },
+];
+
+export function SearchHome({ onSearch, onOpen }: { onSearch: (q: string) => void; onOpen?: (url: string) => void }) {
   const [q, setQ] = useState('');
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-background p-6">
-      <form onSubmit={e => { e.preventDefault(); onSearch(q); }} className="w-full max-w-xl text-center space-y-5">
+    <div className="absolute inset-0 overflow-y-auto bg-background p-6 flex items-center justify-center">
+      <div className="w-full max-w-xl text-center space-y-6">
+      <form onSubmit={e => { e.preventDefault(); onSearch(q); }} className="space-y-5">
         <h1 className="text-4xl font-black tracking-tight"><span className="text-primary">Nexus</span> Search</h1>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -17,6 +28,27 @@ export function SearchHome({ onSearch }: { onSearch: (q: string) => void }) {
         </div>
         <Button type="submit">Search</Button>
       </form>
+      {onOpen && <>
+        <div className="text-left space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">🎮 Browser games</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {GAMES.map(g => (
+              <button key={g.id} onClick={() => onOpen(g.id)} className="rounded-lg border border-border bg-card p-3 text-left hover:border-primary transition-colors">
+                <p className="text-sm font-semibold">{g.emoji} {g.label}</p><p className="text-[11px] text-muted-foreground">{g.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="text-left space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">🔗 Quick links</p>
+          <div className="flex flex-wrap gap-2">
+            {LINKS.map(l => (
+              <button key={l.url} onClick={() => onOpen(l.url)} className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted">{l.emoji} {l.label}</button>
+            ))}
+          </div>
+        </div>
+      </>}
+      </div>
     </div>
   );
 }

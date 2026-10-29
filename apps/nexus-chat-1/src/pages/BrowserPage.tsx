@@ -5,6 +5,8 @@ import { Input } from '@project/components/ui/input';
 import { Button } from '@project/components/ui/button';
 import { cn } from '@project/components/lib/utils';
 import BrowserView, { TabView } from '../components/browser/BrowserView';
+import { GAMES } from '../components/browser/SearchViews';
+import HpClickerPage from './HpClickerPage';
 
 /** History entries: 'nexus:home', 'nexus:search?q=…', or a real http(s) URL. */
 const HOME = 'nexus:home';
@@ -35,6 +37,7 @@ export default function BrowserPage() {
 
   const load = useCallback(async (id: number, entry: string) => {
     if (entry === HOME) { patch(id, { url: HOME, view: { kind: 'home' }, title: 'New tab' }); return; }
+    if (entry.startsWith('nexus:game/')) { patch(id, { url: entry, view: { kind: 'home' }, title: GAMES.find(g => g.id === entry)?.label ?? 'Game' }); return; }
     const q = queryOf(entry);
     if (q !== null) {
       if (!q.trim()) { patch(id, { url: entry, view: { kind: 'error', code: 'EMPTY_QUERY', message: 'Type something to search for.' } }); return; }
@@ -133,8 +136,9 @@ export default function BrowserPage() {
       </div>
 
       <div className="flex-1 relative bg-background">
+        {active.url === 'nexus:game/hpclicker' ? <div className="absolute inset-0 overflow-y-auto"><HpClickerPage /></div> :
         <BrowserView key={active.id} view={active.view} url={externalUrl} onRetry={() => load(active.id, active.url)}
-          onSearch={s => navigate(active.id, searchEntry(s.trim()))} onOpen={u => navigate(active.id, u)} />
+          onSearch={s => navigate(active.id, searchEntry(s.trim()))} onOpen={u => navigate(active.id, u)} />}
       </div>
     </div>
   );

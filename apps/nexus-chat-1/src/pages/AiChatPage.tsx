@@ -9,6 +9,7 @@ import { useAuth } from 'zitejs/auth';
 import { isOwnerEmail } from '../lib/gameData';
 import AiTitleMaker from '../components/AiTitleMaker';
 import AiIdeasButton from '../components/AiIdeasButton';
+import WebsiteMakerButton from '../components/WebsiteMakerButton';
 
 type Message = { role: 'user' | 'assistant'; content: string; imageUrl?: string; attachUrl?: string };
 
@@ -123,6 +124,7 @@ export default function AiChatPage() {
           <span className="text-xs text-muted-foreground">Chat + Image Gen</span>
         </div>
         <div className="flex gap-1.5">
+          <WebsiteMakerButton />
           <AiIdeasButton />
           <AiTitleMaker />
           <Button size="sm" variant="outline" onClick={newChat}>
