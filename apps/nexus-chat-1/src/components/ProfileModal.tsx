@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useAuth } from 'zitejs/auth';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
@@ -40,6 +41,7 @@ type Props = { open: boolean; onClose: () => void; onOpenShop: () => void };
 
 export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
   const { profile, updateProfile } = useApp();
+  const { user: authUser } = useAuth();
   const [name, setName] = useState('');
   const [color, setColor] = useState('#e0e0ff');
   const [color2, setColor2] = useState('');
@@ -129,6 +131,7 @@ export default function ProfileModal({ open, onClose, onOpenShop }: Props) {
             <div>
               <p className="font-bold text-sm" style={previewStyle}>{name || profile.name}</p>
               <p className="text-xs text-muted-foreground">{profile.email}</p>
+              {authUser?.createdAt && <p className="text-[11px] text-muted-foreground">📅 Joined {new Date(authUser.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p>}
               <p className="text-xs text-muted-foreground capitalize">Role: {profile.role}</p>
             </div>
           </div>

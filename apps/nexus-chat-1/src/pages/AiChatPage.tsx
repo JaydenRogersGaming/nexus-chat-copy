@@ -4,7 +4,7 @@ import { useUpload } from 'zitejs/upload';
 import { Button } from '@project/components/ui/button';
 import { Markdown } from '@project/components/markdown';
 import { toast } from 'sonner';
-import { chat, generateArt } from 'zitejs/api';
+import { chat, generateArt, GenerateArtInputType } from 'zitejs/api';
 import { useAuth } from 'zitejs/auth';
 import { isOwnerEmail } from '../lib/gameData';
 import AiTitleMaker from '../components/AiTitleMaker';
@@ -12,6 +12,15 @@ import AiIdeasButton from '../components/AiIdeasButton';
 import WebsiteMakerButton from '../components/WebsiteMakerButton';
 
 type Message = { role: 'user' | 'assistant'; content: string; imageUrl?: string; attachUrl?: string };
+
+const ENGINES = [
+  { id: 'flux', label: '⚡ Flux' },
+  { id: 'turbo', label: '🚀 Turbo' },
+  { id: 'flux-realism', label: '📷 Realism' },
+  { id: 'flux-anime', label: '🌸 Anime' },
+  { id: 'flux-3d', label: '🧊 3D' },
+  { id: 'openai', label: '🤖 OpenAI' },
+];
 
 export default function AiChatPage() {
   const { user } = useAuth();
@@ -23,6 +32,8 @@ export default function AiChatPage() {
   const [streamText, setStreamText] = useState('');
   const [generatingImage, setGeneratingImage] = useState(false);
   const [attach, setAttach] = useState<string | null>(null);
+  const [engine, setEngine] = useState(() => localStorage.getItem('nexus_img_engine') || 'flux');
+  useEffect(() => { localStorage.setItem('nexus_img_engine', engine); }, [engine]);
   const { upload, isUploading } = useUpload();
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -77,19 +88,20 @@ export default function AiChatPage() {
     setGeneratingImage(true);
 
     try {
-      const result = await generateArt({ prompt: text });
+      const result = await generateArt({ prompt: text, engine: engine as GenerateArtInputType['engine'] });
       if (result.blocked) {
         const failMsg: Message = { role: 'assistant', content: "🚫 I can't make that image — it breaks the rules. This request has been reported to the owner." };
         setConversations(prev => prev.map((c, i) => i === activeIdx ? [...updated, failMsg] : c));
         toast.error('Inappropriate prompt — reported to the owner');
         return;
       }
-      const dataUrl = `data:image/png;base64,${result.imageBase64}`;
-      const assistantMsg: Message = { role: 'assistant', content: `Here's your generated image for: "${text}"`, imageUrl: dataUrl };
+      const dataUrl = `data:image/${engine === 'openai' ? 'png' : 'jpeg'};base64,${result.imageBase64}`;
+      const engineLabel = ENGINES.find(e => e.id === engine)?.label ?? engine;
+      const assistantMsg: Message = { role: 'assistant', content: `Here's your image for: "${text}" (made with ${engineLabel})`, imageUrl: dataUrl };
       setConversations(prev => prev.map((c, i) => i === activeIdx ? [...updated, assistantMsg] : c));
       toast.success('🎨 Image generated!');
-    } catch {
-      toast.error('Failed to generate image');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Failed to generate image');
     } finally {
       setGeneratingImage(false);
     }
@@ -200,6 +212,10 @@ export default function AiChatPage() {
               el.style.height = Math.min(el.scrollHeight, 160) + 'px';
             }}
           />
+          <select value={engine} onChange={e => setEngine(e.target.value)} disabled={isBusy} title="Image AI engine"
+            className="h-11 rounded-xl border border-border bg-secondary/50 px-2 text-xs shrink-0 max-w-[120px]">
+            {ENGINES.map(e => <option key={e.id} value={e.id}>{e.label}</option>)}
+          </select>
           {(
             <Button onClick={handleGenerateImage} disabled={!input.trim() || isBusy} size="icon" variant="outline" className="rounded-xl h-11 w-11 shrink-0" title="Generate Image">
               <ImageIcon className="w-4 h-4" />

@@ -32,13 +32,15 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
   const local = email ? DB.getUser(email) : null;
   const [remote, setRemote] = useState<DB.UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
+  const [joinedAt, setJoinedAt] = useState(0);
   useEffect(() => {
-    setRemote(null);
+    setRemote(null); setJoinedAt(0);
     if (!email) return;
     setLoading(true);
     rolesApi({ action: 'profile', email }).then(r => {
       const p = r.profile;
       if (!p) return;
+      setJoinedAt(p.joinedAt);
       const base = DB.getUser(email);
       setRemote({
         ...(base || { bio: '', nameColor2: '', gems: 0, badges: [], messageCount: 0, gambleWins: 0 } as unknown as DB.UserProfile),
@@ -86,6 +88,7 @@ export default function UserProfileModal({ email, onClose, onStartDM }: Props) {
                   : { color: user.nameColor }
               }>{user.name}</p>
               <p className="text-xs text-muted-foreground">{user.email}</p>
+              {joinedAt > 0 && <p className="text-[11px] text-muted-foreground">📅 Joined {new Date(joinedAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p>}
               <div className="flex flex-wrap gap-1 mt-1">
                 {roleBadge && (
                   <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded border"

@@ -46,6 +46,7 @@ export default function WhatsNew() {
                 <Section icon={<Wrench className="w-3 h-3" />} label="Changes" items={r.changed} tone="text-blue-500" />
               </div>
             ))}
+            <p className="text-[11px] text-muted-foreground text-center border-t border-border pt-3">© 2026–2050 Nexus Hub. All rights reserved.</p>
           </div>
         </DialogContent>
       </Dialog>

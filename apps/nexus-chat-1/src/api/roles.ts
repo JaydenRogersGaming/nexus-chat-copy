@@ -27,7 +27,7 @@ export default createEndpoint({
   outputSchema: z.object({
     myRole: z.string(),
     users: z.array(z.object({ email: z.string(), name: z.string(), role: z.string(), customRole: z.string(), customRoleColor: z.string(), customRoleColor2: z.string() })),
-    profile: z.object({ email: z.string(), name: z.string(), profilePic: z.string(), nameColor: z.string(), activeTitle: z.string(), activeTitleColor: z.string(), activeTitleEffect: z.string(), role: z.string(), lastSeen: z.number() }).nullable().optional(),
+    profile: z.object({ email: z.string(), name: z.string(), profilePic: z.string(), nameColor: z.string(), activeTitle: z.string(), activeTitleColor: z.string(), activeTitleEffect: z.string(), role: z.string(), lastSeen: z.number(), joinedAt: z.number() }).nullable().optional(),
   }),
   execute: async ({ input, context }) => {
     const me = context.user;
@@ -40,7 +40,10 @@ export default createEndpoint({
       const { rows } = await zite.sql({ query: `SELECT * FROM "Presence" WHERE lower("email") = $1 LIMIT 1`, params: [email] });
       const r = rows[0];
       if (!r) return { myRole, users: NO_USERS, profile: null };
+      const joined = await zite.sql({ query: `SELECT "created_at" FROM "ziteUsers" WHERE lower("email") = $1 LIMIT 1`, params: [email] });
+      const joinedAt = joined.rows[0]?.created_at ?? r.created_at;
       return { myRole, users: NO_USERS, profile: {
+        joinedAt: joinedAt ? new Date(String(joinedAt)).getTime() : 0,
         email: String(r.email), name: String(r.displayName || email.split('@')[0]), profilePic: String(r.profilePic ?? ''),
         nameColor: String(r.nameColor ?? ''), activeTitle: String(r.activeTitle ?? ''), activeTitleColor: String(r.activeTitleColor ?? ''),
         activeTitleEffect: String(r.activeTitleEffect ?? ''), role: isOwnerEmail(email) ? 'owner' : String(r.role || 'user'),
