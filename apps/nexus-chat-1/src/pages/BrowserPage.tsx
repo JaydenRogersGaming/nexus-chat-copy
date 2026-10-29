@@ -1,181 +1,120 @@
-import { useState, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Home, Search, Globe, ExternalLink } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { ArrowLeft, ArrowRight, RotateCw, Home, Search, Globe, ExternalLink, Plus, X } from 'lucide-react';
+import { proxyPage } from 'zitejs/api';
 import { Input } from '@project/components/ui/input';
 import { Button } from '@project/components/ui/button';
 import { cn } from '@project/components/lib/utils';
+import BrowserView, { TabView } from '../components/browser/BrowserView';
 
-const SEARCH_ENGINES = [
-  { id: 'google', label: 'Google', icon: '🔍', homeUrl: 'https://www.google.com/webhp?igu=1', searchUrl: 'https://www.google.com/search?igu=1&q=' },
-  { id: 'youtube', label: 'YouTube', icon: '▶️', homeUrl: 'https://www.youtube.com/embed?listType=search&list=music', searchUrl: 'https://www.youtube.com/embed?listType=search&list=' },
-  { id: 'bing', label: 'Bing', icon: '🅱️', homeUrl: 'https://www.bing.com/', searchUrl: 'https://www.bing.com/search?q=' },
-  { id: 'ddg', label: 'DuckDuckGo', icon: '🦆', homeUrl: 'https://html.duckduckgo.com/html/', searchUrl: 'https://html.duckduckgo.com/html/?q=' },
-  { id: 'wiki', label: 'Wikipedia', icon: '📚', homeUrl: 'https://en.m.wikipedia.org/', searchUrl: 'https://en.m.wikipedia.org/w/index.php?search=' },
-];
+const HOME = 'https://www.google.com/';
+const DIRECT_HOME = 'https://www.google.com/webhp?igu=1';
+const searchUrl = (q: string) => `https://www.google.com/search?q=${encodeURIComponent(q)}`;
 
-/** Quick-launch sites. `embed` ones load inside Nexus; the rest block framing so they open in a new tab. */
-const QUICK_SITES = [
-  { label: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/embed?listType=search&list=trending', embed: true },
-  { label: 'Wikipedia', icon: '📚', url: 'https://en.m.wikipedia.org/', embed: true },
-  { label: 'OpenStreetMap', icon: '🗺️', url: 'https://www.openstreetmap.org/export/embed.html?bbox=-125,24,-66,50', embed: true },
-  { label: 'Archive.org', icon: '🏛️', url: 'https://archive.org/', embed: true },
-  { label: 'Desmos', icon: '📈', url: 'https://www.desmos.com/calculator', embed: true },
-  { label: 'Scratch', icon: '🐱', url: 'https://scratch.mit.edu/', embed: false },
-  { label: 'Spotify', icon: '🎧', url: 'https://open.spotify.com/', embed: false },
-  { label: 'Twitch', icon: '🎮', url: 'https://www.twitch.tv/', embed: false },
-  { label: 'Reddit', icon: '👽', url: 'https://www.reddit.com/', embed: false },
-  { label: 'Gmail', icon: '✉️', url: 'https://mail.google.com/', embed: false },
-  { label: 'Google Docs', icon: '📝', url: 'https://docs.google.com/', embed: false },
-  { label: 'GitHub', icon: '🐙', url: 'https://github.com/', embed: false },
-];
-
-/** Turns YouTube watch/short links into embeddable player URLs. */
-function toEmbeddable(u: string) {
-  const m = u.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})/);
-  return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1` : u;
-}
+type Tab = { id: number; url: string; history: string[]; idx: number; view: TabView; title: string };
+let nextId = 1;
+const newTab = (): Tab => ({ id: nextId++, url: HOME, history: [HOME], idx: 0, view: { kind: 'loading' }, title: 'Google' });
+const hostOf = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
 
 export default function BrowserPage() {
-  const [engine, setEngine] = useState(SEARCH_ENGINES[0]);
-  const [url, setUrl] = useState(engine.homeUrl);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [history, setHistory] = useState<string[]>([engine.homeUrl]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  const [tabs, setTabs] = useState<Tab[]>(() => [newTab()]);
+  const [activeId, setActiveId] = useState(tabs[0].id);
+  const [input, setInput] = useState('');
+  const proxyOff = useRef(false);
+  const active = tabs.find(t => t.id === activeId) ?? tabs[0];
 
-  const navigate = useCallback((newUrl: string) => {
-    setUrl(newUrl);
-    setIsLoading(true);
-    setHistory(prev => [...prev.slice(0, historyIndex + 1), newUrl]);
-    setHistoryIndex(prev => prev + 1);
-  }, [historyIndex]);
+  const patch = (id: number, p: Partial<Tab>) => setTabs(ts => ts.map(t => t.id === id ? { ...t, ...p } : t));
 
-  function handleSubmit(e: React.FormEvent) {
+  const load = useCallback(async (id: number, url: string) => {
+    if (proxyOff.current) { patch(id, { url, view: { kind: 'direct', url: url === HOME ? DIRECT_HOME : url }, title: hostOf(url) }); return; }
+    patch(id, { url, view: { kind: 'loading' }, title: hostOf(url) });
+    try {
+      const r = await proxyPage({ url });
+      if (r.ok && r.html) {
+        const title = r.html.match(/<title[^>]*>([^<]{1,60})/i)?.[1]?.trim() || hostOf(r.finalUrl || url);
+        patch(id, { url: r.finalUrl || url, view: { kind: 'page', html: r.html }, title });
+      } else if (r.code === 'DISABLED') {
+        proxyOff.current = true;
+        patch(id, { view: { kind: 'direct', url: url === HOME ? DIRECT_HOME : url } });
+      } else {
+        patch(id, { view: { kind: 'error', code: r.code || 'UNSUPPORTED', message: r.message || 'Something went wrong.' } });
+      }
+    } catch {
+      patch(id, { view: { kind: 'error', code: 'PROXY_UNAVAILABLE', message: 'Couldn\'t reach the proxy. Check your connection and try again.' } });
+    }
+  }, []);
+
+  const navigate = useCallback((id: number, url: string) => {
+    setTabs(ts => ts.map(t => t.id === id ? { ...t, history: [...t.history.slice(0, t.idx + 1), url], idx: t.idx + 1 } : t));
+    load(id, url);
+  }, [load]);
+
+  // first tab
+  useEffect(() => { load(tabs[0].id, HOME); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // links clicked inside a proxied page
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === 'nexus-nav' && typeof e.data.url === 'string') navigate(activeId, e.data.url);
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [activeId, navigate]);
+
+  function submit(e: React.FormEvent) {
     e.preventDefault();
-    const val = inputValue.trim();
-    if (!val) return;
-    // If it looks like a URL, navigate directly
-    const isUrl = /^(https?:\/\/|www\.)/.test(val) || (val.includes('.') && !val.includes(' '));
-    const target = isUrl
-      ? (val.startsWith('http') ? val : `https://${val}`)
-      : `${engine.searchUrl}${encodeURIComponent(val)}`;
-    navigate(toEmbeddable(target));
+    const v = input.trim();
+    if (!v) return;
+    const isUrl = /^https?:\/\//i.test(v) || (/^[^\s]+\.[a-z]{2,}(\/|$)/i.test(v));
+    navigate(active.id, isUrl ? (v.startsWith('http') ? v : `https://${v}`) : searchUrl(v));
   }
-
-  function goBack() {
-    if (historyIndex <= 0) return;
-    const newIndex = historyIndex - 1;
-    setHistoryIndex(newIndex);
-    setUrl(history[newIndex]);
-    setIsLoading(true);
-  }
-
-  function goForward() {
-    if (historyIndex >= history.length - 1) return;
-    const newIndex = historyIndex + 1;
-    setHistoryIndex(newIndex);
-    setUrl(history[newIndex]);
-    setIsLoading(true);
-  }
-
-  function goHome() {
-    setInputValue('');
-    navigate(engine.homeUrl);
-  }
-
-  function switchEngine(id: string) {
-    const e = SEARCH_ENGINES.find(s => s.id === id)!;
-    setEngine(e);
-    setInputValue('');
-    navigate(e.homeUrl);
-  }
+  const step = (d: -1 | 1) => {
+    const idx = active.idx + d;
+    if (idx < 0 || idx >= active.history.length) return;
+    patch(active.id, { idx });
+    load(active.id, active.history[idx]);
+  };
+  const addTab = () => { const t = newTab(); setTabs(ts => [...ts, t]); setActiveId(t.id); setInput(''); load(t.id, HOME); };
+  const closeTab = (id: number) => {
+    setTabs(ts => {
+      if (ts.length === 1) { const t = newTab(); setActiveId(t.id); load(t.id, HOME); return [t]; }
+      const i = ts.findIndex(t => t.id === id);
+      const rest = ts.filter(t => t.id !== id);
+      if (id === activeId) setActiveId(rest[Math.max(0, i - 1)].id);
+      return rest;
+    });
+  };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Search engine tabs */}
-      <div className="flex items-center gap-1 px-3 pt-3 pb-1 overflow-x-auto">
-        {SEARCH_ENGINES.map(se => (
-          <button
-            key={se.id}
-            onClick={() => switchEngine(se.id)}
-            className={cn(
-              'px-3 py-1.5 rounded-t-lg text-xs font-semibold transition-colors flex items-center gap-1.5',
-              engine.id === se.id
-                ? 'bg-card border border-b-0 border-border text-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-            )}
-          >
-            <span>{se.icon}</span>
-            {se.label}
-          </button>
+      <div className="flex items-end gap-1 px-2 pt-2 overflow-x-auto bg-secondary/40">
+        {tabs.map(t => (
+          <div key={t.id} onClick={() => { setActiveId(t.id); setInput(''); }}
+            className={cn('group flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-t-lg text-xs max-w-[180px] min-w-[110px] cursor-pointer border border-b-0',
+              t.id === active.id ? 'bg-card border-border text-foreground' : 'border-transparent text-muted-foreground hover:bg-secondary')}>
+            {t.view.kind === 'loading' ? <RotateCw className="w-3 h-3 animate-spin shrink-0" /> : <Globe className="w-3 h-3 shrink-0" />}
+            <span className="truncate flex-1">{t.title}</span>
+            <button onClick={e => { e.stopPropagation(); closeTab(t.id); }} className="p-0.5 rounded hover:bg-muted" title="Close tab"><X className="w-3 h-3" /></button>
+          </div>
         ))}
+        <button onClick={addTab} className="mb-1 p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground" title="New tab"><Plus className="w-4 h-4" /></button>
       </div>
 
-      {/* URL bar */}
       <div className="bg-card border-y border-border px-3 py-2">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={goBack} disabled={historyIndex <= 0}>
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={goForward} disabled={historyIndex >= history.length - 1}>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setIsLoading(true); if (iframeRef.current) iframeRef.current.src = url; }}>
-              <RotateCw className={cn('w-4 h-4', isLoading && 'animate-spin')} />
-            </Button>
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={goHome}>
-              <Home className="w-4 h-4" />
-            </Button>
+        <form onSubmit={submit} className="flex items-center gap-1">
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => step(-1)} disabled={active.idx <= 0}><ArrowLeft className="w-4 h-4" /></Button>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => step(1)} disabled={active.idx >= active.history.length - 1}><ArrowRight className="w-4 h-4" /></Button>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => load(active.id, active.url)}><RotateCw className={cn('w-4 h-4', active.view.kind === 'loading' && 'animate-spin')} /></Button>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setInput(''); navigate(active.id, HOME); }}><Home className="w-4 h-4" /></Button>
+          <div className="flex-1 relative mx-1">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input value={input} onChange={e => setInput(e.target.value)} placeholder={`Search Google or type a URL — ${hostOf(active.url)}`} className="pl-8 h-8 text-xs bg-secondary/50" />
           </div>
-
-          <div className="flex-1 relative">
-            <Globe className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              placeholder="Search or enter URL..."
-              className="pl-8 pr-8 h-8 text-xs bg-secondary/50"
-            />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              <Search className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(url, '_blank')} title="Open in new tab">
-            <ExternalLink className="w-4 h-4" />
-          </Button>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(active.url, '_blank', 'noopener')} title="Open in new browser tab"><ExternalLink className="w-4 h-4" /></Button>
         </form>
       </div>
 
-      {/* Quick launch */}
-      <div className="flex gap-1.5 overflow-x-auto px-3 py-2 border-b border-border bg-card/50">
-        {QUICK_SITES.map(s => (
-          <button key={s.label} onClick={() => (s.embed ? navigate(s.url) : window.open(s.url, '_blank', 'noopener'))}
-            title={s.embed ? `Open ${s.label} here` : `${s.label} blocks embedding — opens in a new tab`}
-            className="shrink-0 flex items-center gap-1 rounded-full border border-border bg-secondary/50 px-2.5 py-1 text-[11px] hover:bg-secondary">
-            <span>{s.icon}</span>{s.label}{!s.embed && <ExternalLink className="w-3 h-3 opacity-60" />}
-          </button>
-        ))}
-      </div>
-
-      {/* Browser frame */}
-      <div className="flex-1 relative bg-white">
-        {isLoading && (
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/20 z-10">
-            <div className="h-full bg-primary animate-pulse w-2/3" />
-          </div>
-        )}
-        <iframe
-          ref={iframeRef}
-          src={url}
-          className="w-full h-full border-0"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads allow-modals allow-presentation"
-          referrerPolicy="no-referrer-when-downgrade"
-          allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; clipboard-write"
-          onLoad={() => setIsLoading(false)}
-          title="Browser"
-        />
+      <div className="flex-1 relative bg-background">
+        <BrowserView key={active.id} view={active.view} url={active.url} onRetry={() => load(active.id, active.url)} onLoaded={() => {}} />
       </div>
     </div>
   );

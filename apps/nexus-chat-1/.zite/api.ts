@@ -25,6 +25,7 @@ import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
 import type { default as _PresenceEp } from '../src/api/presence';
 import type { default as _ProfileSyncEp } from '../src/api/profileSync';
+import type { default as _ProxyPageEp } from '../src/api/proxyPage';
 import type { default as _ReportsEp } from '../src/api/reports';
 import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _StaffToolsEp } from '../src/api/staffTools';
@@ -150,6 +151,11 @@ export type ProfileSyncInputType = NonNullable<_ProfileSyncCfg['inputSchema']> e
 export type ProfileSyncOutputType = Awaited<ReturnType<_ProfileSyncCfg['execute']>>;
 export const profileSync = createCaller<ProfileSyncInputType, ProfileSyncOutputType>('profileSync');
 
+type _ProxyPageCfg = typeof _ProxyPageEp;
+export type ProxyPageInputType = NonNullable<_ProxyPageCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ProxyPageCfg['execute']>[0]['input'];
+export type ProxyPageOutputType = Awaited<ReturnType<_ProxyPageCfg['execute']>>;
+export const proxyPage = createCaller<ProxyPageInputType, ProxyPageOutputType>('proxyPage');
+
 type _ReportsCfg = typeof _ReportsEp;
 export type ReportsInputType = NonNullable<_ReportsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ReportsCfg['execute']>[0]['input'];
 export type ReportsOutputType = Awaited<ReturnType<_ReportsCfg['execute']>>;
@@ -220,6 +226,7 @@ export const api = {
   messages,
   presence,
   profileSync,
+  proxyPage,
   reports,
   roles,
   staffTools,
