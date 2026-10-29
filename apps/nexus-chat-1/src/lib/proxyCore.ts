@@ -94,7 +94,7 @@ export async function fetchViaProxy(rawUrl: string, cfg: ProxyConfig, fetchImpl:
         if (!v.ok) return v;
         continue;
       }
-      if (res.status === 401 || res.status === 403 || res.status === 407 || res.status === 429) return { ok: false, code: 'BLOCKED_BY_SITE', status: res.status, message: 'This site blocked the request or needs you to sign in. Open it in a new tab instead.' };
+      if (res.status === 401 || res.status === 403 || res.status === 407 || res.status === 429) return { ok: false, code: 'BLOCKED_BY_SITE', status: res.status, message: 'This site doesn\'t allow its pages to be loaded through the proxy. You can still open it in your regular browser.' };
       if (res.status === 502 || res.status === 503 || res.status === 504) return { ok: false, code: 'PROXY_UNAVAILABLE', status: res.status, message: 'The proxy or site is unavailable right now.' };
       if (res.status >= 400) return { ok: false, code: 'UNSUPPORTED', status: res.status, message: `The page returned an error (${res.status}).` };
       const type = (res.headers.get('content-type') || '').toLowerCase();

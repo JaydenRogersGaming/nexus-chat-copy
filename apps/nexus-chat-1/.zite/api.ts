@@ -35,6 +35,7 @@ import type { default as _TranslateEp } from '../src/api/translate';
 import type { default as _TypingEp } from '../src/api/typing';
 import type { default as _VideoRoomsEp } from '../src/api/videoRooms';
 import type { default as _WatchPartyEp } from '../src/api/watchParty';
+import type { default as _WebSearchEp } from '../src/api/webSearch';
 
 type _AdminUsersCfg = typeof _AdminUsersEp;
 export type AdminUsersInputType = NonNullable<_AdminUsersCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AdminUsersCfg['execute']>[0]['input'];
@@ -201,6 +202,11 @@ export type WatchPartyInputType = NonNullable<_WatchPartyCfg['inputSchema']> ext
 export type WatchPartyOutputType = Awaited<ReturnType<_WatchPartyCfg['execute']>>;
 export const watchParty = createCaller<WatchPartyInputType, WatchPartyOutputType>('watchParty');
 
+type _WebSearchCfg = typeof _WebSearchEp;
+export type WebSearchInputType = NonNullable<_WebSearchCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_WebSearchCfg['execute']>[0]['input'];
+export type WebSearchOutputType = Awaited<ReturnType<_WebSearchCfg['execute']>>;
+export const webSearch = createCaller<WebSearchInputType, WebSearchOutputType>('webSearch');
+
 
 export const api = {
   adminUsers,
@@ -236,4 +242,5 @@ export const api = {
   typing,
   videoRooms,
   watchParty,
+  webSearch,
 };

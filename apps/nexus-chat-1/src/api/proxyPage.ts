@@ -26,6 +26,11 @@ export default createEndpoint({
   }),
   execute: async ({ input }) => {
     const r = await fetchViaProxy(input.url, readConfig(), (u, init) => fetch(u, init));
+    if (!r.ok && r.code !== 'DISABLED') {
+      // Log only host + error code — never the full URL (may hold query/PII) or proxy credentials.
+      let host = 'invalid'; try { host = new URL(input.url).hostname; } catch { /* keep */ }
+      console.error('[proxyPage] load failed', { host, code: r.code, status: r.status });
+    }
     return r.ok ? { ok: true, html: r.html, finalUrl: r.finalUrl } : { ok: false, code: r.code, message: r.message };
   },
 });
