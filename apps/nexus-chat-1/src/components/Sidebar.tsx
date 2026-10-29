@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import WhatsNew from './WhatsNew';
 import { logout } from 'zitejs/auth';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown, MousePointer2 } from 'lucide-react';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -23,7 +23,6 @@ const NAV = [
   { to: '/leaderboard',  icon: Trophy,        label: 'Leaderboard' },
   { to: '/tournament',   icon: Trophy,        label: 'Tournament' },
   { to: '/watch',        icon: Clapperboard,  label: 'Watch Party' },
-  { to: '/cursors',      icon: MousePointer2, label: 'Cursor Shop' },
   { to: '/aichat',        icon: Bot,           label: 'AI Assistant' },
   { to: '/browser',       icon: Globe,         label: 'Browser' },
   { to: '/calendar',      icon: CalendarDays,  label: 'Calendar' },

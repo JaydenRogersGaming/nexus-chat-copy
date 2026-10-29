@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import CosmeticShop from './CosmeticShop';
 import LimitedCollection from './LimitedCollection';
+import CursorShop from './CursorShop';
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -50,12 +51,14 @@ export default function ShopModal({ open, onClose }: Props) {
           </DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="titles" className="mt-2">
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="titles">Titles</TabsTrigger>
             <TabsTrigger value="bg">Backgrounds</TabsTrigger>
             <TabsTrigger value="typing">Typing</TabsTrigger>
+            <TabsTrigger value="cursors">🖱️ Cursors</TabsTrigger>
             <TabsTrigger value="limited">✨ Limited</TabsTrigger>
           </TabsList>
+          <TabsContent value="cursors"><CursorShop /></TabsContent>
           <TabsContent value="limited"><LimitedCollection /></TabsContent>
           <TabsContent value="bg"><CosmeticShop kind="bg" /></TabsContent>
           <TabsContent value="typing"><CosmeticShop kind="typing" /></TabsContent>
