@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import WhatsNew from './WhatsNew';
-import { logout } from 'zitejs/auth';
 import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Heart, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
@@ -98,10 +97,6 @@ export default function Sidebar({ onProfileClick }: Props) {
         </button>
       )}
       <WhatsNew />
-      <button onClick={() => logout()}
-        className="mx-3 mb-3 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-        <LogOut className="w-3.5 h-3.5" /> Sign out
-      </button>
     </aside>
   );
 }
