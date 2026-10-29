@@ -5,6 +5,7 @@ import OpenAI from 'openai';
 
 export default createEndpoint({
   description: 'Builds a playable single-page website or mini game from a description',
+  authenticated: true,
   inputSchema: z.object({
     kind: z.string().max(60),
     prompt: z.string().max(2000),
