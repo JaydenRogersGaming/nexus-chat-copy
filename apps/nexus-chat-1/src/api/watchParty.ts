@@ -8,7 +8,7 @@ const fail = (m: string) => { throw new ZiteError({ code: 'BAD_REQUEST', message
 const party = z.object({ id: z.string(), title: z.string(), videoUrl: z.string(), hostEmail: z.string(), hostName: z.string(), scheduledFor: z.string(), playing: z.boolean(), positionSeconds: z.number(), syncedAtMs: z.number(), ended: z.boolean(), viewers: z.array(z.object({ email: z.string(), name: z.string() })) });
 type P = Awaited<ReturnType<typeof zite.watchParties.findOne>>;
 const toParty = (p: NonNullable<P>, viewers: { email: string; name: string }[]) => ({
-  id: p.id, title: p.title || 'Watch party', videoUrl: p.videoUrl || '', hostEmail: p.hostEmail || '', hostName: p.hostName || '',
+  id: p.id, title: p.title || 'Thearters', videoUrl: p.videoUrl || '', hostEmail: p.hostEmail || '', hostName: p.hostName || '',
   scheduledFor: p.scheduledFor || '', playing: !!p.playing, positionSeconds: p.positionSeconds || 0, syncedAtMs: p.syncedAtMs || 0, ended: !!p.ended, viewers,
 });
 
