@@ -1828,6 +1828,20 @@
             "type": "checkbox",
             "template": {}
           }
+        },
+        {
+          "id": "fqMPzWBCkYP",
+          "sdkName": "endsAt",
+          "definition": {
+            "name": "Ends At",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
         }
       ]
     },

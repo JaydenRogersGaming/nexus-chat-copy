@@ -6,6 +6,10 @@ import { toast } from 'sonner';
 import { watchParty, WatchPartyOutputType } from 'zitejs/api';
 import { useApp } from '../../contexts/AppContext';
 import PartyPlayer, { targetTime } from './PartyPlayer';
+import ShowtimeEditor from './ShowtimeEditor';
+import { isOwnerEmail } from '../../lib/permissions';
+import { platformOf, opensExternally } from '../../lib/theater';
+import { format } from 'date-fns';
 
 type Party = WatchPartyOutputType['parties'][0];
 type Msg = WatchPartyOutputType['messages'][0];
@@ -40,7 +44,8 @@ export default function PartyRoom({ id, onLeave }: { id: string; onLeave: () => 
   useEffect(() => { if (!floating.length) return; const t = setTimeout(() => setFloating(f => f.slice(1)), 2500); return () => clearTimeout(t); }, [floating]);
 
   if (!party) return <div className="p-6 text-sm text-muted-foreground">Joining party…</div>;
-  const isHost = party.hostEmail.toLowerCase() === profile?.email.toLowerCase();
+  const isHost = party.hostEmail.toLowerCase() === profile?.email.toLowerCase() || isOwnerEmail(profile?.email);
+  const platform = platformOf(party.videoUrl);
   const now = targetTime(party);
   const control = (playing: boolean, pos: number) => {
     setParty({ ...party, playing, positionSeconds: pos, syncedAtMs: Date.now() });
@@ -53,11 +58,18 @@ export default function PartyRoom({ id, onLeave }: { id: string; onLeave: () => 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-center gap-2">
           <Button size="sm" variant="ghost" onClick={onLeave}><ArrowLeft className="h-4 w-4" /></Button>
-          <div className="min-w-0 flex-1"><p className="truncate font-bold">{party.title}</p><p className="text-xs text-muted-foreground">Hosted by {party.hostName} · {party.ended ? 'Ended' : party.playing ? 'Playing' : 'Paused'}</p></div>
+          <div className="min-w-0 flex-1"><p className="truncate font-bold">{party.title}</p><p className="text-xs text-muted-foreground">{platform} · Hosted by {party.hostName} · {party.ended ? 'Ended' : party.playing ? 'Playing' : 'Paused'}</p>
+            <p className="text-xs text-muted-foreground">Starts {format(new Date(party.scheduledFor), 'MMM d, h:mm a')}{party.endsAt ? ` · Ends ${format(new Date(party.endsAt), 'MMM d, h:mm a')}` : ''}</p></div>
           <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="h-3.5 w-3.5" />{party.viewers.length}</span>
         </div>
         <div className="relative">
-          <PartyPlayer url={party.videoUrl} state={party} isHost={isHost} nonce={nonce} />
+          {opensExternally(platform) ? (
+            <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-xl border border-border bg-muted/40 p-6 text-center">
+              <p className="text-lg font-bold">{party.title}</p>
+              <p className="max-w-sm text-sm text-muted-foreground">{platform} only plays in its own app or site. Open it with your own {platform} account, then hang out in Theater chat.</p>
+              <Button asChild><a href={party.videoUrl} target="_blank" rel="noopener noreferrer">Open on {platform}</a></Button>
+            </div>
+          ) : <PartyPlayer url={party.videoUrl} state={party} isHost={isHost} nonce={nonce} />}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             {floating.map(f => <span key={f.id} className="wp-float absolute bottom-2 text-3xl" style={{ left: `${f.left}%` }}>{f.e}</span>)}
           </div>
@@ -68,6 +80,7 @@ export default function PartyRoom({ id, onLeave }: { id: string; onLeave: () => 
             <Button size="sm" onClick={() => control(!party.playing, now)}>{party.playing ? <><Pause className="mr-1 h-4 w-4" />Pause</> : <><Play className="mr-1 h-4 w-4" />Play for everyone</>}</Button>
             <Button size="sm" variant="outline" onClick={() => control(party.playing, now + 10)}><FastForward className="h-4 w-4" /></Button>
             <Button size="sm" variant="ghost" className="text-destructive" onClick={() => call({ action: 'end' })}><Power className="mr-1 h-4 w-4" />End</Button>
+            <ShowtimeEditor party={party} onSave={(scheduledFor, endsAt) => call({ action: 'schedule', scheduledFor, endsAt })} />
           </>}
           {!isHost && <>
             <span className="text-xs text-muted-foreground">Only {party.hostName} can pause or skip — you're watching live.</span>
@@ -78,7 +91,7 @@ export default function PartyRoom({ id, onLeave }: { id: string; onLeave: () => 
         <p className="text-xs text-muted-foreground">Watching now: {party.viewers.map(v => v.name).join(', ') || 'just you'}</p>
       </div>
       <div className="flex h-80 flex-col rounded-xl border border-border bg-card lg:h-auto lg:w-80">
-        <p className="border-b border-border px-3 py-2 text-sm font-semibold">Party chat</p>
+        <p className="border-b border-border px-3 py-2 text-sm font-semibold">Theater chat</p>
         <div className="flex-1 space-y-1.5 overflow-y-auto p-3 text-sm">
           {msgs.filter(m => !m.isReaction).map(m => <p key={m.id}><span className="font-semibold text-primary">{m.senderName}</span> {m.text}</p>)}
           <div ref={endRef} />

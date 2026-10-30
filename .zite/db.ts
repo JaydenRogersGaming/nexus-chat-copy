@@ -591,6 +591,8 @@ export type WatchPartiesRecordType = {
   /** "Synced At Ms". 0 decimal places, format: local (e.g. 1,000,000.50) */
   syncedAtMs?: number;
   ended?: boolean;
+  /** "Ends At". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  endsAt?: string;
 };
 
 /** What you may write when creating or updating a record in the "Watch Parties" table. */
@@ -604,6 +606,7 @@ export type WatchPartiesRecordInput = {
   positionSeconds: string | number | null;
   syncedAtMs: string | number | null;
   ended: string | boolean | null;
+  endsAt: string | Date | null;
 };
 
 /** A record in the "Watch Party Messages" table, as it is read back. */

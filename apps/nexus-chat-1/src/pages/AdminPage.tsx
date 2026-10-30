@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import ServerBanPanel from '../components/ServerBanPanel';
 import OwnerThemesTab from '../components/OwnerThemesTab';
 import OwnerTypingTab from '../components/OwnerTypingTab';
+import TheaterAccessTab from '../components/TheaterAccessTab';
 import OwnerEventsTab from '../components/OwnerEventsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import { Button } from '@project/components/ui/button';
@@ -242,6 +243,7 @@ export default function AdminPage() {
           {isOwner && <TabsTrigger value="customroles">⚡ Custom Roles</TabsTrigger>}
           {isOwner && <TabsTrigger value="themes">🎨 Badges & Themes</TabsTrigger>}
           {isOwner && <TabsTrigger value="events">🎃 Holiday Events</TabsTrigger>}
+          {isOwner && <TabsTrigger value="theater">🎭 Theater</TabsTrigger>}
           {isOwner && <TabsTrigger value="casino"><Dices className="w-3.5 h-3.5 mr-1" />Casino Rig</TabsTrigger>}
           {isOwner && <TabsTrigger value="appsettings"><Settings className="w-3.5 h-3.5 mr-1" />Edit App</TabsTrigger>}
           {isCoOwner && <TabsTrigger value="tags"><Tag className="w-3.5 h-3.5 mr-1" />User Tags</TabsTrigger>}
@@ -496,6 +498,11 @@ export default function AdminPage() {
         {isOwner && (
           <TabsContent value="events" className="space-y-4">
             <OwnerEventsTab />
+          </TabsContent>
+        )}
+        {isOwner && (
+          <TabsContent value="theater" className="space-y-4">
+            <TheaterAccessTab />
           </TabsContent>
         )}
 
