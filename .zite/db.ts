@@ -692,6 +692,28 @@ export type CustomLimitedItemsRecordInput = {
   active: string | boolean | null;
 };
 
+/** A record in the "Pranks" table, as it is read back. */
+export type PranksRecordType = {
+  id: string;
+  /** Primary field. "Prank Id" */
+  prankId?: string;
+  targetEmail?: string;
+  senderEmail?: string;
+  senderName?: string;
+  seen?: boolean;
+  /** Read-only. "Sent At". Auto-set when record was created (ISO 8601) */
+  sentAt?: string;
+};
+
+/** What you may write when creating or updating a record in the "Pranks" table. */
+export type PranksRecordInput = {
+  prankId: string | null;
+  targetEmail: string | null;
+  senderEmail: string | null;
+  senderName: string | null;
+  seen: string | boolean | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -727,6 +749,7 @@ export const zite = {
   watchPartyViewers: createTableClient<WatchPartyViewersRecordType, WatchPartyViewersRecordInput>('WatchPartyViewers'), // "Watch Party Viewers"
   chatSettings: createTableClient<ChatSettingsRecordType, ChatSettingsRecordInput>('ChatSettings'), // "Chat Settings"
   customLimitedItems: createTableClient<CustomLimitedItemsRecordType, CustomLimitedItemsRecordInput>('CustomLimitedItems'), // "Custom Limited Items"
+  pranks: createTableClient<PranksRecordType, PranksRecordInput>('Pranks'), // "Pranks"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };

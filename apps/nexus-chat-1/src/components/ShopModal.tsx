@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui
 import CosmeticShop from './CosmeticShop';
 import LimitedCollection from './LimitedCollection';
 import CursorShop from './CursorShop';
+import PrankShop from './PrankShop';
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -51,14 +52,16 @@ export default function ShopModal({ open, onClose }: Props) {
           </DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="titles" className="mt-2">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full h-auto">
             <TabsTrigger value="titles">Titles</TabsTrigger>
             <TabsTrigger value="bg">Backgrounds</TabsTrigger>
             <TabsTrigger value="typing">Typing</TabsTrigger>
             <TabsTrigger value="cursors">🖱️ Cursors</TabsTrigger>
+            <TabsTrigger value="pranks">🃏 Pranks</TabsTrigger>
             <TabsTrigger value="limited">✨ Limited</TabsTrigger>
           </TabsList>
           <TabsContent value="cursors"><CursorShop /></TabsContent>
+          <TabsContent value="pranks"><PrankShop /></TabsContent>
           <TabsContent value="limited"><LimitedCollection /></TabsContent>
           <TabsContent value="bg"><CosmeticShop kind="bg" /></TabsContent>
           <TabsContent value="typing"><CosmeticShop kind="typing" /></TabsContent>

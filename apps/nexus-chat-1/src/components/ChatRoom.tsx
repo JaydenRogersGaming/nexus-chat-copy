@@ -1,4 +1,5 @@
 import { INFINITE_GEMS } from '../lib/formatGems';
+import { typingGems } from '../lib/vip';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Users, X } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -382,7 +383,7 @@ export default function ChatRoom({ room, onStartDM }: Props) {
     typingApi({ action: 'stop', roomId: room.id, email: profile.email }).catch(() => {});
     const newCount = profile.messageCount + 1;
     DB.saveUser({ ...profile, messageCount: newCount });
-    addGems(5);
+    addGems(typingGems(profile.email), { noBonus: true });
     updateProfile({ messageCount: newCount });
 
     if (room.type === 'dm') {

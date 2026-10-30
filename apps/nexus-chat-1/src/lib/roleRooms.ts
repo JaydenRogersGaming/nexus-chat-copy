@@ -22,7 +22,9 @@ export function canEnterRoleRoom(p: UserProfile, role: string, badgeOnly?: boole
   return rank >= RANK[role];
 }
 
+export const VIP_LOUNGE_ID = 'role-vip';
+/** Everyone sees the VIP Lounge; non-VIPs get sent to buy VIP when they click it. */
 export function roleRoomsFor(p: UserProfile): ChatRoom[] {
-  return ROLE_ROOMS.filter(r => canEnterRoleRoom(p, r.role, r.badgeOnly))
+  return ROLE_ROOMS.filter(r => r.role === 'vip' || canEnterRoleRoom(p, r.role, r.badgeOnly))
     .map(r => ({ id: `role-${r.role}`, name: r.name, type: 'group' as const, members: [], createdBy: OWNER_EMAIL }));
 }

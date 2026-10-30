@@ -8,6 +8,7 @@ import VipMembershipCard from '../components/vip/VipMembershipCard';
 import VipStyleStudio from '../components/vip/VipStyleStudio';
 import VipPerksBoard from '../components/vip/VipPerksBoard';
 import VipEarlyAccess from '../components/vip/VipEarlyAccess';
+import VipDailyBonus from '../components/vip/VipDailyBonus';
 import type * as DB from '../lib/storage';
 
 const PERKS = [
@@ -17,8 +18,15 @@ const PERKS = [
   ['🗳️', 'Vote on ideas', 'Suggest songs, topics and server ideas'],
   ['🎁', 'Monthly giveaway', 'One free entry every month'],
   ['🏆', 'VIP of the Month', 'A featured spotlight spot'],
-  ['💎', '+25% game rewards', 'Bonus gems in server games'],
+  ['💎', '+25% on all gems', 'Every gem you earn (casino, games, quiz) — except the monthly lottery prize'],
   ['🎃', 'Seasonal role', 'Your VIP role changes with the seasons'],
+  ['⌨️', '3× typing gems', '15 gems per chat message instead of 5'],
+  ['🎁', 'Daily VIP bonus', 'Claim 500 free gems every day'],
+  ['🖱️', 'Free custom cursor', 'Design your own cursor at no cost'],
+  ['🏷️', '20% off cursors', 'Every cursor in the shop is cheaper'],
+  ['💖', 'VIP-only cursor', 'The exclusive VIP Heart cursor'],
+  ['🛡️', 'Prank Shield', 'Turn pranks off so nobody can prank you'],
+  ['😈', 'Extra mean pranks', '5 mean pranks instead of 2'],
 ];
 
 const LOUNGE: DB.ChatRoom = { id: 'vip-lounge', name: '👑 VIP Lounge', type: 'global', members: [], createdBy: 'system' };
@@ -42,6 +50,7 @@ export default function VipPage() {
             </div>
           ))}
         </div>
+        {unlocked && <VipDailyBonus />}
         {unlocked ? (
           <Tabs defaultValue="lounge">
             <TabsList className="flex-wrap h-auto">

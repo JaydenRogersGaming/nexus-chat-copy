@@ -19,15 +19,18 @@ export default function VipMembershipCard() {
   const [busy, setBusy] = useState(false);
   if (!profile) return null;
   const season = Vip.seasonalVariant();
-  const canAfford = isInfiniteGems(profile.gems) || profile.gems >= Vip.VIP_PRICE;
+  const price = Vip.nextPrice(profile.email);
+  const first = price === Vip.VIP_UNLOCK_PRICE;
+  const canAfford = isInfiniteGems(profile.gems) || profile.gems >= price;
 
   const pay = () => {
     setBusy(true);
     const fresh = profile;
-    if (!isInfiniteGems(fresh.gems) && fresh.gems < Vip.VIP_PRICE) { toast.error('Not enough gems'); setBusy(false); return; }
-    const updates: Partial<typeof fresh> = isInfiniteGems(fresh.gems) ? {} : { gems: fresh.gems - Vip.VIP_PRICE };
+    if (!isInfiniteGems(fresh.gems) && fresh.gems < price) { toast.error('Not enough gems'); setBusy(false); return; }
+    const updates: Partial<typeof fresh> = isInfiniteGems(fresh.gems) ? {} : { gems: fresh.gems - price };
     if (fresh.role === 'user') updates.role = 'vip'; // never changes staff roles
     updateProfile(updates);
+    Vip.markUnlocked(fresh.email);
     const s = Vip.extendVip(fresh.email);
     toast.success(`👑 VIP active until ${new Date(s.expiresAt).toLocaleDateString()}`);
     setBusy(false); setConfirm(false);
@@ -44,15 +47,15 @@ export default function VipMembershipCard() {
         {active ? `You're VIP — ${days} day${days === 1 ? '' : 's'} left` : 'Become a VIP'}
       </h2>
       <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-        {Vip.VIP_PRICE.toLocaleString()} gems for {Vip.VIP_DAYS} days. Cosmetic perks, private spaces and early access —
+        {Vip.VIP_UNLOCK_PRICE.toLocaleString()} gems one-time to unlock (includes your first {Vip.VIP_DAYS} days), then {Vip.VIP_PRICE.toLocaleString()} gems every month. Perks, private spaces and gem boosts —
         VIP never grants moderation powers.
       </p>
       <div className="flex flex-wrap items-center gap-3 mt-5">
         <Button onClick={() => setConfirm(true)} disabled={!canAfford || busy} className="gap-2">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : active ? <RefreshCw className="w-4 h-4" /> : <Gem className="w-4 h-4" />}
-          {active ? 'Add 30 days' : 'Subscribe'} · {Vip.VIP_PRICE.toLocaleString()} 💎
+          {first ? 'Unlock VIP' : active ? 'Add 30 days' : 'Renew VIP'} · {price.toLocaleString()} 💎
         </Button>
-        {!canAfford && <span className="text-xs text-destructive">You need {Vip.VIP_PRICE - profile.gems} more gems</span>}
+        {!canAfford && <span className="text-xs text-destructive">You need {(price - profile.gems).toLocaleString()} more gems</span>}
         {status && (
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <Switch checked={status.autoRenew} onCheckedChange={v => { Vip.setAutoRenew(profile.email, v); toast(v ? 'Auto-renew on' : 'Auto-renew off — VIP ends when time runs out'); }} />
@@ -66,12 +69,12 @@ export default function VipMembershipCard() {
           <AlertDialogHeader>
             <AlertDialogTitle>{active ? 'Extend VIP?' : 'Start VIP?'}</AlertDialogTitle>
             <AlertDialogDescription>
-              {Vip.VIP_PRICE.toLocaleString()} gems will be taken from your balance for {Vip.VIP_DAYS} days of VIP. Gems aren't refunded if you cancel.
+              {price.toLocaleString()} gems will be taken from your balance for {Vip.VIP_DAYS} days of VIP{first ? ` (after this, VIP is ${Vip.VIP_PRICE.toLocaleString()} gems/month)` : ''}. Gems aren't refunded if you cancel.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={pay}>Pay {Vip.VIP_PRICE.toLocaleString()} 💎</AlertDialogAction>
+            <AlertDialogAction onClick={pay}>Pay {price.toLocaleString()} 💎</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,23 +1,37 @@
-export type CursorItem = { id: string; name: string; emoji: string; price: number };
+export type CursorItem = { id: string; name: string; emoji: string; price: number; vipOnly?: boolean };
 
 export const CURSORS: CursorItem[] = [
   { id: 'default', name: 'Classic', emoji: '🖱️', price: 0 },
-  { id: 'sword', name: 'Sword', emoji: '🗡️', price: 150 },
-  { id: 'star', name: 'Star', emoji: '⭐', price: 200 },
-  { id: 'heart', name: 'Heart', emoji: '❤️', price: 200 },
-  { id: 'fire', name: 'Fire', emoji: '🔥', price: 300 },
-  { id: 'ghost', name: 'Ghost', emoji: '👻', price: 300 },
-  { id: 'pumpkin', name: 'Pumpkin', emoji: '🎃', price: 350 },
-  { id: 'cat', name: 'Cat Paw', emoji: '🐾', price: 400 },
-  { id: 'rocket', name: 'Rocket', emoji: '🚀', price: 500 },
-  { id: 'wand', name: 'Magic Wand', emoji: '🪄', price: 750 },
-  { id: 'diamond', name: 'Diamond', emoji: '💎', price: 1500 },
+  { id: 'pointer', name: 'Neon Finger', emoji: '👉', price: 150 },
+  { id: 'lightning', name: 'Lightning', emoji: '⚡', price: 200 },
+  { id: 'comet', name: 'Comet', emoji: '☄️', price: 250 },
+  { id: 'bat', name: 'Bat', emoji: '🦇', price: 300 },
+  { id: 'skull', name: 'Skull', emoji: '💀', price: 350 },
+  { id: 'saturn', name: 'Planet', emoji: '🪐', price: 400 },
+  { id: 'dragon', name: 'Dragon', emoji: '🐉', price: 600 },
+  { id: 'ufo', name: 'UFO', emoji: '🛸', price: 750 },
+  { id: 'sparkles', name: 'Sparkles', emoji: '✨', price: 900 },
+  { id: 'trophy', name: 'Trophy', emoji: '🏆', price: 1500 },
   { id: 'crown', name: 'Crown', emoji: '👑', price: 3000 },
+  { id: 'vipheart', name: 'VIP Heart', emoji: '💖', price: 500, vipOnly: true },
 ];
+
+/** Making your own custom cursor costs this once; you can change it freely after. */
+export const CUSTOM_CURSOR_PRICE = 1000;
 
 const ownedKey = (e: string) => `nexus_cursors_owned_${e}`;
 const eqKey = (e: string) => `nexus_cursor_equipped_${e}`;
+const customKey = (e: string) => `nexus_cursor_custom_${e}`;
 export const CURSOR_EVENT = 'nexus-cursor-change';
+
+export type CustomCursor = { emoji: string; size: number };
+export function getCustom(email: string): CustomCursor | null {
+  try { return JSON.parse(localStorage.getItem(customKey(email)) || 'null'); } catch { return null; }
+}
+export function saveCustom(email: string, c: CustomCursor) {
+  localStorage.setItem(customKey(email), JSON.stringify(c));
+  window.dispatchEvent(new Event(CURSOR_EVENT));
+}
 
 export function getOwned(email: string): string[] {
   try { return ['default', ...JSON.parse(localStorage.getItem(ownedKey(email)) || '[]')]; } catch { return ['default']; }
@@ -31,9 +45,17 @@ export function equip(email: string, id: string) {
   localStorage.setItem(eqKey(email), id);
   window.dispatchEvent(new Event(CURSOR_EVENT));
 }
-export function cursorCss(id: string): string {
-  const c = CURSORS.find(x => x.id === id);
-  if (!c || c.id === 'default') return '';
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='2' y='26' font-size='24'>${c.emoji}</text></svg>`;
+export function emojiCursorCss(emoji: string, size = 24): string {
+  const box = size + 8;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${box}' height='${box}'><text x='2' y='${size + 2}' font-size='${size}'>${emoji}</text></svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}") 4 4, auto`;
 }
+export function cursorCss(id: string, email = ''): string {
+  if (id === 'custom') { const c = getCustom(email); return c ? emojiCursorCss(c.emoji, c.size) : ''; }
+  const c = CURSORS.find(x => x.id === id);
+  if (!c || c.id === 'default') return '';
+  return emojiCursorCss(c.emoji);
+}
+
+/** VIPs get 20% off every cursor. */
+export const cursorPrice = (c: CursorItem, vip: boolean) => (vip ? Math.round(c.price * 0.8) : c.price);

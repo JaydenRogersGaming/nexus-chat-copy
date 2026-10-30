@@ -41,7 +41,7 @@ export default function DailyLottery() {
     localStorage.setItem(key, today);
     setLast(today);
     setWon(prize);
-    addGems(prize);
+    addGems(prize, { noBonus: true });
     toast.success(prize === LOTTERY_MAX ? `🎉 JACKPOT! ${formatGems(prize)} gems!` : `You won ${formatGems(prize)} gems!`);
   }
 

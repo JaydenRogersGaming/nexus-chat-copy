@@ -13,7 +13,7 @@ type AppContextType = {
   profile: DB.UserProfile | null;
   refreshProfile: () => void;
   updateProfile: (updates: Partial<DB.UserProfile>) => void;
-  addGems: (amount: number) => void;
+  addGems: (amount: number, opts?: { noBonus?: boolean }) => void;
   checkAchievements: () => void;
   unreadCount: number;
   setUnreadCount: (n: number) => void;
@@ -137,11 +137,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const addGems = useCallback((rawAmount: number) => {
+  const addGems = useCallback((rawAmount: number, opts?: { noBonus?: boolean }) => {
     setProfile(prev => {
       if (!prev) return prev;
       // VIPs earn +25% on rewards (spending is unaffected)
-      const amount = rawAmount > 0 ? Math.round(rawAmount * vipBonus(prev.email)) : rawAmount;
+      const amount = rawAmount > 0 && !opts?.noBonus ? Math.round(rawAmount * vipBonus(prev.email)) : rawAmount;
       if (!Number.isFinite(amount)) return prev;
       const base = DB.getUser(prev.email) || prev;
       // Infinite gems stay infinite — spending or earning doesn't change them.

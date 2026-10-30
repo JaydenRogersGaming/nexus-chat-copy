@@ -10,7 +10,7 @@ export default function CursorEffect() {
     const el = document.createElement('style');
     document.head.appendChild(el);
     const apply = () => {
-      const css = email ? cursorCss(getEquipped(email)) : '';
+      const css = email ? cursorCss(getEquipped(email), email) : '';
       el.textContent = css ? `*, *::before, *::after { cursor: ${css} !important; }` : '';
     };
     apply();

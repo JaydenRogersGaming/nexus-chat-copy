@@ -14,10 +14,13 @@ import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { cn } from '@project/components/lib/utils';
 import { toast } from 'sonner';
-import { roleRoomsFor } from '../lib/roleRooms';
+import { roleRoomsFor, canEnterRoleRoom, VIP_LOUNGE_ID } from '../lib/roleRooms';
+import { isVip } from '../lib/vip';
+import { useNavigate } from 'react-router-dom';
 
 export default function ChatPage() {
   const { profile, unreadCount, setUnreadCount, setActiveRoomId } = useApp();
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState<DB.ChatRoom[]>([]);
   const [activeRoom, _setActiveRoom] = useState<DB.ChatRoom | null>(null);
   const activeRoomRef = useRef<DB.ChatRoom | null>(null);
@@ -79,6 +82,9 @@ export default function ChatPage() {
   }, [loadRooms]);
 
   function selectRoom(room: DB.ChatRoom) {
+    if (room.id === VIP_LOUNGE_ID && !isVip(profile!.email) && !canEnterRoleRoom(profile!, 'vip', true)) {
+      toast('💖 The VIP Lounge is for VIPs — unlock VIP to get in!'); navigate('/vip'); return;
+    }
     setActiveRoom(room); setActiveRoomId(room.id);
     if (room.type === 'dm') { DB.markNotificationsRead(profile!.email); setUnreadCount(0); }
   }

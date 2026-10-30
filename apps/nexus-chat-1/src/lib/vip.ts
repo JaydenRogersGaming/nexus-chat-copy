@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
-// VIP membership — 1,000 gems / month. Stored per user like the rest of Nexus.
-export const VIP_PRICE = 1000;
+// VIP membership — 1,500 gems one-time unlock (includes the first 30 days), then 7,000 gems / month.
+export const VIP_UNLOCK_PRICE = 1500;
+export const VIP_PRICE = 7000;
 export const VIP_DAYS = 30;
 const DAY = 86_400_000;
 
@@ -44,6 +45,13 @@ export function isVip(email: string): boolean { const s = getVip(email); return 
 export function daysLeft(email: string): number {
   const s = getVip(email); return s ? Math.max(0, Math.ceil((s.expiresAt - Date.now()) / DAY)) : 0;
 }
+
+export function hasUnlocked(email: string): boolean { return read<boolean>(`unlocked:${email}`, false) || !!getVip(email); }
+export function markUnlocked(email: string) { write(`unlocked:${email}`, true); }
+/** What the next payment costs: the one-time unlock first, then the monthly fee. */
+export const nextPrice = (email: string) => (hasUnlocked(email) ? VIP_PRICE : VIP_UNLOCK_PRICE);
+/** VIPs earn 3x gems per chat message. */
+export const typingGems = (email: string) => (isVip(email) ? 15 : 5);
 
 /** Adds 30 days (stacking on any remaining time). */
 export function extendVip(email: string): VipStatus {

@@ -25,6 +25,7 @@ import type { default as _IpBansEp } from '../src/api/ipBans';
 import type { default as _ItemOwnersEp } from '../src/api/itemOwners';
 import type { default as _ListingsEp } from '../src/api/listings';
 import type { default as _MessagesEp } from '../src/api/messages';
+import type { default as _PranksEp } from '../src/api/pranks';
 import type { default as _PresenceEp } from '../src/api/presence';
 import type { default as _ProfileSyncEp } from '../src/api/profileSync';
 import type { default as _ProxyPageEp } from '../src/api/proxyPage';
@@ -154,6 +155,11 @@ export type MessagesInputType = NonNullable<_MessagesCfg['inputSchema']> extends
 export type MessagesOutputType = Awaited<ReturnType<_MessagesCfg['execute']>>;
 export const messages = createCaller<MessagesInputType, MessagesOutputType>('messages');
 
+type _PranksCfg = typeof _PranksEp;
+export type PranksInputType = NonNullable<_PranksCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_PranksCfg['execute']>[0]['input'];
+export type PranksOutputType = Awaited<ReturnType<_PranksCfg['execute']>>;
+export const pranks = createCaller<PranksInputType, PranksOutputType>('pranks');
+
 type _PresenceCfg = typeof _PresenceEp;
 export type PresenceInputType = NonNullable<_PresenceCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_PresenceCfg['execute']>[0]['input'];
 export type PresenceOutputType = Awaited<ReturnType<_PresenceCfg['execute']>>;
@@ -244,6 +250,7 @@ export const api = {
   itemOwners,
   listings,
   messages,
+  pranks,
   presence,
   profileSync,
   proxyPage,

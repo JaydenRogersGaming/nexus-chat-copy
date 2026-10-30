@@ -2092,6 +2092,73 @@
           }
         }
       ]
+    },
+    {
+      "id": "tvZbbz5VkBv",
+      "sdkName": "pranks",
+      "name": "Pranks",
+      "primaryFieldId": "fbVhUV2Vrg2",
+      "fields": [
+        {
+          "id": "fbVhUV2Vrg2",
+          "sdkName": "prankId",
+          "definition": {
+            "name": "Prank Id",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fgfMWypp4uM",
+          "sdkName": "targetEmail",
+          "definition": {
+            "name": "Target Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fpVUVaPfG6U",
+          "sdkName": "senderEmail",
+          "definition": {
+            "name": "Sender Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "f8iKdSEPRn2",
+          "sdkName": "senderName",
+          "definition": {
+            "name": "Sender Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fxfwLzgy2fK",
+          "sdkName": "seen",
+          "definition": {
+            "name": "Seen",
+            "type": "checkbox",
+            "template": {}
+          }
+        },
+        {
+          "id": "fiKFouiTW9Z",
+          "sdkName": "sentAt",
+          "definition": {
+            "name": "Sent At",
+            "type": "created_at",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        }
+      ]
     }
   ]
 }
