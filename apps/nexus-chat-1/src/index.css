@@ -189,3 +189,5 @@
 
 .lt-glow { text-shadow: 0 0 8px currentColor; }
 .lt-mythic { font-weight: 700; text-shadow: 0 0 6px currentColor, 0 0 16px currentColor, 0 0 28px currentColor; }
+
+@keyframes browser-load { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
