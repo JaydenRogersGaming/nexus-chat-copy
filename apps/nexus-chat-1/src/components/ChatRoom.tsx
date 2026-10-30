@@ -447,7 +447,12 @@ export default function ChatRoom({ room, onStartDM }: Props) {
       const history = messages.slice(-15).map(m => ({ name: m.senderName, content: m.content }));
       const { reply } = await chatBot({ userName: profile.name, prompt: censored.replace(/^\/chatrobot\b/i, '').replace(/@(jaydenchatbot|jayden|nexusbot)/ig, '').trim() || 'hi', history });
       postBot(DB.censorCustom(reply));
-    } catch { postBot("Beep boop… my brain lagged 🤖 try again in a sec!"); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      postBot(/402|paid plan|BYOK/i.test(msg)
+        ? "🤖 I can't think right now — my AI brain isn't switched on yet. The owner needs to upgrade the Zite plan or connect their own OpenAI key."
+        : "Beep boop… my brain lagged 🤖 try again in a sec!");
+    }
   }
 
   const ALL_COMMANDS: { cmd: string; desc: string; level: 'all' | 'staff' | 'owner' }[] = [
