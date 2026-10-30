@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Home, Search, Globe, ExternalLink, Plus, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, Home, Search, Globe, ExternalLink, Plus, X, Star } from 'lucide-react';
+import LibraryMenu from '../components/browser/LibraryMenu';
+import { addHistory, isBookmarked, toggleBookmark } from '../lib/browserStore';
 import { proxyPage, webSearch } from 'zitejs/api';
 import { Input } from '@project/components/ui/input';
 import { Button } from '@project/components/ui/button';
@@ -31,6 +33,7 @@ export default function BrowserPage() {
   const [tabs, setTabs] = useState<Tab[]>(() => [newTab()]);
   const [activeId, setActiveId] = useState(tabs[0].id);
   const [input, setInput] = useState('');
+  const [starTick, setStarTick] = useState(0);
   const proxyOff = useRef(false);
   const active = tabs.find(t => t.id === activeId) ?? tabs[0];
   const patch = (id: number, p: Partial<Tab>) => setTabs(ts => ts.map(t => t.id === id ? { ...t, ...p } : t));
@@ -103,6 +106,7 @@ export default function BrowserPage() {
     return rest;
   });
   const q = queryOf(active.url);
+  useEffect(() => { if (active.view.kind !== 'loading' && active.view.kind !== 'error') addHistory(active.url, active.title); }, [active.url, active.title, active.view.kind]);
   const externalUrl = q !== null ? googleUrl(q) : active.url.startsWith('http') ? active.url : 'https://www.google.com/';
 
   return (
@@ -131,6 +135,10 @@ export default function BrowserPage() {
             <Input value={input} onChange={e => setInput(e.target.value)} placeholder={q !== null ? `Search: ${q}` : active.url.startsWith('http') ? hostOf(active.url) : 'Search anything or type a URL'} className="pl-8 pr-8 h-8 text-xs bg-secondary/50" />
             <button type="submit" title="Search" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><Search className="w-3.5 h-3.5" /></button>
           </div>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" disabled={active.url === HOME} onClick={() => { toggleBookmark(active.url, active.title); setStarTick(n => n + 1); }} title="Bookmark this page">
+            <Star className={cn('w-4 h-4', starTick >= 0 && isBookmarked(active.url) && 'fill-primary text-primary')} />
+          </Button>
+          <LibraryMenu onOpen={u => navigate(active.id, u)} />
           <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(externalUrl, '_blank', 'noopener')} title="Open in your regular browser"><ExternalLink className="w-4 h-4" /></Button>
         </form>
       </div>

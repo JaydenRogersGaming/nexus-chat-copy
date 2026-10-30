@@ -30,6 +30,7 @@ import type { default as _PresenceEp } from '../src/api/presence';
 import type { default as _ProfileSyncEp } from '../src/api/profileSync';
 import type { default as _ProxyPageEp } from '../src/api/proxyPage';
 import type { default as _ReportsEp } from '../src/api/reports';
+import type { default as _ResearchSummaryEp } from '../src/api/researchSummary';
 import type { default as _RolesEp } from '../src/api/roles';
 import type { default as _StaffToolsEp } from '../src/api/staffTools';
 import type { default as _TournamentsEp } from '../src/api/tournaments';
@@ -180,6 +181,11 @@ export type ReportsInputType = NonNullable<_ReportsCfg['inputSchema']> extends {
 export type ReportsOutputType = Awaited<ReturnType<_ReportsCfg['execute']>>;
 export const reports = createCaller<ReportsInputType, ReportsOutputType>('reports');
 
+type _ResearchSummaryCfg = typeof _ResearchSummaryEp;
+export type ResearchSummaryInputType = NonNullable<_ResearchSummaryCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_ResearchSummaryCfg['execute']>[0]['input'];
+export type ResearchSummaryOutputType = Awaited<ReturnType<_ResearchSummaryCfg['execute']>>;
+export const researchSummary = createCaller<ResearchSummaryInputType, ResearchSummaryOutputType>('researchSummary');
+
 type _RolesCfg = typeof _RolesEp;
 export type RolesInputType = NonNullable<_RolesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_RolesCfg['execute']>[0]['input'];
 export type RolesOutputType = Awaited<ReturnType<_RolesCfg['execute']>>;
@@ -255,6 +261,7 @@ export const api = {
   profileSync,
   proxyPage,
   reports,
+  researchSummary,
   roles,
   staffTools,
   tournaments,
