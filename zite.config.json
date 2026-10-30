@@ -8,5 +8,10 @@
       "type": "openai",
       "connectionId": "svc_456915"
     }
+  },
+  "envVars": {
+    "ZITE_BRAVE_SEARCH_KEY": {
+      "description": "Brave Search API key for real web results in the in-app browser"
+    }
   }
 }
