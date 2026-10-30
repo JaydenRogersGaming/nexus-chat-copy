@@ -30,8 +30,8 @@ export default createEndpoint({
   }),
   execute: async ({ input, context }) => {
     const kind = input.kind ?? 'features';
-    if (kind !== 'features' && !isOwnerEmail(context.user?.email?.toLowerCase())) {
-      throw new ZiteError({ code: 'FORBIDDEN', message: 'owner only', userFacingMessage: 'Only the owner can use this idea type.' });
+    if (!isOwnerEmail(context.user?.email?.toLowerCase())) {
+      throw new ZiteError({ code: 'FORBIDDEN', message: 'owner only', userFacingMessage: 'Only the owner can use the idea generator.' });
     }
     const avoid = (input.avoid ?? []).slice(-150).map(s => s.slice(0, 80));
     const { accessToken } = await integrations.get('openai');

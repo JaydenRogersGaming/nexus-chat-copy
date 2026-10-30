@@ -69,7 +69,7 @@ export const aiVipStyle = createCaller<AiVipStyleInputType, AiVipStyleOutputType
 type _AiWebsiteCfg = typeof _AiWebsiteEp;
 export type AiWebsiteInputType = NonNullable<_AiWebsiteCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AiWebsiteCfg['execute']>[0]['input'];
 export type AiWebsiteOutputType = Awaited<ReturnType<_AiWebsiteCfg['execute']>>;
-export const aiWebsite = createCaller<AiWebsiteInputType, AiWebsiteOutputType>('aiWebsite');
+export const aiWebsite = createStreamingCaller<AiWebsiteInputType, AiWebsiteOutputType>('aiWebsite');
 
 type _AuditLogCfg = typeof _AuditLogEp;
 export type AuditLogInputType = NonNullable<_AuditLogCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_AuditLogCfg['execute']>[0]['input'];

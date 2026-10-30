@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { Lightbulb } from 'lucide-react';
+import { useAuth } from 'zitejs/auth';
 import { Button } from '@project/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@project/components/ui/dialog';
 import IdeasPage from '../pages/IdeasPage';
+import { isOwnerEmail } from '../lib/permissions';
 
-/** Owner-only idea generator, opened from the AI Assistant header. */
+/** Owner-only idea generator, opened from the AI Assistant header. Hidden for everyone else. */
 export default function AiIdeasButton() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  if (!isOwnerEmail(user?.email)) return null;
   return (
     <>
       <Button size="sm" variant="outline" onClick={() => setOpen(true)}>

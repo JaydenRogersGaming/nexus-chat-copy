@@ -75,7 +75,7 @@ export default function WatchPartyPage() {
   return (
     <div className="mx-auto grid max-w-5xl gap-4 p-4 md:grid-cols-[1fr_320px]">
       <div className="space-y-3">
-        <div><h1 className="text-xl font-bold">🍿 Watch Party</h1><p className="text-sm text-muted-foreground">Watch together, chat and react in real time. See what everyone is watching right now.</p></div>
+        <div><h1 className="text-xl font-bold">🎭 Theater</h1><p className="text-sm text-muted-foreground">Watch together, chat and react in real time. See what everyone is watching right now.</p></div>
         {parties === null ? [0, 1, 2].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)
           : parties.length === 0 ? <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No parties yet — start one!</p>
           : parties.map(p => <PartyCard key={p.id} p={p} onJoin={() => nav(`/watch/${p.id}`)} />)}

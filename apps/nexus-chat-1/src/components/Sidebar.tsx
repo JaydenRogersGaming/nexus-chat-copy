@@ -22,7 +22,7 @@ const NAV = [
   { to: '/gamble',       icon: Dices,         label: 'Casino' },
   { to: '/leaderboard',  icon: Trophy,        label: 'Leaderboard' },
   { to: '/tournament',   icon: Trophy,        label: 'Tournament' },
-  { to: '/watch',        icon: Clapperboard,  label: 'Watch Party' },
+  { to: '/watch',        icon: Clapperboard,  label: 'Theater' },
   { to: '/aichat',        icon: Bot,           label: 'AI Assistant' },
   { to: '/browser',       icon: Globe,         label: 'Browser' },
   { to: '/calendar',      icon: CalendarDays,  label: 'Calendar' },

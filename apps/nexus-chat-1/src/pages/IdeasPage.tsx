@@ -9,7 +9,7 @@ import { useAuth } from 'zitejs/auth';
 import { isOwnerEmail } from '../lib/gameData';
 
 const FOCUS = ['Games', 'Chat features', 'Making money with gems', 'Staff tools', 'Customization', 'Events'];
-const SECTIONS = ['Chat', 'DMs & Groups', 'Shop', 'Limited Shop', 'Casino', 'HP Clicker', 'Art', 'Video Rooms', 'Watch Party', 'Marketplace', 'Tournaments', 'VIP', 'Profile', 'Leaderboard', 'Staff Tools', 'Browser', 'Calendar'];
+const SECTIONS = ['Chat', 'DMs & Groups', 'Shop', 'Limited Shop', 'Casino', 'HP Clicker', 'Art', 'Video Rooms', 'Theater', 'Marketplace', 'Tournaments', 'VIP', 'Profile', 'Leaderboard', 'Staff Tools', 'Browser', 'Calendar'];
 
 type Kind = 'features' | 'site' | 'roles' | 'events' | 'tabs' | 'future' | 'titles' | 'typing';
 const KINDS: [Kind, string][] = [['features', '✨ Features'], ['site', '🧭 Every part of the site'], ['roles', '🛡️ New roles'], ['tabs', '🗂️ New tabs'], ['future', '🚀 Future roadmap'], ['events', '🎃 Theme events'], ['titles', '🏷️ Titles'], ['typing', '⌨️ Typing effects']];
