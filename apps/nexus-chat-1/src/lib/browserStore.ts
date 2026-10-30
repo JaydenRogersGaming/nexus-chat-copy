@@ -11,6 +11,16 @@ export function toggleBookmark(url: string, title: string) {
 }
 
 export const getHistory = () => read('nexus_browser_history');
+
+export type Engine = 'google' | 'duckduckgo';
+export const engineUrl = (e: Engine, q: string) =>
+  e === 'duckduckgo'
+    ? `https://duckduckgo.com/?q=${encodeURIComponent(q)}`
+    : `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+export const getEngine = (): Engine => (localStorage.getItem('nexus_search_engine') === 'duckduckgo' ? 'duckduckgo' : 'google');
+export const setEngine = (e: Engine) => localStorage.setItem('nexus_search_engine', e);
+export const searchUrl = (q: string) => engineUrl(getEngine(), q);
+
 export function addHistory(url: string, title: string) {
   if (url === 'nexus:home') return;
   write('nexus_browser_history', [{ url, title, at: Date.now() }, ...getHistory().filter(h => h.url !== url)].slice(0, 100));

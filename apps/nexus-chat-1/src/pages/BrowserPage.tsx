@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, RotateCw, Home, Search, Globe, ExternalLink, Plus, X, Star } from 'lucide-react';
 import LibraryMenu from '../components/browser/LibraryMenu';
-import { addHistory, isBookmarked, toggleBookmark } from '../lib/browserStore';
+import { addHistory, isBookmarked, toggleBookmark, searchUrl } from '../lib/browserStore';
 import { proxyPage, webSearch } from 'zitejs/api';
 import { Input } from '@project/components/ui/input';
 import { Button } from '@project/components/ui/button';
@@ -13,7 +13,7 @@ import HpClickerPage from './HpClickerPage';
 /** History entries: 'nexus:home', 'nexus:search?q=…', or a real http(s) URL. */
 const HOME = 'nexus:home';
 const searchEntry = (q: string) => `nexus:search?q=${encodeURIComponent(q)}`;
-const googleUrl = (q: string) => `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+const googleUrl = (q: string) => searchUrl(q);
 
 type Tab = { id: number; url: string; history: string[]; idx: number; view: TabView; title: string };
 let nextId = 1;

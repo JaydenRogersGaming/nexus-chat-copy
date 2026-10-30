@@ -28,6 +28,7 @@ import HolidayDecor from './HolidayDecor';
 import { HOLIDAYS, variantFor, windowFor } from '../lib/holidays';
 import EventShop from './EventShop';
 import FriendsWatching from './FriendsWatching';
+import { useFriendOnlineAlerts } from '../hooks/useFriendOnlineAlerts';
 import { useActiveEvent } from '../hooks/useActiveEvent';
 import { useChatSettingsSync } from '../hooks/useChatSettingsSync';
 import { useOwnerLimited } from '../hooks/useOwnerLimited';
@@ -196,6 +197,7 @@ function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }
 
 export default function Layout() {
   useAutoCloak();
+  useFriendOnlineAlerts();
   const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
   const [shopOpen,    setShopOpen]    = useState(false);

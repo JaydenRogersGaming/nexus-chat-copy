@@ -3,8 +3,7 @@ import { Search, ExternalLink, Globe } from 'lucide-react';
 import { Input } from '@project/components/ui/input';
 import { Button } from '@project/components/ui/button';
 import ResearchHelper from './ResearchHelper';
-import { getBookmarks } from '../../lib/browserStore';
-
+import { getBookmarks, engineUrl, getEngine, setEngine, Engine } from '../../lib/browserStore';
 export type Result = { title: string; url: string; snippet: string; source: string };
 
 export const GAMES = [
@@ -27,6 +26,7 @@ const LINKS = [
 
 export function SearchHome({ onSearch, onOpen }: { onSearch: (q: string) => void; onOpen?: (url: string) => void }) {
   const [q, setQ] = useState('');
+  const [engine, setEng] = useState<Engine>(getEngine());
   return (
     <div className="absolute inset-0 overflow-y-auto bg-background p-6 flex items-center justify-center">
       <div className="w-full max-w-xl text-center space-y-6">
@@ -37,6 +37,15 @@ export function SearchHome({ onSearch, onOpen }: { onSearch: (q: string) => void
           <Input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search anything…" className="pl-9 h-11 rounded-full" />
         </div>
         <Button type="submit">Search</Button>
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <span>Open results on:</span>
+          {(['google', 'duckduckgo'] as Engine[]).map(e => (
+            <button key={e} type="button" onClick={() => { setEngine(e); setEng(e); }}
+              className={`rounded-full border px-3 py-1 transition-colors ${engine === e ? 'border-primary text-primary font-medium' : 'border-border hover:bg-muted'}`}>
+              {e === 'google' ? 'Google' : 'DuckDuckGo'}
+            </button>
+          ))}
+        </div>
       </form>
       {onOpen && <>
         <div className="text-left space-y-2">
@@ -82,13 +91,15 @@ export function SearchHome({ onSearch, onOpen }: { onSearch: (q: string) => void
 }
 
 export function SearchResults({ query, results, provider, onOpen }: { query: string; results: Result[]; provider: string; onOpen: (url: string) => void }) {
-  const google = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
   return (
     <div className="absolute inset-0 overflow-y-auto bg-background">
       <div className="max-w-3xl mx-auto p-4 md:p-6 space-y-5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <p className="text-xs text-muted-foreground">{results.length} results for <span className="font-semibold text-foreground">“{query}”</span>{provider === 'wikipedia' && ' · from Wikipedia'}</p>
-          <Button size="sm" variant="outline" onClick={() => window.open(google, '_blank', 'noopener')}><ExternalLink className="w-3.5 h-3.5 mr-1" />Search on Google</Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => window.open(engineUrl('duckduckgo', query), '_blank', 'noopener')}><ExternalLink className="w-3.5 h-3.5 mr-1" />DuckDuckGo</Button>
+            <Button size="sm" variant="outline" onClick={() => window.open(engineUrl('google', query), '_blank', 'noopener')}><ExternalLink className="w-3.5 h-3.5 mr-1" />Google</Button>
+          </div>
         </div>
         <ResearchHelper query={query} results={results} />
         {results.length === 0 && <p className="text-sm text-muted-foreground text-center py-12">No results. Try different words, or search on Google.</p>}
