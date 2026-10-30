@@ -69,7 +69,10 @@ export default function PartyRoom({ id, onLeave }: { id: string; onLeave: () => 
             <Button size="sm" variant="outline" onClick={() => control(party.playing, now + 10)}><FastForward className="h-4 w-4" /></Button>
             <Button size="sm" variant="ghost" className="text-destructive" onClick={() => call({ action: 'end' })}><Power className="mr-1 h-4 w-4" />End</Button>
           </>}
-          {!isHost && <Button size="sm" variant="outline" onClick={() => setNonce(n => n + 1)}><RefreshCw className="mr-1 h-4 w-4" />Sync with host</Button>}
+          {!isHost && <>
+            <span className="text-xs text-muted-foreground">Only {party.hostName} can pause or skip — you're watching live.</span>
+            <Button size="sm" variant="outline" onClick={() => setNonce(n => n + 1)}><RefreshCw className="mr-1 h-4 w-4" />Jump to live</Button>
+          </>}
           <div className="ml-auto flex gap-1">{REACTIONS.map(r => <button key={r} onClick={() => send(r, true)} className="rounded-lg px-1.5 py-1 text-xl transition hover:scale-125">{r}</button>)}</div>
         </div>
         <p className="text-xs text-muted-foreground">Watching now: {party.viewers.map(v => v.name).join(', ') || 'just you'}</p>
