@@ -114,6 +114,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       "ZITE_APP_URL": string;
+      "ZITE_BRAVE_SEARCH_KEY": string;
       "ZITE_GIPHY_API_KEY": string;
       "ZITE_TENOR_API_KEY": string;
     }

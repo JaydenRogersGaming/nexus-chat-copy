@@ -7,6 +7,8 @@ declare namespace NodeJS {
     ZITE_APP_URL: string;
     /** openai access token (openai) */
     ZITE_OPENAI_ACCESS_TOKEN: string;
+    /** Brave Search API key for real web results in the in-app browser */
+    ZITE_BRAVE_SEARCH_KEY: string;
     /** Giphy API key for the GIF search feature in chat */
     ZITE_GIPHY_API_KEY: string;
     /** Google Tenor API key for GIF search (powered by Google) */
