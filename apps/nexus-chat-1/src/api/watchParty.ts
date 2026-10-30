@@ -22,7 +22,7 @@ async function viewersOf(ids: string[]) {
 }
 
 export default createEndpoint({
-  description: 'Creates, joins and syncs watch parties with live chat and reactions',
+  description: 'Creates, joins and syncs theaters parties with live chat and reactions',
   inputSchema: z.object({
     action: z.enum(['list', 'friends', 'create', 'state', 'control', 'send', 'end']),
     id: z.string().optional(),
