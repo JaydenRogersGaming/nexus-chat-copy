@@ -38,6 +38,7 @@ import type { default as _TradesEp } from '../src/api/trades';
 import type { default as _TranslateEp } from '../src/api/translate';
 import type { default as _TypingEp } from '../src/api/typing';
 import type { default as _VideoRoomsEp } from '../src/api/videoRooms';
+import type { default as _VipSettingsEp } from '../src/api/vipSettings';
 import type { default as _WatchPartyEp } from '../src/api/watchParty';
 import type { default as _WebSearchEp } from '../src/api/webSearch';
 
@@ -221,6 +222,11 @@ export type VideoRoomsInputType = NonNullable<_VideoRoomsCfg['inputSchema']> ext
 export type VideoRoomsOutputType = Awaited<ReturnType<_VideoRoomsCfg['execute']>>;
 export const videoRooms = createCaller<VideoRoomsInputType, VideoRoomsOutputType>('videoRooms');
 
+type _VipSettingsCfg = typeof _VipSettingsEp;
+export type VipSettingsInputType = NonNullable<_VipSettingsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_VipSettingsCfg['execute']>[0]['input'];
+export type VipSettingsOutputType = Awaited<ReturnType<_VipSettingsCfg['execute']>>;
+export const vipSettings = createCaller<VipSettingsInputType, VipSettingsOutputType>('vipSettings');
+
 type _WatchPartyCfg = typeof _WatchPartyEp;
 export type WatchPartyInputType = NonNullable<_WatchPartyCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_WatchPartyCfg['execute']>[0]['input'];
 export type WatchPartyOutputType = Awaited<ReturnType<_WatchPartyCfg['execute']>>;
@@ -269,6 +275,7 @@ export const api = {
   translate,
   typing,
   videoRooms,
+  vipSettings,
   watchParty,
   webSearch,
 };

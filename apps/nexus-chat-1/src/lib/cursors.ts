@@ -58,4 +58,4 @@ export function cursorCss(id: string, email = ''): string {
 }
 
 /** VIPs get 20% off every cursor. */
-export const cursorPrice = (c: CursorItem, vip: boolean) => (vip ? Math.round(c.price * 0.8) : c.price);
+export const cursorPrice = (c: CursorItem, vip: boolean) => (vip ? Math.round(c.price * 0.75) : c.price);

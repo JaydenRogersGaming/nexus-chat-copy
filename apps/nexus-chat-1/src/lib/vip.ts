@@ -1,7 +1,24 @@
 import type { CSSProperties } from 'react';
+import { isOwnerEmail } from './permissions';
 // VIP membership — 1,500 gems one-time unlock (includes the first 30 days), then 7,000 gems / month.
 export const VIP_UNLOCK_PRICE = 1500;
-export const VIP_PRICE = 7000;
+export const DEFAULT_VIP_PRICE = 7000;
+/** Monthly price — the owner can change it; loaded from the server on start. */
+export let VIP_PRICE = DEFAULT_VIP_PRICE;
+export function setMonthlyPrice(n: number) { VIP_PRICE = n; window.dispatchEvent(new Event('vip-change')); }
+/** The owner always has VIP and never pays. */
+export const isOwnerVip = (email: string) => isOwnerEmail(email);
+/** VIPs get 25% off shop items. */
+export const VIP_DISCOUNT = 0.25;
+export const shopPrice = (cost: number, email: string) => (isVip(email) ? Math.round(cost * (1 - VIP_DISCOUNT)) : cost);
+/** "8 months" or "1 year, 3 months". */
+export function durationLabel(months: number): string {
+  const y = Math.floor(months / 12), m = months % 12;
+  const ms = `${m} month${m === 1 ? '' : 's'}`;
+  if (!y) return ms;
+  const ys = `${y} year${y === 1 ? '' : 's'}`;
+  return m ? `${ys}, ${ms}` : ys;
+}
 export const VIP_DAYS = 30;
 const DAY = 86_400_000;
 
@@ -41,7 +58,7 @@ function write<T>(key: string, v: T) {
 }
 
 export function getVip(email: string): VipStatus | null { return read<VipStatus | null>(`status:${email}`, null); }
-export function isVip(email: string): boolean { const s = getVip(email); return !!s && s.expiresAt > Date.now(); }
+export function isVip(email: string): boolean { if (isOwnerVip(email)) return true; const s = getVip(email); return !!s && s.expiresAt > Date.now(); }
 export function daysLeft(email: string): number {
   const s = getVip(email); return s ? Math.max(0, Math.ceil((s.expiresAt - Date.now()) / DAY)) : 0;
 }

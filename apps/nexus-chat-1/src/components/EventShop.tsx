@@ -16,6 +16,7 @@ import ShopMusic from './shop/ShopMusic';
 import CountryPicker from './shop/CountryPicker';
 import ShopItemCard, { ShopRow } from './shop/ShopItemCard';
 import OwnerLimitedEditor from './shop/OwnerLimitedEditor';
+import { shopPrice, isVip } from '../lib/vip';
 import { useOwnerLimited, bgCss } from '../hooks/useOwnerLimited';
 
 type Props = { event: ActiveEvent; open: boolean; onOpenChange: (o: boolean) => void };
@@ -71,7 +72,8 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
     finally { setRefreshing(false); }
   };
 
-  const pay = (id: string, cost: number, name: string) => {
+  const pay = (id: string, base: number, name: string) => {
+    const cost = shopPrice(base, profile.email);
     if (profile.gems < cost) { toast.error(`Need ${(cost - profile.gems).toLocaleString()} more gems!`); return false; }
     addGems(-cost); DB.addUserItem(profile.email, id); toast.success(`🎉 You got ${name}! Limited — gone after this event.`);
     itemOwners({ action: 'claim', itemId: id, ownerName: profile.name })
@@ -139,7 +141,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
         {/* Items */}
         <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-background">
           {rows.map((r, i) => (
-            <ShopItemCard key={r.id} row={r} index={i} accent={accent} tierName={tier.name} owned={owned.includes(r.id)} stat={stats[r.id]} me={me}
+            <ShopItemCard key={r.id} row={{ ...r, cost: shopPrice(r.cost, profile.email), label: isVip(profile.email) ? `${r.label} · 👑 −25%` : r.label }} index={i} accent={accent} tierName={tier.name} owned={owned.includes(r.id)} stat={stats[r.id]} me={me}
               onBuy={() => { if (pay(r.id, r.cost, r.name)) r.use(); }} />
           ))}
           {isRealOwner && <OwnerLimitedEditor items={ownerItems} holidayKey={event.holiday.key} mutate={mutate} />}

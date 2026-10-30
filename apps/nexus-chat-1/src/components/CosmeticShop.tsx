@@ -6,6 +6,7 @@ import { COSMETICS_EVENT } from './SettingsExtras';
 import { useApp } from '../contexts/AppContext';
 import * as DB from '../lib/storage';
 import { toast } from 'sonner';
+import { shopPrice, isVip } from '../lib/vip';
 
 // Shop section for backgrounds and typing styles — buy, then equip right away
 export default function CosmeticShop({ kind }: { kind: 'bg' | 'typing' }) {
@@ -21,7 +22,8 @@ export default function CosmeticShop({ kind }: { kind: 'bg' | 'typing' }) {
     window.dispatchEvent(new Event(COSMETICS_EVENT));
     bump(n => n + 1);
   }
-  function buy(id: string, cost: number, name: string) {
+  function buy(id: string, base: number, name: string) {
+    const cost = shopPrice(base, profile!.email);
     if (profile!.gems < cost) { toast.error(`Need ${cost - profile!.gems} more gems!`); return; }
     addGems(-cost);
     DB.addUserItem(profile!.email, id);
@@ -47,7 +49,7 @@ export default function CosmeticShop({ kind }: { kind: 'bg' | 'typing' }) {
             </div>
             {isOwned
               ? <Button size="sm" variant={isOn ? 'secondary' : 'outline'} className="text-xs" onClick={() => equip(isOn ? '' : it.id)}>{isOn ? 'Equipped ✓' : 'Equip'}</Button>
-              : <Button size="sm" className="text-xs gap-1" disabled={profile.gems < it.cost} onClick={() => buy(it.id, it.cost, it.name)}><Gem className="w-3 h-3" />{it.cost.toLocaleString()}</Button>}
+              : <Button size="sm" className="text-xs gap-1" disabled={profile.gems < shopPrice(it.cost, profile.email)} onClick={() => buy(it.id, it.cost, it.name)}><Gem className="w-3 h-3" />{shopPrice(it.cost, profile.email).toLocaleString()}{isVip(profile.email) && <span className="text-[10px]">👑−25%</span>}</Button>}
           </div>
         );
       })}
