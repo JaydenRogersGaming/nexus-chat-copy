@@ -7,6 +7,13 @@ import { getInventory } from '../lib/inventory';
 
 const COSMETICS_EVENT = 'nexus-cosmetics';
 
+/** Collapses items with the same name into one entry with a count. */
+function groupByName<T extends { name: string }>(items: T[]) {
+  const m = new Map<string, { item: T; count: number }>();
+  for (const i of items) { const g = m.get(i.name); if (g) g.count++; else m.set(i.name, { item: i, count: 1 }); }
+  return [...m.values()];
+}
+
 /** Switch between owned original + limited themes, typing effects and titles. */
 export default function ItemSwitcher({ showTitles = true }: { showTitles?: boolean }) {
   const { profile, updateProfile } = useApp();
@@ -29,9 +36,10 @@ export default function ItemSwitcher({ showTitles = true }: { showTitles?: boole
   const Row = ({ kind, active, onPick }: { kind: 'theme' | 'typing' | 'title'; active: string; onPick: (id: string) => void }) => (
     <div className="flex flex-wrap gap-1.5">
       <button className={chip(!active)} onClick={() => onPick('')}>Default</button>
-      {inv.filter(i => i.kind === kind).map(i => (
+      {groupByName(inv.filter(i => i.kind === kind)).map(({ item: i, count }) => (
         <button key={i.id} className={chip(active === i.id)} onClick={() => onPick(i.id)}>
           {i.name}{i.limited && <span className="ml-1 text-[9px] px-1 rounded bg-primary/20 text-primary">LIMITED</span>}
+          {count > 1 && <span className="ml-1 text-[9px] font-bold px-1 rounded bg-amber-500/20 text-amber-500">×{count}</span>}
         </button>
       ))}
     </div>
