@@ -7,6 +7,10 @@
     "openai": {
       "type": "openai",
       "connectionId": "svc_456915"
+    },
+    "openai-2": {
+      "type": "openai",
+      "connectionId": "svc_573782"
     }
   },
   "envVars": {
