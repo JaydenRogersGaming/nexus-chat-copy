@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Pause, Play, Rewind, FastForward, RefreshCw, Send, Users, Power } from 'lucide-react';
+import { ArrowLeft, Pause, Play, Rewind, FastForward, RefreshCw, Send, Users, Power, Trash2 } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
 import { toast } from 'sonner';
@@ -93,7 +93,17 @@ export default function PartyRoom({ id, onLeave }: { id: string; onLeave: () => 
       <div className="flex h-80 flex-col rounded-xl border border-border bg-card lg:h-auto lg:w-80">
         <p className="border-b border-border px-3 py-2 text-sm font-semibold">Theater chat</p>
         <div className="flex-1 space-y-1.5 overflow-y-auto p-3 text-sm">
-          {msgs.filter(m => !m.isReaction).map(m => <p key={m.id}><span className="font-semibold text-primary">{m.senderName}</span> {m.text}</p>)}
+          {msgs.filter(m => !m.isReaction).map(m => (
+            <p key={m.id} className="group flex items-start gap-1">
+              <span className="flex-1"><span className="font-semibold text-primary">{m.senderName}</span> {m.text}</span>
+              {isOwnerEmail(profile?.email) && (
+                <button type="button" title="Delete message" className="opacity-0 transition-opacity group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                  onClick={() => { setMsgs(ms => ms.filter(x => x.id !== m.id)); call({ action: 'deleteMessage', messageId: m.id }); }}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </p>
+          ))}
           <div ref={endRef} />
         </div>
         <form className="flex gap-1.5 border-t border-border p-2" onSubmit={e => { e.preventDefault(); send(text); }}>

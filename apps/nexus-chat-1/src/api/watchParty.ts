@@ -40,7 +40,8 @@ export default createEndpoint({
   description: 'Runs the Theater: movie listings, who can start movies, playback sync, start/end times and chat',
   authenticated: true,
   inputSchema: z.object({
-    action: z.enum(['list', 'friends', 'create', 'state', 'control', 'send', 'end', 'schedule', 'access', 'setRoles']),
+    action: z.enum(['list', 'friends', 'create', 'state', 'control', 'send', 'end', 'schedule', 'access', 'setRoles', 'deleteMessage']),
+    messageId: z.string().optional(),
     id: z.string().optional(),
     name: z.string().max(60).optional(),
     title: z.string().trim().max(100).optional(),
@@ -126,6 +127,13 @@ export default createEndpoint({
     if (input.action === 'send') {
       if (!input.text) fail('Type a message first.');
       await zite.watchPartyMessages.create({ record: { text: input.text!, partyId: p!.id, senderEmail: email, senderName: name, isReaction: !!input.isReaction } });
+    }
+
+    if (input.action === 'deleteMessage') {
+      if (!owner) fail('Only the owner can delete Theater messages.');
+      if (!input.messageId) fail('Pick a message to delete.');
+      const m = await zite.watchPartyMessages.findOne({ id: input.messageId! });
+      if (m && m.partyId === p!.id) await zite.watchPartyMessages.delete({ id: m.id });
     }
 
     if (isOver(p!) && !p!.ended) await zite.watchParties.update({ id: p!.id, record: { ended: true, playing: false } });
