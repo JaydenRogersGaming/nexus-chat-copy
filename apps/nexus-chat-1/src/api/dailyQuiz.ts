@@ -11,7 +11,7 @@ export default createEndpoint({
   inputSchema: z.object({ subject: z.string(), level: z.string() }),
   outputSchema: z.object({ questions: z.array(Q) }),
   execute: async ({ input }) => {
-    const { accessToken } = await integrations.get('openai');
+    const { accessToken } = await integrations.get('openai-2');
     const openai = new OpenAI({ apiKey: accessToken });
     const res = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

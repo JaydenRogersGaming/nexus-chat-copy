@@ -40,7 +40,7 @@ export default createEndpoint({
     if (input.prompt.length > PROMPT_LIMIT) {
       throw new ZiteError({ code: 'BAD_REQUEST', message: 'prompt too long', userFacingMessage: `Prompts can be up to ${PROMPT_LIMIT.toLocaleString()} characters.` });
     }
-    const { accessToken } = await integrations.get('openai');
+    const { accessToken } = await integrations.get('openai-2');
     const client = new OpenAI({ apiKey: accessToken });
     const past = (input.history ?? []).slice(-8).map((p, i) => `${i + 1}. ${p.slice(0, 4000)}`).join('\n');
     const user = input.currentHtml

@@ -8,6 +8,7 @@ export type UserProfile = {
   profilePic: string;
   nameColor: string;
   nameColor2: string;
+  vipStyle?: Record<string, unknown>;
   bio: string;
   gems: number;
   activeTitle: string;

@@ -17,7 +17,7 @@ export default createEndpoint({
   }),
   outputSchema: z.object({ options: z.array(Option) }),
   execute: async ({ input }) => {
-    const { accessToken } = await integrations.get('openai');
+    const { accessToken } = await integrations.get('openai-2');
     const client = new OpenAI({ apiKey: accessToken });
     const keep = !!(input.keepName && input.name?.trim());
     const wordsRule = keep

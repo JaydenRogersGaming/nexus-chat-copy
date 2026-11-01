@@ -9,7 +9,7 @@ export default createEndpoint({
   outputSchema: z.object({ translations: z.array(z.string()) }),
   execute: async ({ input }) => {
     if (!input.texts.length) return { translations: [] };
-    const { accessToken } = await integrations.get('openai');
+    const { accessToken } = await integrations.get('openai-2');
     const openai = new OpenAI({ apiKey: accessToken });
     const res = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
