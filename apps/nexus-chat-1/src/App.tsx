@@ -19,7 +19,6 @@ import BrowserPage from './pages/BrowserPage';
 import CalendarPage from './pages/CalendarPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import VipPage from './pages/VipPage';
-import PublicSitePage from './pages/PublicSitePage';
 import CursorEffect from './components/CursorEffect';
 import PrankOverlay from './components/PrankOverlay';
 import BanScreen from './components/BanScreen';
@@ -62,9 +61,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  // Published Website Builder sites are public — no sign-in needed to view them
-  const siteSlug = /^\/site\/([^/]+)/.exec(window.location.pathname)?.[1];
-  if (siteSlug) return <PublicSitePage slug={decodeURIComponent(siteSlug)} />;
   return (
     <BrowserRouter>
       <AuthGate>

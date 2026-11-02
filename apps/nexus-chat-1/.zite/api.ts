@@ -32,7 +32,6 @@ import type { default as _ProxyPageEp } from '../src/api/proxyPage';
 import type { default as _ReportsEp } from '../src/api/reports';
 import type { default as _ResearchSummaryEp } from '../src/api/researchSummary';
 import type { default as _RolesEp } from '../src/api/roles';
-import type { default as _SitesEp } from '../src/api/sites';
 import type { default as _StaffToolsEp } from '../src/api/staffTools';
 import type { default as _TournamentsEp } from '../src/api/tournaments';
 import type { default as _TradesEp } from '../src/api/trades';
@@ -193,11 +192,6 @@ export type RolesInputType = NonNullable<_RolesCfg['inputSchema']> extends { _in
 export type RolesOutputType = Awaited<ReturnType<_RolesCfg['execute']>>;
 export const roles = createCaller<RolesInputType, RolesOutputType>('roles');
 
-type _SitesCfg = typeof _SitesEp;
-export type SitesInputType = NonNullable<_SitesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_SitesCfg['execute']>[0]['input'];
-export type SitesOutputType = Awaited<ReturnType<_SitesCfg['execute']>>;
-export const sites = createCaller<SitesInputType, SitesOutputType>('sites');
-
 type _StaffToolsCfg = typeof _StaffToolsEp;
 export type StaffToolsInputType = NonNullable<_StaffToolsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_StaffToolsCfg['execute']>[0]['input'];
 export type StaffToolsOutputType = Awaited<ReturnType<_StaffToolsCfg['execute']>>;
@@ -275,7 +269,6 @@ export const api = {
   reports,
   researchSummary,
   roles,
-  sites,
   staffTools,
   tournaments,
   trades,
