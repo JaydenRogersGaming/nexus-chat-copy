@@ -107,7 +107,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [email, realEmail]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!profile || !synced.current || profile.email !== realEmail) return;
-    const t = setTimeout(() => { profileSync({ action: 'save', data: JSON.stringify(profile) }).catch(() => {}); }, 1500);
+    const t = setTimeout(() => {
+      profileSync({ action: 'save', data: JSON.stringify(profile) }).then(({ data }) => {
+        const srv = data ? JSON.parse(data) : null;
+        if (srv && srv.name !== profile.name) { DB.saveUser({ ...profile, name: srv.name, renamedByOwnerAt: srv.renamedByOwnerAt } as typeof profile); refreshProfile(); }
+      }).catch(() => {});
+    }, 1500);
     return () => clearTimeout(t);
   }, [profile, realEmail]);
 

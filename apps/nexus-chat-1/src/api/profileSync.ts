@@ -15,7 +15,7 @@ export default createEndpoint({
       const target = (input.targetEmail || '').toLowerCase(); const name = (input.name || '').trim();
       if (!target || !name) throw new ZiteError('Pick a user and a name.');
       const row = await zite.userProfiles.findOne({ filters: { email: target } });
-      const data = JSON.stringify({ ...(row?.profileData ? JSON.parse(row.profileData) : {}), email: target, name });
+      const data = JSON.stringify({ ...(row?.profileData ? JSON.parse(row.profileData) : {}), email: target, name, renamedByOwnerAt: Date.now() });
       if (row) await zite.userProfiles.update({ id: row.id, record: { profileData: data } });
       else await zite.userProfiles.create({ record: { email: target, profileData: data } });
       return { data };
@@ -27,6 +27,9 @@ export default createEndpoint({
 
     if (input.action === 'save' && input.data) {
       const parsed = JSON.parse(input.data);
+      const prev = original?.profileData ? JSON.parse(original.profileData) : {};
+      // An owner rename beats a device that still has the old name cached
+      if (prev.renamedByOwnerAt && (parsed.renamedByOwnerAt ?? 0) < prev.renamedByOwnerAt) { parsed.name = prev.name; parsed.renamedByOwnerAt = prev.renamedByOwnerAt; }
       const clean = JSON.stringify({ ...parsed, email });
       if (original) await zite.userProfiles.update({ id: original.id, record: { profileData: clean } });
       else await zite.userProfiles.create({ record: { email, profileData: clean } });
