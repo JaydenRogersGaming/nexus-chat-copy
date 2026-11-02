@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAuth, loginWithRedirect } from 'zitejs/auth';
+import { useAuth } from 'zitejs/auth';
 import TournamentPage from './pages/TournamentPage';
 import WatchPartyPage from './pages/WatchPartyPage';
 import VideoRoomsPage from './pages/VideoRoomsPage';
@@ -32,10 +31,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const settings = DB.getAppSettings();
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
-  // Public app: send signed-out visitors to the sign-in page.
-  useEffect(() => {
-    if (!isLoading && !user) loginWithRedirect();
-  }, [isLoading, user]);
+  // Internal app: Zite SSO signs members in before the app loads.
   const serverBan = useServerBan(!!user);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
