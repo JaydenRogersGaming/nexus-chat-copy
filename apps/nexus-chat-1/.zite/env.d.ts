@@ -17,6 +17,8 @@ declare namespace NodeJS {
     ZITE_GIPHY_API_KEY: string;
     /** Google Tenor API key for GIF search (powered by Google) */
     ZITE_TENOR_API_KEY: string;
+    /** TMDB API Read Access Token (v4) for movie info and where-to-watch data */
+    ZITE_TMDB_TOKEN: string;
     [key: string]: string | undefined;
   }
 }
