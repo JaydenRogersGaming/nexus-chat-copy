@@ -680,6 +680,7 @@ export type CustomLimitedItemsRecordType = {
   holidayKey?: string;
   active?: boolean;
   songUrl?: string;
+  description?: string;
 };
 
 /** What you may write when creating or updating a record in the "Custom Limited Items" table. */
@@ -695,6 +696,7 @@ export type CustomLimitedItemsRecordInput = {
   holidayKey: string | null;
   active: string | boolean | null;
   songUrl: string | null;
+  description: string | null;
 };
 
 /** A record in the "Pranks" table, as it is read back. */

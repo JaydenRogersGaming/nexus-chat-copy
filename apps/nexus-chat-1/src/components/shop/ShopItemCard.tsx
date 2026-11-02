@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Gem, Crown, Users } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
 
-export type ShopRow = { id: string; label: string; name: string; cost: number; preview: ReactNode; sub?: ReactNode; on: boolean; use: () => void };
+export type ShopRow = { id: string; label: string; name: string; cost: number; preview: ReactNode; sub?: ReactNode; description?: string; on: boolean; use: () => void };
 type Stat = { count: number; firstEmail: string; firstName: string };
 
 export default function ShopItemCard({ row, index, accent, tierName, owned, stat, me, onBuy }: {
@@ -21,6 +21,7 @@ export default function ShopItemCard({ row, index, accent, tierName, owned, stat
           <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full border" style={{ color: accent, borderColor: `${accent}66`, background: `${accent}14` }}>{tierName}</span>
         </div>
       </div>
+      {row.description && <p className="text-xs text-muted-foreground leading-relaxed">{row.description}</p>}
       {row.sub}
       {stat && (
         <p className="text-[11px] text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">

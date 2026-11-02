@@ -96,17 +96,17 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   ];
   for (const i of shownOwnerItems) {
     const id = `own-${i.id}`;
-    if (i.kind === 'Background') rows.push({ id, label: '👑 Owner Exclusive Background', name: `${i.emoji} ${i.name}`, cost: i.cost,
+    if (i.kind === 'Background') rows.push({ id, description: i.description, label: '👑 Owner Exclusive Background', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={box} style={{ background: bgCss(i) }} />, on: eq.bg === id, use: () => equip({ bg: eq.bg === id ? '' : id }) });
-    else if (i.kind === 'Typing Effect') rows.push({ id, label: '👑 Owner Exclusive Typing', name: `${i.emoji} ${i.name}`, cost: i.cost,
+    else if (i.kind === 'Typing Effect') rows.push({ id, description: i.description, label: '👑 Owner Exclusive Typing', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={`${box} bg-background text-3xl`}>{i.emoji}</div>,
       sub: <p className={`text-xs rounded-lg bg-background/60 px-2 py-1.5 ${i.effect === 'rainbow' ? 'title-rainbow' : i.effect === 'pulse' ? 'animate-pulse' : ''}`} style={{ color: i.color }}>You {i.typingText} {i.emoji}</p>,
       on: eq.typing === id, use: () => equip({ typing: eq.typing === id ? '' : id }) });
-    else if (i.kind === 'Music') rows.push({ id, label: '👑 Owner Exclusive Song', name: `${i.emoji} ${i.name}`, cost: i.cost,
+    else if (i.kind === 'Music') rows.push({ id, description: i.description, label: '👑 Owner Exclusive Song', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={`${box} text-3xl`} style={{ background: `linear-gradient(135deg,${i.color}55,${i.color2}55)` }}>🎵</div>,
       on: getMusic().url === i.songUrl,
       use: () => { setMusic({ ...getMusic(), url: i.songUrl }); toast.success('Added to your songs — open the 🎵 music player to play it'); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); } });
-    else rows.push({ id, label: '👑 Owner Exclusive Title', name: `${i.emoji} ${i.name}`, cost: i.cost,
+    else rows.push({ id, description: i.description, label: '👑 Owner Exclusive Title', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={`${box} text-3xl`} style={{ background: `linear-gradient(135deg,${i.color}55,${i.color2}55)` }}>{i.emoji}</div>,
       on: profile.activeTitle === `${i.emoji} ${i.name}`,
       use: () => { updateProfile({ activeTitle: `${i.emoji} ${i.name}`, activeTitleColor: i.color, activeTitleEffect: i.effect === 'none' ? '' : i.effect }); bump(n => n + 1); } });

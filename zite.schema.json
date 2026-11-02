@@ -2118,6 +2118,15 @@
             "type": "url",
             "template": {}
           }
+        },
+        {
+          "id": "f5FnN3xU1Tx",
+          "sdkName": "description",
+          "definition": {
+            "name": "Description",
+            "type": "long_text",
+            "template": {}
+          }
         }
       ]
     },
