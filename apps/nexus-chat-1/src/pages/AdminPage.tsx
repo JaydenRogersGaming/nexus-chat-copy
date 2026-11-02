@@ -7,6 +7,7 @@ import TheaterAccessTab from '../components/TheaterAccessTab';
 import OwnerEventsTab from '../components/OwnerEventsTab';
 import FeedbackTab from '../components/admin/FeedbackTab';
 import LimitedShopTab from '../components/admin/LimitedShopTab';
+import CopyCodeButton from '../components/admin/CopyCodeButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
@@ -221,6 +222,7 @@ export default function AdminPage() {
           <h1 className="text-xl font-black">{isOwner ? 'Owner Panel' : isCoOwner ? 'Co-Owner Panel' : isAdmin ? 'Admin Panel' : 'Mod Panel'}</h1>
           <p className="text-xs text-muted-foreground">Manage users, roles, titles, and reports</p>
         </div>
+        {isOwner && <CopyCodeButton />}
       </div>
 
       <Tabs defaultValue={isMod && !isAdmin ? 'cussreports' : 'gems'}>
