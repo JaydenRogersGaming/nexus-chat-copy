@@ -2196,6 +2196,94 @@
           }
         }
       ]
+    },
+    {
+      "id": "tu5f9WXE9m8",
+      "sdkName": "publishedSites",
+      "name": "Published Sites",
+      "primaryFieldId": "fqc6FQMgFFv",
+      "fields": [
+        {
+          "id": "fqc6FQMgFFv",
+          "sdkName": "siteName",
+          "definition": {
+            "name": "Site Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "froXKEnkWKZ",
+          "sdkName": "slug",
+          "definition": {
+            "name": "Slug",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fwgCu87wc79",
+          "sdkName": "html",
+          "definition": {
+            "name": "Html",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fgy3HYGsUbf",
+          "sdkName": "ownerEmail",
+          "definition": {
+            "name": "Owner Email",
+            "type": "email",
+            "template": {}
+          }
+        },
+        {
+          "id": "fbY7vxHDxzt",
+          "sdkName": "ownerName",
+          "definition": {
+            "name": "Owner Name",
+            "type": "single_line_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fh8MSRBr5fX",
+          "sdkName": "paidUntil",
+          "definition": {
+            "name": "Paid Until",
+            "type": "datetime",
+            "template": {
+              "timezone": "",
+              "dateFormat": "local",
+              "timeFormat": "12h",
+              "displayTimeZone": false
+            }
+          }
+        },
+        {
+          "id": "f3U2rrbUTZ5",
+          "sdkName": "settings",
+          "definition": {
+            "name": "Settings",
+            "type": "long_text",
+            "template": {}
+          }
+        },
+        {
+          "id": "fojHbzrhs9r",
+          "sdkName": "views",
+          "definition": {
+            "name": "Views",
+            "type": "number",
+            "template": {
+              "numberFormat": "local",
+              "decimalPlaces": 1
+            }
+          }
+        }
+      ]
     }
   ]
 }

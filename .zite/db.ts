@@ -721,6 +721,34 @@ export type PranksRecordInput = {
   seen: string | boolean | null;
 };
 
+/** A record in the "Published Sites" table, as it is read back. */
+export type PublishedSitesRecordType = {
+  id: string;
+  /** Primary field. "Site Name" */
+  siteName?: string;
+  slug?: string;
+  html?: string;
+  ownerEmail?: string;
+  ownerName?: string;
+  /** "Paid Until". Date+time field (ISO 8601 timestamp), null when unset, date: "local" format, time: 12h */
+  paidUntil?: string;
+  settings?: string;
+  /** "Views". 1 decimal places, format: local (e.g. 1,000,000.50) */
+  views?: number;
+};
+
+/** What you may write when creating or updating a record in the "Published Sites" table. */
+export type PublishedSitesRecordInput = {
+  siteName: string | null;
+  slug: string | null;
+  html: string | null;
+  ownerEmail: string | null;
+  ownerName: string | null;
+  paidUntil: string | Date | null;
+  settings: string | null;
+  views: string | number | null;
+};
+
 export interface ZiteAuthUser {
   id: string;
   name: string;
@@ -757,6 +785,7 @@ export const zite = {
   chatSettings: createTableClient<ChatSettingsRecordType, ChatSettingsRecordInput>('ChatSettings'), // "Chat Settings"
   customLimitedItems: createTableClient<CustomLimitedItemsRecordType, CustomLimitedItemsRecordInput>('CustomLimitedItems'), // "Custom Limited Items"
   pranks: createTableClient<PranksRecordType, PranksRecordInput>('Pranks'), // "Pranks"
+  publishedSites: createTableClient<PublishedSitesRecordType, PublishedSitesRecordInput>('PublishedSites'), // "Published Sites"
   sql: createSqlClient(),
   auth: createAuthClient<ZiteAuthUser>(),
 };
