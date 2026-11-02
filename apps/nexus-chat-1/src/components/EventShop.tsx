@@ -23,8 +23,9 @@ type Props = { event: ActiveEvent; open: boolean; onOpenChange: (o: boolean) => 
 
 /** Which holiday's look the shop uses: a live national day always wins; otherwise the theme picked on the last refresh. */
 function resolveTheme(event: ActiveEvent, shopTheme: string | null | undefined): Holiday {
-  if (event.holiday.countries) return event.holiday;
-  return HOLIDAYS.find(h => h.key === shopTheme) ?? event.holiday;
+  // Each shop always stays on its own holiday / national day — refreshing only upgrades the items
+  void shopTheme;
+  return event.holiday;
 }
 
 function safeItems(e: ActiveEvent, h: Holiday, drop: number) {
@@ -61,13 +62,11 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   const refreshShop = async () => {
     setRefreshing(true);
     // National day stays pinned; otherwise rotate to a random different holiday the user can see
-    const pool = HOLIDAYS.filter(h => appliesTo(h, country) && h.key !== themeH.key);
-    const next = isNational || !pool.length ? event.holiday.key : pool[Math.floor(Math.random() * pool.length)].key;
+    const next = event.holiday.key;
     try {
       await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key, shopTheme: next });
       window.dispatchEvent(new Event(EVENTS_CHANGED));
-      const h = HOLIDAYS.find(x => x.key === next);
-      toast.success(`🔄 Drop ${(drop % 30) + 1}/30 — ${h?.emoji ?? ''} ${h?.name ?? ''} theme!${drop === 30 ? ' Looped back to the first drop.' : ''}`);
+      toast.success(`🔄 Drop ${(drop % 30) + 1}/30 — new ${event.holiday.emoji} ${event.holiday.name} items!${drop === 30 ? ' Looped back to the first drop.' : ''}`);
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not refresh'); }
     finally { setRefreshing(false); }
   };
@@ -139,7 +138,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
               )}
             </div>
             {isNational && <p className="text-[11px] text-white/75 flex items-center gap-1"><Flag className="w-3 h-3" />One-day-only shop — closes at midnight!</p>}
-            {isNational && isRealOwner && <p className="text-[11px] text-white/75">National day is live — refreshes upgrade items but keep this theme.</p>}
+            {isRealOwner && <p className="text-[11px] text-white/75">Refreshing gives new {event.holiday.name} items — the theme stays the same.</p>}
           </div>
         </div>
         {/* Items */}
