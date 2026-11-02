@@ -3,7 +3,7 @@ import { Clock, RefreshCw, CalendarDays, Flag } from 'lucide-react';
 import { itemOwners, events as eventsApi } from 'zitejs/api';
 import { useActiveEvent, EVENTS_CHANGED } from '../hooks/useActiveEvent';
 import { toast } from 'sonner';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { Button } from '@project/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { useApp } from '../contexts/AppContext';
@@ -13,6 +13,7 @@ import { ActiveEvent, HOLIDAYS, Holiday, appliesTo, limitedItems, tierFor, varia
 import { holidaySong } from '../lib/holidaySongs';
 import { setMusic, getMusic } from '../lib/personalize';
 import ShopMusic from './shop/ShopMusic';
+import Countdown from './shop/Countdown';
 import CountryPicker from './shop/CountryPicker';
 import ShopItemCard, { ShopRow } from './shop/ShopItemCard';
 import OwnerLimitedEditor from './shop/OwnerLimitedEditor';
@@ -126,7 +127,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
             </DialogHeader>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/85">
               <span className="flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />{event.holiday.emoji} {event.holiday.name} · {format(event.day, 'EEEE, MMM d, yyyy')}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />Ends {formatDistanceToNow(event.end, { addSuffix: true })}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />Ends in <Countdown to={event.end} onDone={() => { toast('This limited shop has closed'); onOpenChange(false); }} /></span>
             </div>
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <ShopMusic songUrl={song.url} title={song.name} open={open} />

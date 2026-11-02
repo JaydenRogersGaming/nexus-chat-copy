@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { formatDistanceToNow, format } from 'date-fns';
+import { format } from 'date-fns';
+import Countdown from './Countdown';
 import { ShoppingBag } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
@@ -22,8 +23,8 @@ function Row({ h, onOpen }: { h: Holiday; onOpen: (e: ActiveEvent) => void }) {
         <p className="text-[11px] text-muted-foreground truncate">{country ? `${COUNTRIES[country] ?? country} · ` : ''}{format(w.day, 'MMM d, yyyy')}</p>
       </div>
       {w.live
-        ? <span className="text-[10px] font-bold rounded-full bg-primary text-primary-foreground px-2 py-0.5">LIVE · ends {formatDistanceToNow(w.end, { addSuffix: true })}</span>
-        : <span className="text-[10px] text-muted-foreground whitespace-nowrap">Opens {formatDistanceToNow(w.start, { addSuffix: true })}</span>}
+        ? <span className="text-[10px] font-bold rounded-full bg-primary text-primary-foreground px-2 py-0.5">LIVE · <Countdown to={w.end} /></span>
+        : <span className="text-[10px] text-muted-foreground whitespace-nowrap">Opens in <Countdown to={w.start} /></span>}
     </button>
   );
 }

@@ -9,6 +9,9 @@ let cache: Override[] = [];
 export function useActiveEvent() {
   const [overrides, setOverrides] = useState<Override[]>(cache);
   const [country, setCountryState] = useState(getCountry());
+  const [, tick] = useState(0);
+  // Re-check every 30s so the shop switches to the next holiday as soon as one ends
+  useEffect(() => { const t = setInterval(() => tick(n => n + 1), 30_000); return () => clearInterval(t); }, []);
   useEffect(() => {
     let alive = true;
     const load = () => eventsApi({ action: 'list' }).then(r => { cache = r.overrides; if (alive) setOverrides(r.overrides); }).catch(() => {});
