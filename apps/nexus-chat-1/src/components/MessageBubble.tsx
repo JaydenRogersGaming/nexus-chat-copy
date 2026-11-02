@@ -152,7 +152,7 @@ export default function MessageBubble({ msg, onDeleted, onReactionUpdate, onRepl
             senderUser?.nameColor2
               ? { backgroundImage: `linear-gradient(90deg, ${senderUser.nameColor}, ${senderUser.nameColor2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
               : { color: msg.senderNameColor || '#e0e0ff' }
-          }>{senderUser?.name || msg.senderName}</button>
+          }>{msg.senderName}</button>
           {(senderUser?.verified || isOwnerEmail(msg.senderEmail)) && (
             <BadgeCheck className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
           )}

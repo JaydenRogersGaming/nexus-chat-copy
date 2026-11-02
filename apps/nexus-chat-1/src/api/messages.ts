@@ -105,10 +105,19 @@ export default createEndpoint({
       params: [input.roomId ?? 'global'],
     });
     const parse = <T,>(v: unknown, fb: T): T => { try { return v ? JSON.parse(String(v)) : fb; } catch { return fb; } };
+    // Show each sender's current profile name, not the name saved on old messages
+    const emails = [...new Set(rows.map(r => String(r.senderEmail ?? '').toLowerCase()).filter(Boolean))];
+    const names = new Map<string, string>();
+    // Fallback: the name on each sender's newest message
+    for (const r of rows) { const e = String(r.senderEmail ?? '').toLowerCase(); if (e && r.senderName) names.set(e, String(r.senderName)); }
+    if (emails.length) {
+      const prof = await zite.sql({ query: `SELECT "email","profileData" FROM "UserProfiles" WHERE LOWER("email") = ANY($1)`, params: [emails] });
+      for (const p of prof.rows) { const n = parse<{ name?: string }>(p.profileData, {}).name; if (n) names.set(String(p.email).toLowerCase(), n); }
+    }
     return {
       messages: rows.map(r => ({
         id: String(r.messageId ?? ''), chatRoomId: String(r.roomId ?? ''),
-        senderEmail: String(r.senderEmail ?? ''), senderName: String(r.senderName ?? ''),
+        senderEmail: String(r.senderEmail ?? ''), senderName: names.get(String(r.senderEmail ?? '').toLowerCase()) || String(r.senderName ?? ''),
         content: String(r.content ?? ''), reactions: parse<Record<string, string[]>>(r.reactionsJson, {}),
         deleted: Boolean(r.deleted), senderTitle: String(r.senderTitle ?? ''),
         senderTitleEffect: String(r.senderTitleEffect ?? ''), senderTitleColor: String(r.senderTitleColor ?? ''),
