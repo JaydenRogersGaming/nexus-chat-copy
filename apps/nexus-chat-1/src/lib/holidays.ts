@@ -7,6 +7,9 @@ export type Holiday = { key: string; name: string; emoji: string; date: (y: numb
 export const COUNTRIES: Record<string, string> = {
   US: '🇺🇸 United States', CA: '🇨🇦 Canada', MX: '🇲🇽 Mexico', BR: '🇧🇷 Brazil', GB: '🇬🇧 United Kingdom', FR: '🇫🇷 France', DE: '🇩🇪 Germany',
   IN: '🇮🇳 India', PH: '🇵🇭 Philippines', AU: '🇦🇺 Australia', JP: '🇯🇵 Japan',
+  IE: '🇮🇪 Ireland', IT: '🇮🇹 Italy', ES: '🇪🇸 Spain', CN: '🇨🇳 China', KR: '🇰🇷 South Korea', NG: '🇳🇬 Nigeria',
+  ZA: '🇿🇦 South Africa', KE: '🇰🇪 Kenya', EG: '🇪🇬 Egypt', AR: '🇦🇷 Argentina', CO: '🇨🇴 Colombia', NZ: '🇳🇿 New Zealand',
+  GR: '🇬🇷 Greece', PK: '🇵🇰 Pakistan', TR: '🇹🇷 Türkiye', VN: '🇻🇳 Vietnam', ID: '🇮🇩 Indonesia', JM: '🇯🇲 Jamaica',
 };
 const COUNTRY_KEY = 'nexus_country';
 export const getCountry = (): string => { try { return localStorage.getItem(COUNTRY_KEY) || ''; } catch { return ''; } };
@@ -71,6 +74,24 @@ export const HOLIDAYS: Holiday[] = [
   nat('inindependence', 'Indian Independence Day', '🇮🇳', 'IN', 8, 15, ['#140a02', '#ea580c', '#16a34a'], ['🪁', '🎆', '🌸'], '🪁', 'is flying a kite 🪁'),
   nat('phindependence', 'Philippine Independence Day', '🇵🇭', 'PH', 6, 12, ['#030a1f', '#1d4ed8', '#facc15'], ['☀️', '🎉', '🥭'], '☀️', 'is celebrating Kalayaan ☀️'),
   nat('australiaday', 'Australia Day', '🇦🇺', 'AU', 1, 26, ['#02081f', '#1e3a8a', '#fbbf24'], ['🦘', '🏖️', '🎆'], '🦘', 'is at a barbie 🦘'),
+  nat('stpatricksie', 'Ireland National Day', '🇮🇪', 'IE', 3, 18, ['#03140a', '#15803d', '#f97316'], ['☘️', '🎻', '🌈'], '☘️', 'is doing an Irish jig 🎻'),
+  nat('itrepublic', 'Festa della Repubblica', '🇮🇹', 'IT', 6, 2, ['#03140a', '#16a34a', '#dc2626'], ['🍕', '🎆', '🍝'], '🍕', 'is tossing pizza dough 🍕'),
+  nat('esnational', 'Fiesta Nacional de España', '🇪🇸', 'ES', 10, 12, ['#1a0303', '#b91c1c', '#facc15'], ['💃', '🥘', '🎆'], '💃', 'is dancing flamenco 💃'),
+  nat('cnnational', 'China National Day', '🇨🇳', 'CN', 10, 1, ['#1a0303', '#dc2626', '#facc15'], ['🏮', '🎆', '🐉'], '🏮', 'is lighting lanterns 🏮'),
+  nat('krliberation', 'Korea Liberation Day', '🇰🇷', 'KR', 8, 15, ['#030a1f', '#1d4ed8', '#ef4444'], ['🌸', '🎆', '🥢'], '🌸', 'is celebrating Gwangbokjeol 🌸'),
+  nat('ngindependence', 'Nigeria Independence Day', '🇳🇬', 'NG', 10, 1, ['#03140a', '#15803d', '#f8fafc'], ['🥁', '🎉', '🦅'], '🦅', 'is drumming to the beat 🥁'),
+  nat('zafreedom', 'Freedom Day', '🇿🇦', 'ZA', 4, 27, ['#03140a', '#15803d', '#facc15'], ['🦁', '🎉', '🥁'], '🦁', 'is singing for freedom 🦁'),
+  nat('kejamhuri', 'Jamhuri Day', '🇰🇪', 'KE', 12, 12, ['#050505', '#b91c1c', '#16a34a'], ['🦒', '🎉', '🥁'], '🦒', 'is shouting Harambee! 🦒'),
+  nat('egrevolution', 'Egypt Revolution Day', '🇪🇬', 'EG', 7, 23, ['#1a0303', '#b91c1c', '#facc15'], ['🐫', '🏜️', '🎆'], '🐫', 'is visiting the pyramids 🏜️'),
+  nat('arindependence', 'Argentina Independence Day', '🇦🇷', 'AR', 7, 9, ['#020c1b', '#38bdf8', '#facc15'], ['⚽', '☀️', '🧉'], '☀️', 'is sipping mate 🧉'),
+  nat('coindependence', 'Colombia Independence Day', '🇨🇴', 'CO', 7, 20, ['#0a0a1f', '#facc15', '#dc2626'], ['☕', '🎉', '🦜'], '☕', 'is brewing coffee ☕'),
+  nat('nzwaitangi', 'Waitangi Day', '🇳🇿', 'NZ', 2, 6, ['#020617', '#1e3a8a', '#dc2626'], ['🥝', '🐑', '🎆'], '🥝', 'is chilling with kiwis 🥝'),
+  nat('grindependence', 'Greek Independence Day', '🇬🇷', 'GR', 3, 25, ['#020c1b', '#1d4ed8', '#f8fafc'], ['🏛️', '🫒', '🎆'], '🏛️', 'is visiting the Acropolis 🏛️'),
+  nat('pkindependence', 'Pakistan Independence Day', '🇵🇰', 'PK', 8, 14, ['#03140a', '#15803d', '#f8fafc'], ['🌙', '⭐', '🎆'], '🌙', 'is waving the green flag 🌙'),
+  nat('trrepublic', 'Republic Day', '🇹🇷', 'TR', 10, 29, ['#1a0303', '#dc2626', '#f8fafc'], ['🌙', '⭐', '🎆'], '🌙', 'is sipping çay 🫖'),
+  nat('vnnational', 'Vietnam National Day', '🇻🇳', 'VN', 9, 2, ['#1a0303', '#dc2626', '#facc15'], ['⭐', '🏮', '🍜'], '⭐', 'is slurping phở 🍜'),
+  nat('idindependence', 'Indonesia Independence Day', '🇮🇩', 'ID', 8, 17, ['#1a0303', '#dc2626', '#f8fafc'], ['🏝️', '🎉', '🦅'], '🦅', 'is shouting Merdeka! 🦅'),
+  nat('jmindependence', 'Jamaica Independence Day', '🇯🇲', 'JM', 8, 6, ['#050505', '#16a34a', '#facc15'], ['🎶', '☀️', '🌴'], '🌴', 'is vibing to reggae 🎶'),
   nat('jpfoundation', 'National Foundation Day', '🇯🇵', 'JP', 2, 11, ['#120306', '#be123c', '#fdf2f8'], ['🌸', '🗻', '🎏'], '🌸', 'is watching cherry blossoms 🌸'),
 ];
 
@@ -83,12 +104,24 @@ export const variantFor = (h: Holiday, year: number) => h.variants[year % h.vari
 /** Normal window: 7 days before through 7 days after the holiday. */
 export function windowFor(h: Holiday, year: number, o?: Override) {
   const day = h.date(year);
+  // National days are a one-day-only shop: open just on the day itself
+  if (h.countries) return { day, start: o?.earlyStart ? new Date(o.earlyStart + 'T00:00:00') : day, end: new Date(day.getTime() + DAY) };
   const start = o?.earlyStart ? new Date(o.earlyStart + 'T00:00:00') : new Date(day.getTime() - 7 * DAY);
   return { day, start, end: new Date(day.getTime() + 8 * DAY) };
 }
 
-/** National days only show for people who picked that country. Global holidays show for everyone. */
-export const appliesTo = (h: Holiday, country: string) => !h.countries || h.countries.includes(country);
+/** Every holiday and national day is celebrated worldwide. (country kept for API compatibility) */
+export const appliesTo = (_h: Holiday, _country: string) => true;
+
+/** This year's (or next) window for a holiday, and whether it's live right now. */
+export function nextWindow(h: Holiday, overrides: Override[] = [], now = new Date()) {
+  const o = overrides.find(x => x.holidayKey === h.key);
+  for (const y of [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1]) {
+    const w = windowFor(h, y, o);
+    if (now < w.end) return { ...w, year: y, live: !o?.forceOff && now >= w.start };
+  }
+  const y = now.getFullYear() + 1; return { ...windowFor(h, y, o), year: y, live: false };
+}
 
 export function getActiveEvent(overrides: Override[], now = new Date(), country = getCountry()): ActiveEvent | null {
   const forced = overrides.find(o => o.forceOn);

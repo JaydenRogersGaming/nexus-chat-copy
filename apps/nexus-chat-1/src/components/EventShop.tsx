@@ -121,7 +121,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
           <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/75" />
           <div className="relative space-y-3">
             <DialogHeader className="text-left space-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{isNational ? 'National Day Event' : 'Limited Holiday Shop'} · {tier.name}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{isNational ? 'National Day · 1-Day Shop' : 'Limited Holiday Shop'} · {tier.name}</p>
               <DialogTitle className="text-2xl sm:text-3xl font-black leading-tight drop-shadow">{themeH.emoji} {themeH.name} — {variant.name}</DialogTitle>
               <DialogDescription className="text-white/80 text-sm">{variant.tagline}</DialogDescription>
             </DialogHeader>
@@ -138,7 +138,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
                 </Button>
               )}
             </div>
-            {!country && <p className="text-[11px] text-white/75 flex items-center gap-1"><Flag className="w-3 h-3" />Pick your country to unlock national-day events like Independence Day.</p>}
+            {isNational && <p className="text-[11px] text-white/75 flex items-center gap-1"><Flag className="w-3 h-3" />One-day-only shop — closes at midnight!</p>}
             {isNational && isRealOwner && <p className="text-[11px] text-white/75">National day is live — refreshes upgrade items but keep this theme.</p>}
           </div>
         </div>

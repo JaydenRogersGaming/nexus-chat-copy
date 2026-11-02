@@ -27,6 +27,7 @@ import { isOwnerEmail } from '../lib/gameData';
 import HolidayDecor from './HolidayDecor';
 import { HOLIDAYS, variantFor, windowFor } from '../lib/holidays';
 import EventShop from './EventShop';
+import HolidayShopHub from './shop/HolidayShopHub';
 import FriendsWatching from './FriendsWatching';
 import { useFriendOnlineAlerts } from '../hooks/useFriendOnlineAlerts';
 import { useActiveEvent } from '../hooks/useActiveEvent';
@@ -294,6 +295,7 @@ export default function Layout() {
         <header className="h-12 border-b border-border bg-card/50 flex items-center px-4 gap-2 flex-shrink-0">
           <GemDisplay />
           <div className="flex items-center gap-1.5 ml-2">
+            <HolidayShopHub />
             <button
               onClick={() => setShopOpen(true)}
               className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors flex items-center gap-1"
