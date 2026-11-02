@@ -35,9 +35,10 @@ export default createEndpoint({
     }
     const cutoff = new Date(Date.now() - 60 * 1000).toISOString();
     const { rows } = await zite.sql({
-      query: `SELECT u."email", coalesce(nullif(p."displayName",''), u."name", split_part(u."email",'@',1)) AS "displayName",
+      query: `SELECT u."email", coalesce(nullif(CASE WHEN up."profileData" LIKE '{%' THEN up."profileData"::json->>'name' END,''), nullif(p."displayName",''), u."name", split_part(u."email",'@',1)) AS "displayName",
               coalesce(p."profilePic", u."image") AS "profilePic", p."nameColor", p."activeTitle", p."activeTitleColor", p."activeTitleEffect", p."role", p."lastSeen"
               FROM "ziteUsers" u LEFT JOIN "Presence" p ON lower(p."email") = lower(u."email")
+              LEFT JOIN LATERAL (SELECT "profileData" FROM "UserProfiles" x WHERE lower(x."email") = lower(u."email") LIMIT 1) up ON true
               ORDER BY 2 ASC LIMIT 2000`,
     });
     const all = rows.map(r => ({

@@ -111,6 +111,8 @@ export default createEndpoint({
     // Fallback: the name on each sender's newest message
     for (const r of rows) { const e = String(r.senderEmail ?? '').toLowerCase(); if (e && r.senderName) names.set(e, String(r.senderName)); }
     if (emails.length) {
+      const pres = await zite.sql({ query: `SELECT "email","displayName" FROM "Presence" WHERE LOWER("email") = ANY($1)`, params: [emails] });
+      for (const p of pres.rows) if (p.displayName) names.set(String(p.email).toLowerCase(), String(p.displayName));
       const prof = await zite.sql({ query: `SELECT "email","profileData" FROM "UserProfiles" WHERE LOWER("email") = ANY($1)`, params: [emails] });
       for (const p of prof.rows) { const n = parse<{ name?: string }>(p.profileData, {}).name; if (n) names.set(String(p.email).toLowerCase(), n); }
     }

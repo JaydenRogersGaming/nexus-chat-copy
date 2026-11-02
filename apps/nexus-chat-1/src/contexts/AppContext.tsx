@@ -116,6 +116,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [profile, realEmail]);
 
+  // Owner signed in as someone else: a name change is saved to that person's shared profile
+  const impName = useRef<string | null>(null);
+  useEffect(() => {
+    if (!profile || profile.email === realEmail || !isOwnerEmail(realEmail)) { impName.current = null; return; }
+    if (impName.current === null) { impName.current = profile.name; return; }
+    if (impName.current === profile.name) return;
+    const name = profile.name.trim();
+    const t = setTimeout(() => {
+      profileSync({ action: 'setName', targetEmail: profile.email, name })
+        .then(() => { impName.current = name; toast.success(`Name changed to ${name} for everyone`); })
+        .catch(e => toast.error(e instanceof Error ? e.message : 'Name not saved'));
+    }, 800);
+    return () => clearTimeout(t);
+  }, [profile, realEmail]);
+
   // Check streak on login
   const streakChecked = useRef(false);
   useEffect(() => {
