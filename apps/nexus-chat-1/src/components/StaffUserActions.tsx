@@ -1,3 +1,4 @@
+import { profileSync } from 'zitejs/api';
 import { useState } from 'react';
 import { Award, LogIn, UserCog } from 'lucide-react';
 import { Button } from '@project/components/ui/button';
@@ -22,6 +23,7 @@ function EditAccount({ email, onDone }: { email: string; onDone: () => void }) {
     if (!name.trim()) { toast.error('Name is required'); return; }
     const g = Math.max(0, Math.floor(Number(gems) || 0));
     DB.saveUser({ ...DB.getUser(email)!, name: name.trim(), bio, gems: g, nameColor: color });
+    if (name.trim() !== u!.name) profileSync({ action: 'setName', targetEmail: email, name: name.trim() }).catch(e => toast.error(e instanceof Error ? e.message : 'Name not synced'));
     toast.success('Account updated');
     onDone();
   }

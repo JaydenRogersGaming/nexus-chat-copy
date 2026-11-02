@@ -5,6 +5,8 @@ import OwnerThemesTab from '../components/OwnerThemesTab';
 import OwnerTypingTab from '../components/OwnerTypingTab';
 import TheaterAccessTab from '../components/TheaterAccessTab';
 import OwnerEventsTab from '../components/OwnerEventsTab';
+import FeedbackTab from '../components/admin/FeedbackTab';
+import LimitedShopTab from '../components/admin/LimitedShopTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import { Button } from '@project/components/ui/button';
 import { Input } from '@project/components/ui/input';
@@ -33,7 +35,6 @@ const ROLE_META: Record<string, { color: string; label: string }> = {
 export default function AdminPage() {
   const { profile } = useApp();
   const [users, setUsers]           = useState<DB.UserProfile[]>([]);
-  const [bugs, setBugs]             = useState<DB.Bug[]>([]);
   const [customRoles, setCustomRoles] = useState<DB.CustomRole[]>([]);
   const [targetEmail, setTargetEmail] = useState('');
   const [gemAmount, setGemAmount]   = useState('');
@@ -123,7 +124,7 @@ export default function AdminPage() {
     return () => clearTimeout(t);
   }, [newBannedName]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const reload = () => { setUsers(DB.getAllUsers()); setBugs(DB.getBugs()); setCustomRoles(DB.getCustomRoles()); setBans(DB.getBans()); setCussReports(DB.getCussReports()); setAnnouncements(DB.getAnnouncements()); setUserTags(DB.getUserTags()); };
+  const reload = () => { setUsers(DB.getAllUsers()); setCustomRoles(DB.getCustomRoles()); setBans(DB.getBans()); setCussReports(DB.getCussReports()); setAnnouncements(DB.getAnnouncements()); setUserTags(DB.getUserTags()); };
   useEffect(reload, []);
 
   // Auto-save settings whenever any value changes (must be before early return to avoid hooks order change)
@@ -212,10 +213,6 @@ export default function AdminPage() {
     DB.deleteCustomRole(id); reload(); toast.success('Role deleted');
   }
 
-  function updateBugStatus(id: string, status: DB.Bug['status']) {
-    DB.updateBugStatus(id, status); reload();
-  }
-
   return (
     <div className="h-full overflow-y-auto p-4 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
@@ -243,6 +240,7 @@ export default function AdminPage() {
           {isOwner && <TabsTrigger value="customroles">⚡ Custom Roles</TabsTrigger>}
           {isOwner && <TabsTrigger value="themes">🎨 Badges & Themes</TabsTrigger>}
           {isOwner && <TabsTrigger value="events">🎃 Holiday Events</TabsTrigger>}
+          {isOwner && <TabsTrigger value="limited">🛍️ Limited Shop</TabsTrigger>}
           {isOwner && <TabsTrigger value="theater">🎭 Theater</TabsTrigger>}
           {isOwner && <TabsTrigger value="casino"><Dices className="w-3.5 h-3.5 mr-1" />Casino Rig</TabsTrigger>}
           {isOwner && <TabsTrigger value="appsettings"><Settings className="w-3.5 h-3.5 mr-1" />Edit App</TabsTrigger>}
@@ -260,7 +258,7 @@ export default function AdminPage() {
               )}
             </TabsTrigger>
           )}
-          <TabsTrigger value="bugs"><Bug className="w-3.5 h-3.5 mr-1" />Bugs</TabsTrigger>
+          <TabsTrigger value="bugs"><Bug className="w-3.5 h-3.5 mr-1" />Feedback</TabsTrigger>
           <TabsTrigger value="users"><Users className="w-3.5 h-3.5 mr-1" />Users</TabsTrigger>
         </TabsList>
 
@@ -498,6 +496,11 @@ export default function AdminPage() {
         {isOwner && (
           <TabsContent value="events" className="space-y-4">
             <OwnerEventsTab />
+          </TabsContent>
+        )}
+        {isOwner && (
+          <TabsContent value="limited" className="space-y-4">
+            <LimitedShopTab />
           </TabsContent>
         )}
         {isOwner && (
@@ -958,21 +961,9 @@ export default function AdminPage() {
           </TabsContent>
         )}
 
-        {/* Bugs */}
+        {/* Feedback: bugs + suggestions */}
         <TabsContent value="bugs" className="space-y-3">
-          {bugs.length === 0 && <p className="text-muted-foreground text-center py-4">No bug reports yet!</p>}
-          {bugs.map(bug => (
-            <div key={bug.id} className="p-3 bg-card border border-border rounded-xl space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div><p className="font-semibold text-sm">{bug.title}</p><p className="text-xs text-muted-foreground">by {bug.reporterName}</p></div>
-                <Select value={bug.status} onValueChange={v => updateBugStatus(bug.id, v as DB.Bug['status'])}>
-                  <SelectTrigger className="w-32 h-7 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="open">Open</SelectItem><SelectItem value="in-progress">In Progress</SelectItem><SelectItem value="resolved">Resolved</SelectItem></SelectContent>
-                </Select>
-              </div>
-              <p className="text-xs text-muted-foreground">{bug.description}</p>
-            </div>
-          ))}
+          <FeedbackTab />
         </TabsContent>
 
         {/* Users */}

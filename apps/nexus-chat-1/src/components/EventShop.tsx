@@ -67,7 +67,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
       await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key, shopTheme: next });
       window.dispatchEvent(new Event(EVENTS_CHANGED));
       const h = HOLIDAYS.find(x => x.key === next);
-      toast.success(`🔄 New ${tierFor((drop + 1) % 102).name} drop — ${h?.emoji ?? ''} ${h?.name ?? ''} theme!`);
+      toast.success(`🔄 Drop ${(drop % 30) + 1}/30 — ${h?.emoji ?? ''} ${h?.name ?? ''} theme!${drop === 30 ? ' Looped back to the first drop.' : ''}`);
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not refresh'); }
     finally { setRefreshing(false); }
   };
@@ -103,6 +103,10 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
       preview: <div className={`${box} bg-background text-3xl`}>{i.emoji}</div>,
       sub: <p className={`text-xs rounded-lg bg-background/60 px-2 py-1.5 ${i.effect === 'rainbow' ? 'title-rainbow' : i.effect === 'pulse' ? 'animate-pulse' : ''}`} style={{ color: i.color }}>You {i.typingText} {i.emoji}</p>,
       on: eq.typing === id, use: () => equip({ typing: eq.typing === id ? '' : id }) });
+    else if (i.kind === 'Music') rows.push({ id, label: '👑 Owner Exclusive Song', name: `${i.emoji} ${i.name}`, cost: i.cost,
+      preview: <div className={`${box} text-3xl`} style={{ background: `linear-gradient(135deg,${i.color}55,${i.color2}55)` }}>🎵</div>,
+      on: getMusic().url === i.songUrl,
+      use: () => { setMusic({ ...getMusic(), url: i.songUrl }); toast.success('Added to your songs — open the 🎵 music player to play it'); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); } });
     else rows.push({ id, label: '👑 Owner Exclusive Title', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={`${box} text-3xl`} style={{ background: `linear-gradient(135deg,${i.color}55,${i.color2}55)` }}>{i.emoji}</div>,
       on: profile.activeTitle === `${i.emoji} ${i.name}`,
@@ -130,7 +134,7 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
               <CountryPicker country={country} />
               {isRealOwner && (
                 <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs" disabled={refreshing} onClick={refreshShop}>
-                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh shop{drop ? ` · #${drop}` : ''}
+                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh shop · {drop || 0}/30
                 </Button>
               )}
             </div>

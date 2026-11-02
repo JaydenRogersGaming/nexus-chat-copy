@@ -2022,6 +2022,11 @@
                   "value": "reV8",
                   "label": "Background",
                   "color": "blue"
+                },
+                {
+                  "value": "8AY1",
+                  "label": "Music",
+                  "color": "gray"
                 }
               ],
               "disableColors": false
@@ -2103,6 +2108,15 @@
             "template": {
               "defaultValue": true
             }
+          }
+        },
+        {
+          "id": "foayefz3gxu",
+          "sdkName": "songUrl",
+          "definition": {
+            "name": "Song Url",
+            "type": "url",
+            "template": {}
           }
         }
       ]

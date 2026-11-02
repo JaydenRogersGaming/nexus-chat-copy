@@ -11,6 +11,8 @@ import { format } from 'date-fns';
 import { watchParty, WatchPartyOutputType } from 'zitejs/api';
 import { useApp } from '../contexts/AppContext';
 import PartyRoom from '../components/watch/PartyRoom';
+import MovieDiscover from '../components/theater/MovieDiscover';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
 import { PLATFORMS, platformOf } from '../lib/theater';
 
 type Party = WatchPartyOutputType['parties'][0];
@@ -92,9 +94,16 @@ export default function WatchPartyPage() {
   if (id) return <PartyRoom id={id} onLeave={() => nav('/watch')} />;
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-4 p-4 md:grid-cols-[1fr_320px]">
+    <div className="h-full overflow-y-auto">
+    <Tabs defaultValue="discover" className="mx-auto max-w-6xl p-4">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div><h1 className="text-2xl font-black">🎭 Theater</h1><p className="text-sm text-muted-foreground">Find movies to stream, or watch together with friends.</p></div>
+        <TabsList><TabsTrigger value="discover">Discover</TabsTrigger><TabsTrigger value="showtimes">Showtimes</TabsTrigger></TabsList>
+      </div>
+      <TabsContent value="discover"><MovieDiscover /></TabsContent>
+      <TabsContent value="showtimes">
+    <div className="grid gap-4 md:grid-cols-[1fr_320px]">
       <div className="space-y-3">
-        <div><h1 className="text-xl font-bold">🎭 Theater</h1><p className="text-sm text-muted-foreground">Watch movies together, chat and react in real time.</p></div>
         <div className="flex flex-wrap gap-2">
           <div className="relative min-w-[160px] flex-1">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -119,6 +128,9 @@ export default function WatchPartyPage() {
           <p className="text-xs text-muted-foreground">Pick a movie that's playing to join. Only the owner and roles they allow can start new ones.</p>
         </div>
       )}
+    </div>
+      </TabsContent>
+    </Tabs>
     </div>
   );
 }

@@ -34,8 +34,9 @@ export default createEndpoint({
       });
     }
     if (input.action === 'refreshShop') {
+      if (!isOwner) throw new ZiteError('Only the owner can refresh the shop.');
       const cur = await zite.eventOverrides.findOne({ filters: { holidayKey: input.holidayKey! } });
-      const next = ((cur?.shopDrop ?? 0) + 1) % 102; // climbs one rarity per refresh, then loops back to the start
+      const next = ((cur?.shopDrop ?? 0) % 30) + 1; // 30 drops, then loops back to the first
       await zite.eventOverrides.bulkCreate({ matchOn: ['holidayKey'], records: [{ holidayKey: input.holidayKey!, shopDrop: next, shopTheme: input.shopTheme ?? null }] });
     }
     const { records } = await zite.eventOverrides.findAll({ limit: 100 });

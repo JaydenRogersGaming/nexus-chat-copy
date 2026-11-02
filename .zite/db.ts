@@ -669,7 +669,7 @@ export type CustomLimitedItemsRecordType = {
   id: string;
   /** Primary field. "Name" */
   name?: string;
-  kind?: "Title" | "Typing Effect" | "Background" | string;
+  kind?: "Title" | "Typing Effect" | "Background" | "Music" | string;
   emoji?: string;
   color?: string;
   color2?: string;
@@ -679,12 +679,13 @@ export type CustomLimitedItemsRecordType = {
   cost?: number;
   holidayKey?: string;
   active?: boolean;
+  songUrl?: string;
 };
 
 /** What you may write when creating or updating a record in the "Custom Limited Items" table. */
 export type CustomLimitedItemsRecordInput = {
   name: string | null;
-  kind: "Title" | "Typing Effect" | "Background" | string | null;
+  kind: "Title" | "Typing Effect" | "Background" | "Music" | string | null;
   emoji: string | null;
   color: string | null;
   color2: string | null;
@@ -693,6 +694,7 @@ export type CustomLimitedItemsRecordInput = {
   cost: string | number | null;
   holidayKey: string | null;
   active: string | boolean | null;
+  songUrl: string | null;
 };
 
 /** A record in the "Pranks" table, as it is read back. */
