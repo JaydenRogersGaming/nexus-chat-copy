@@ -6,13 +6,19 @@ declare namespace NodeJS {
     /** Public URL of the current app. */
     ZITE_APP_URL: string;
     /** openai access token (openai) */
+    ZITE_OPENAI_OPENAI_ACCESS_TOKEN: string;
+    /** Alias for ZITE_OPENAI_OPENAI_ACCESS_TOKEN (openai) */
     ZITE_OPENAI_ACCESS_TOKEN: string;
+    /** openai access token (openai-2) */
+    ZITE_OPENAI_2_OPENAI_ACCESS_TOKEN: string;
     /** Brave Search API key for real web results in the in-app browser */
     ZITE_BRAVE_SEARCH_KEY: string;
     /** Giphy API key for the GIF search feature in chat */
     ZITE_GIPHY_API_KEY: string;
     /** Google Tenor API key for GIF search (powered by Google) */
     ZITE_TENOR_API_KEY: string;
+    /** TMDB API Read Access Token (v4) for movie info and where-to-watch data */
+    ZITE_TMDB_TOKEN: string;
     [key: string]: string | undefined;
   }
 }
