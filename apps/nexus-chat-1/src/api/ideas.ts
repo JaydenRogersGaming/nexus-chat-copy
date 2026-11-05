@@ -34,7 +34,7 @@ export default createEndpoint({
       throw new ZiteError({ code: 'FORBIDDEN', message: 'owner only', userFacingMessage: 'Only the owner can use the idea generator.' });
     }
     const avoid = (input.avoid ?? []).slice(-150).map(s => s.slice(0, 80));
-    const { accessToken } = await integrations.get('openai-2');
+    const { accessToken } = await integrations.get('openai');
     const openai = new OpenAI({ apiKey: accessToken });
     const res = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

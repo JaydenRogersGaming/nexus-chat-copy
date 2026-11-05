@@ -6,21 +6,14 @@ import * as DB from '../lib/storage';
 import { COSMETICS_EVENT } from './SettingsExtras';
 import { ownedLimitedByHoliday } from '../lib/holidays';
 
-type RowProps = { preview: React.ReactNode; label: string; name: string; on: boolean; toggle: () => void; count?: number };
-/** Keeps one of each name and counts the copies. */
-function uniq<T extends { name: string }>(items: T[]) {
-  const m = new Map<string, { item: T; count: number }>();
-  for (const i of items) { const g = m.get(i.name); if (g) g.count++; else m.set(i.name, { item: i, count: 1 }); }
-  return [...m.values()];
-}
-function Row({ preview, label, name, on, toggle, count = 1 }: RowProps) {
+type RowProps = { preview: React.ReactNode; label: string; name: string; on: boolean; toggle: () => void };
+function Row({ preview, label, name, on, toggle }: RowProps) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl border border-amber-500/30 bg-amber-500/5">
       {preview}
       <div className="flex-1 min-w-0">
         <p className="text-[10px] uppercase tracking-wider font-bold text-amber-500">{label}</p>
         <p className="text-sm font-semibold truncate">{name}</p>
-        <p className="text-[11px] text-muted-foreground">You own {count}</p>
       </div>
       <Button size="sm" variant={on ? 'secondary' : 'outline'} className="text-xs" onClick={toggle}>{on ? 'Unequip' : 'Equip'}</Button>
     </div>
@@ -60,16 +53,16 @@ export default function LimitedCollection() {
             </button>
             {isOpen && (
               <div className="space-y-2 p-2 pt-0">
-                {uniq(g.themes).map(({ item: t, count }) => <Row key={t.id} count={count} label="Limited Theme" name={t.name} on={eq.bg === t.id}
+                {g.themes.map(t => <Row key={t.id} label="Limited Theme" name={t.name} on={eq.bg === t.id}
                   preview={<div className="w-14 h-10 rounded-lg border border-border flex-shrink-0" style={{ background: t.css }} />}
                   toggle={() => equip({ bg: eq.bg === t.id ? '' : t.id })} />)}
-                {uniq(g.typing).map(({ item: t, count }) => <Row key={t.id} count={count} label="Limited Typing Effect" name={t.name} on={eq.typing === t.id}
+                {g.typing.map(t => <Row key={t.id} label="Limited Typing Effect" name={t.name} on={eq.typing === t.id}
                   preview={<div className="w-14 h-10 rounded-lg border border-border bg-background flex items-center justify-center text-[10px] flex-shrink-0"><span className={t.className} style={{ color: t.color }}>{t.text.split(' ')[0]}</span></div>}
                   toggle={() => equip({ typing: eq.typing === t.id ? '' : t.id })} />)}
-                {uniq(g.badges).map(({ item: b, count }) => {
+                {g.badges.map(b => {
                   const title = `${b.emoji} ${b.name}`;
                   const on = profile.activeTitle === title;
-                  return <Row key={b.id} count={count} label="Limited Badge" name={title} on={on}
+                  return <Row key={b.id} label="Limited Badge" name={title} on={on}
                     preview={<div className="w-14 h-10 rounded-lg border border-border flex items-center justify-center text-2xl flex-shrink-0">{b.emoji}</div>}
                     toggle={() => { updateProfile(on ? { activeTitle: '' } : { activeTitle: title, activeTitleColor: b.color, activeTitleEffect: 'glow' }); bump(n => n + 1); }} />;
                 })}

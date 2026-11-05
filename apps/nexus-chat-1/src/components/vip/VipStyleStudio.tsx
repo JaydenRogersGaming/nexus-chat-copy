@@ -20,30 +20,18 @@ const ANIMS: Vip.VipStyle['animation'][] = ['none', 'shimmer', 'pulse', 'rainbow
 export default function VipStyleStudio() {
   const { profile, updateProfile } = useApp();
   const [s, setS] = useState<Vip.VipStyle>(Vip.DEFAULT_STYLE);
-  useEffect(() => {
-    if (profile) setS({ ...Vip.getStyle(profile.email), ...(profile.vipStyle as Partial<Vip.VipStyle> | undefined) });
-  }, [profile?.email]);
-  const [saving, setSaving] = useState(false);
+  useEffect(() => { if (profile) setS(Vip.getStyle(profile.email)); }, [profile?.email]);
   if (!profile) return null;
   const set = <K extends keyof Vip.VipStyle>(key: K, v: Vip.VipStyle[K]) => setS(p => ({ ...p, [key]: v }));
 
   const save = () => {
-    setSaving(true);
-    try {
-      try { Vip.saveStyle(profile.email, s); } catch { /* local copy is optional; the profile copy below syncs */ }
-      const plainRole = !profile.role || profile.role === 'vip' || profile.role === 'user';
-      updateProfile({
-        vipStyle: { ...s },
-        nameColor: s.color1, nameColor2: s.color2,
-        ...(plainRole ? { customRole: `${s.icon} ${s.roleName || 'VIP'}`, customRoleColor: s.color1, customRoleColor2: s.color2 } : {}),
-      });
-      window.dispatchEvent(new Event('vip-change'));
-      toast.success('VIP style saved');
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Could not save your style');
-    } finally {
-      setSaving(false);
-    }
+    Vip.saveStyle(profile.email, s);
+    const isPlainVip = profile.role === 'vip' || profile.role === 'user';
+    updateProfile({
+      nameColor: s.color1, nameColor2: s.color2,
+      ...(isPlainVip ? { customRole: `${s.icon} ${s.roleName || 'VIP'}`, customRoleColor: s.color1, customRoleColor2: s.color2 } : {}),
+    });
+    toast.success('VIP style saved');
   };
 
   return (
@@ -93,7 +81,7 @@ export default function VipStyleStudio() {
           <div><Label>Custom status</Label><Input maxLength={40} value={s.status} placeholder="Vibing in the lounge" onChange={e => set('status', e.target.value)} /></div>
         </div>
         <div><Label>Personal welcome message</Label><Textarea maxLength={160} value={s.welcome} placeholder="Shown when you enter the VIP Lounge" onChange={e => set('welcome', e.target.value)} /></div>
-        <Button type="button" onClick={save} disabled={saving} className="gap-2">{saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save style</Button>
+        <Button onClick={save} className="gap-2"><Save className="w-4 h-4" /> Save style</Button>
       </div>
       <Preview s={s} name={s.nickname || profile.name} pic={profile.profilePic} />
     </div>

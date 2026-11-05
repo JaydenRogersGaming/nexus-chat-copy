@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Ban, Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { Ban, LogOut, Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { logout } from 'zitejs/auth';
 import { reports } from 'zitejs/api';
 import { Textarea } from '@project/components/ui/textarea';
 import type { BanRecord } from '../lib/storage';
@@ -54,6 +55,10 @@ export default function BanScreen({ ban }: { ban: BanRecord & { banType?: string
             <Send className="w-4 h-4" /> Appeal — I think this was a mistake
           </button>
         )}
+
+        <button onClick={() => logout()} className="w-full h-11 rounded-lg border border-white/20 text-white/80 text-sm hover:bg-white/10 flex items-center justify-center gap-2">
+          <LogOut className="w-4 h-4" /> Sign out / switch account
+        </button>
       </div>
     </div>
   );

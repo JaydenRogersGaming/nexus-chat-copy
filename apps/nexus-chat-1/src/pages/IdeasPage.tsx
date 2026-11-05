@@ -22,12 +22,6 @@ const saveHist = (h: string[]) => localStorage.setItem(HIST, JSON.stringify(h.sl
 const ACTION_STYLE: Record<string, string> = { Add: 'bg-green-500/15 text-green-500', Change: 'bg-blue-500/15 text-blue-500', Delete: 'bg-red-500/15 text-red-500' };
 
 export default function IdeasPage() {
-  const { user: ideasUser } = useAuth();
-  if (!isOwnerEmail(ideasUser?.email)) return null;
-  return <IdeasPageInner />;
-}
-
-function IdeasPageInner() {
   const { user } = useAuth();
   const isOwner = isOwnerEmail(user?.email?.toLowerCase());
   const [kind, setKind] = useState<Kind>('features');

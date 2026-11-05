@@ -49,9 +49,9 @@ export default createEndpoint({
   }),
   outputSchema: z.object({ reply: z.string() }),
   execute: async ({ input }) => {
-    const { accessToken } = await integrations.get('openai-2');
+    const { accessToken } = await integrations.get('openai');
     const client = new OpenAI({ apiKey: accessToken });
-    const transcript = (input.history ?? []).slice(-15).map(h => `${h.name}: ${h.content}`).join('\n');
+    const transcript = input.history.slice(-15).map(h => `${h.name}: ${h.content}`).join('\n');
     const res = await client.chat.completions.create({
       model: 'gpt-4.1-mini',
       temperature: 0.9,

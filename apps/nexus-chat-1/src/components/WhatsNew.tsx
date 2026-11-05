@@ -2,10 +2,6 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Bug, Wrench, Rocket } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@project/components/ui/dialog';
 import { CHANGELOG, APP_VERSION } from '../lib/changelog';
-import { useAuth } from 'zitejs/auth';
-import { isOwnerEmail } from '../lib/permissions';
-
-const hideIdeas = (items: string[], owner: boolean) => owner ? items : items.filter(i => !/idea generator/i.test(i));
 
 const SEEN = 'nexus_seen_version';
 
@@ -21,7 +17,6 @@ function Section({ icon, label, items, tone }: { icon: React.ReactNode; label: s
 
 /** Sidebar version chip + changelog dialog. Auto-opens once after a new version. */
 export default function WhatsNew() {
-  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const fresh = localStorage.getItem(SEEN) !== APP_VERSION;
   useEffect(() => { if (fresh) setOpen(true); }, [fresh]);
@@ -46,7 +41,7 @@ export default function WhatsNew() {
                   <span className="text-xs text-muted-foreground ml-auto">{r.date}</span>
                 </div>
                 <p className="font-semibold">{r.title}</p>
-                <Section icon={<Sparkles className="w-3 h-3" />} label="New" items={hideIdeas(r.added, isOwnerEmail(user?.email))} tone="text-green-500" />
+                <Section icon={<Sparkles className="w-3 h-3" />} label="New" items={r.added} tone="text-green-500" />
                 <Section icon={<Bug className="w-3 h-3" />} label="Bug fixes" items={r.fixed} tone="text-red-500" />
                 <Section icon={<Wrench className="w-3 h-3" />} label="Changes" items={r.changed} tone="text-blue-500" />
               </div>

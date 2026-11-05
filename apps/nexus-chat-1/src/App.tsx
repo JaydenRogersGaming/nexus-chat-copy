@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from 'zitejs/auth';
+import { useEffect } from 'react';
+import { useAuth, loginWithRedirect } from 'zitejs/auth';
 import TournamentPage from './pages/TournamentPage';
 import WatchPartyPage from './pages/WatchPartyPage';
 import VideoRoomsPage from './pages/VideoRoomsPage';
@@ -18,7 +19,6 @@ import BrowserPage from './pages/BrowserPage';
 import CalendarPage from './pages/CalendarPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import VipPage from './pages/VipPage';
-import PublicSitePage from './pages/PublicSitePage';
 import CursorEffect from './components/CursorEffect';
 import PrankOverlay from './components/PrankOverlay';
 import BanScreen from './components/BanScreen';
@@ -31,7 +31,10 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const settings = DB.getAppSettings();
   const mc = DB.getMyMatrixColor() || settings.matrixColor;
 
-  // Internal app: Zite SSO signs members in before the app loads.
+  // Public mode: send signed-out visitors to the sign-in page.
+  useEffect(() => {
+    if (!isLoading && !user) loginWithRedirect();
+  }, [isLoading, user]);
   const serverBan = useServerBan(!!user);
   if (isLoading || !user) return (
     <div className="relative h-screen overflow-hidden">
@@ -58,9 +61,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  // Published Website Builder sites are public — no sign-in needed to view them
-  const siteSlug = /^\/site\/([^/]+)/.exec(window.location.pathname)?.[1];
-  if (siteSlug) return <PublicSitePage slug={decodeURIComponent(siteSlug)} />;
   return (
     <BrowserRouter>
       <AuthGate>

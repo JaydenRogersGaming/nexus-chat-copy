@@ -11,7 +11,7 @@ export default createEndpoint({
   }),
   outputSchema: z.object({ summary: z.string() }),
   execute: async ({ input }) => {
-    const { accessToken } = await integrations.get('openai-2');
+    const { accessToken } = await integrations.get('openai');
     const client = new OpenAI({ apiKey: accessToken });
     const sources = input.results.slice(0, 8).map((r, i) => `[${i + 1}] ${r.title} — ${r.snippet}`).join('\n');
     const res = await client.chat.completions.create({

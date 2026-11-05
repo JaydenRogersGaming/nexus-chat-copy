@@ -13,7 +13,6 @@ import CosmeticShop from './CosmeticShop';
 import LimitedCollection from './LimitedCollection';
 import CursorShop from './CursorShop';
 import PrankShop from './PrankShop';
-import { shopPrice, isVip } from '../lib/vip';
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -30,9 +29,8 @@ export default function ShopModal({ open, onClose }: Props) {
     ...customShopTitles.map(t => ({ name: t.name, effect: t.effect as string, cost: t.cost, color: t.color, description: 'Custom title' })),
   ];
 
-  function buy(item: (typeof allShopItems)[0]) {
+  function buy(title: (typeof allShopItems)[0]) {
     if (!profile) return;
-    const title = { ...item, cost: shopPrice(item.cost, profile.email) };
     if (profile.gems < title.cost) { toast.error(`Need ${title.cost - profile.gems} more gems!`); return; }
     if (owned.includes(title.name)) { toast.info('Already owned!'); return; }
     setBuying(title.name);
@@ -71,8 +69,7 @@ export default function ShopModal({ open, onClose }: Props) {
         <div className="space-y-3 mt-2">
           {allShopItems.map(item => {
             const isOwned = owned.includes(item.name);
-            const cost = shopPrice(item.cost, profile.email);
-            const canAfford = profile.gems >= cost;
+            const canAfford = profile.gems >= item.cost;
             return (
               <div key={item.name} className="flex items-center justify-between p-3 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors">
                 <div className="flex flex-col gap-1">
@@ -81,7 +78,7 @@ export default function ShopModal({ open, onClose }: Props) {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className="text-sm font-bold flex items-center gap-1">
-                    <Gem className="w-3.5 h-3.5 text-purple-400" />{cost.toLocaleString()}{isVip(profile.email) && <span className="ml-1 text-[10px] text-amber-400">👑 −25%</span>}
+                    <Gem className="w-3.5 h-3.5 text-purple-400" />{item.cost.toLocaleString()}
                   </span>
                   {isOwned
                     ? (profile.activeTitle === item.name

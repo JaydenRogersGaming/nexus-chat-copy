@@ -1,5 +1,5 @@
 {
-  "accessMode": "internal",
+  "accessMode": "external",
   "authentication": {
     "signup": "open",
     "authenticationMethods": {
@@ -17,9 +17,6 @@
     },
     "ZITE_TENOR_API_KEY": {
       "description": "Google Tenor API key for GIF search (powered by Google)"
-    },
-    "ZITE_TMDB_TOKEN": {
-      "description": "TMDB API Read Access Token (v4) for movie info and where-to-watch data"
     }
   },
   "id": "1vc4gaurvx"

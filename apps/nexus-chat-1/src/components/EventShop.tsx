@@ -3,7 +3,7 @@ import { Clock, RefreshCw, CalendarDays, Flag } from 'lucide-react';
 import { itemOwners, events as eventsApi } from 'zitejs/api';
 import { useActiveEvent, EVENTS_CHANGED } from '../hooks/useActiveEvent';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Button } from '@project/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
 import { useApp } from '../contexts/AppContext';
@@ -13,20 +13,17 @@ import { ActiveEvent, HOLIDAYS, Holiday, appliesTo, limitedItems, tierFor, varia
 import { holidaySong } from '../lib/holidaySongs';
 import { setMusic, getMusic } from '../lib/personalize';
 import ShopMusic from './shop/ShopMusic';
-import Countdown from './shop/Countdown';
 import CountryPicker from './shop/CountryPicker';
 import ShopItemCard, { ShopRow } from './shop/ShopItemCard';
 import OwnerLimitedEditor from './shop/OwnerLimitedEditor';
-import { shopPrice, isVip } from '../lib/vip';
 import { useOwnerLimited, bgCss } from '../hooks/useOwnerLimited';
 
 type Props = { event: ActiveEvent; open: boolean; onOpenChange: (o: boolean) => void };
 
 /** Which holiday's look the shop uses: a live national day always wins; otherwise the theme picked on the last refresh. */
 function resolveTheme(event: ActiveEvent, shopTheme: string | null | undefined): Holiday {
-  // Each shop always stays on its own holiday / national day — refreshing only upgrades the items
-  void shopTheme;
-  return event.holiday;
+  if (event.holiday.countries) return event.holiday;
+  return HOLIDAYS.find(h => h.key === shopTheme) ?? event.holiday;
 }
 
 function safeItems(e: ActiveEvent, h: Holiday, drop: number) {
@@ -63,17 +60,18 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   const refreshShop = async () => {
     setRefreshing(true);
     // National day stays pinned; otherwise rotate to a random different holiday the user can see
-    const next = event.holiday.key;
+    const pool = HOLIDAYS.filter(h => appliesTo(h, country) && h.key !== themeH.key);
+    const next = isNational || !pool.length ? event.holiday.key : pool[Math.floor(Math.random() * pool.length)].key;
     try {
       await eventsApi({ action: 'refreshShop', holidayKey: event.holiday.key, shopTheme: next });
       window.dispatchEvent(new Event(EVENTS_CHANGED));
-      toast.success(`🔄 Drop ${(drop % 30) + 1}/30 — new ${event.holiday.emoji} ${event.holiday.name} items!${drop === 30 ? ' Looped back to the first drop.' : ''}`);
+      const h = HOLIDAYS.find(x => x.key === next);
+      toast.success(`🔄 New ${tierFor((drop + 1) % 102).name} drop — ${h?.emoji ?? ''} ${h?.name ?? ''} theme!`);
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not refresh'); }
     finally { setRefreshing(false); }
   };
 
-  const pay = (id: string, base: number, name: string) => {
-    const cost = shopPrice(base, profile.email);
+  const pay = (id: string, cost: number, name: string) => {
     if (profile.gems < cost) { toast.error(`Need ${(cost - profile.gems).toLocaleString()} more gems!`); return false; }
     addGems(-cost); DB.addUserItem(profile.email, id); toast.success(`🎉 You got ${name}! Limited — gone after this event.`);
     itemOwners({ action: 'claim', itemId: id, ownerName: profile.name })
@@ -97,17 +95,13 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
   ];
   for (const i of shownOwnerItems) {
     const id = `own-${i.id}`;
-    if (i.kind === 'Background') rows.push({ id, description: i.description, label: '👑 Owner Exclusive Background', name: `${i.emoji} ${i.name}`, cost: i.cost,
+    if (i.kind === 'Background') rows.push({ id, label: '👑 Owner Exclusive Background', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={box} style={{ background: bgCss(i) }} />, on: eq.bg === id, use: () => equip({ bg: eq.bg === id ? '' : id }) });
-    else if (i.kind === 'Typing Effect') rows.push({ id, description: i.description, label: '👑 Owner Exclusive Typing', name: `${i.emoji} ${i.name}`, cost: i.cost,
+    else if (i.kind === 'Typing Effect') rows.push({ id, label: '👑 Owner Exclusive Typing', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={`${box} bg-background text-3xl`}>{i.emoji}</div>,
       sub: <p className={`text-xs rounded-lg bg-background/60 px-2 py-1.5 ${i.effect === 'rainbow' ? 'title-rainbow' : i.effect === 'pulse' ? 'animate-pulse' : ''}`} style={{ color: i.color }}>You {i.typingText} {i.emoji}</p>,
       on: eq.typing === id, use: () => equip({ typing: eq.typing === id ? '' : id }) });
-    else if (i.kind === 'Music') rows.push({ id, description: i.description, label: '👑 Owner Exclusive Song', name: `${i.emoji} ${i.name}`, cost: i.cost,
-      preview: <div className={`${box} text-3xl`} style={{ background: `linear-gradient(135deg,${i.color}55,${i.color2}55)` }}>🎵</div>,
-      on: getMusic().url === i.songUrl,
-      use: () => { setMusic({ ...getMusic(), url: i.songUrl }); toast.success('Added to your songs — open the 🎵 music player to play it'); window.dispatchEvent(new Event(COSMETICS_EVENT)); bump(n => n + 1); } });
-    else rows.push({ id, description: i.description, label: '👑 Owner Exclusive Title', name: `${i.emoji} ${i.name}`, cost: i.cost,
+    else rows.push({ id, label: '👑 Owner Exclusive Title', name: `${i.emoji} ${i.name}`, cost: i.cost,
       preview: <div className={`${box} text-3xl`} style={{ background: `linear-gradient(135deg,${i.color}55,${i.color2}55)` }}>{i.emoji}</div>,
       on: profile.activeTitle === `${i.emoji} ${i.name}`,
       use: () => { updateProfile({ activeTitle: `${i.emoji} ${i.name}`, activeTitleColor: i.color, activeTitleEffect: i.effect === 'none' ? '' : i.effect }); bump(n => n + 1); } });
@@ -121,31 +115,31 @@ export default function EventShop({ event, open, onOpenChange }: Props) {
           <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/75" />
           <div className="relative space-y-3">
             <DialogHeader className="text-left space-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{isNational ? 'National Day · 1-Day Shop' : 'Limited Holiday Shop'} · {tier.name}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{isNational ? 'National Day Event' : 'Limited Holiday Shop'} · {tier.name}</p>
               <DialogTitle className="text-2xl sm:text-3xl font-black leading-tight drop-shadow">{themeH.emoji} {themeH.name} — {variant.name}</DialogTitle>
               <DialogDescription className="text-white/80 text-sm">{variant.tagline}</DialogDescription>
             </DialogHeader>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/85">
               <span className="flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />{event.holiday.emoji} {event.holiday.name} · {format(event.day, 'EEEE, MMM d, yyyy')}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />Ends in <Countdown to={event.end} onDone={() => { toast('This limited shop has closed'); onOpenChange(false); }} /></span>
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />Ends {formatDistanceToNow(event.end, { addSuffix: true })}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <ShopMusic songUrl={song.url} title={song.name} open={open} />
               <CountryPicker country={country} />
               {isRealOwner && (
                 <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs" disabled={refreshing} onClick={refreshShop}>
-                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh shop · {drop || 0}/30
+                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh shop{drop ? ` · #${drop}` : ''}
                 </Button>
               )}
             </div>
-            {isNational && <p className="text-[11px] text-white/75 flex items-center gap-1"><Flag className="w-3 h-3" />One-day-only shop — closes at midnight!</p>}
-            {isRealOwner && <p className="text-[11px] text-white/75">Refreshing gives new {event.holiday.name} items — the theme stays the same.</p>}
+            {!country && <p className="text-[11px] text-white/75 flex items-center gap-1"><Flag className="w-3 h-3" />Pick your country to unlock national-day events like Independence Day.</p>}
+            {isNational && isRealOwner && <p className="text-[11px] text-white/75">National day is live — refreshes upgrade items but keep this theme.</p>}
           </div>
         </div>
         {/* Items */}
         <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-background">
           {rows.map((r, i) => (
-            <ShopItemCard key={r.id} row={{ ...r, cost: shopPrice(r.cost, profile.email), label: isVip(profile.email) ? `${r.label} · 👑 −25%` : r.label }} index={i} accent={accent} tierName={tier.name} owned={owned.includes(r.id)} stat={stats[r.id]} me={me}
+            <ShopItemCard key={r.id} row={r} index={i} accent={accent} tierName={tier.name} owned={owned.includes(r.id)} stat={stats[r.id]} me={me}
               onBuy={() => { if (pay(r.id, r.cost, r.name)) r.use(); }} />
           ))}
           {isRealOwner && <OwnerLimitedEditor items={ownerItems} holidayKey={event.holiday.key} mutate={mutate} />}

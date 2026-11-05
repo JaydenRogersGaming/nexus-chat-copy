@@ -32,14 +32,12 @@ import type { default as _ProxyPageEp } from '../src/api/proxyPage';
 import type { default as _ReportsEp } from '../src/api/reports';
 import type { default as _ResearchSummaryEp } from '../src/api/researchSummary';
 import type { default as _RolesEp } from '../src/api/roles';
-import type { default as _SitesEp } from '../src/api/sites';
 import type { default as _StaffToolsEp } from '../src/api/staffTools';
 import type { default as _TournamentsEp } from '../src/api/tournaments';
 import type { default as _TradesEp } from '../src/api/trades';
 import type { default as _TranslateEp } from '../src/api/translate';
 import type { default as _TypingEp } from '../src/api/typing';
 import type { default as _VideoRoomsEp } from '../src/api/videoRooms';
-import type { default as _VipSettingsEp } from '../src/api/vipSettings';
 import type { default as _WatchPartyEp } from '../src/api/watchParty';
 import type { default as _WebSearchEp } from '../src/api/webSearch';
 
@@ -193,11 +191,6 @@ export type RolesInputType = NonNullable<_RolesCfg['inputSchema']> extends { _in
 export type RolesOutputType = Awaited<ReturnType<_RolesCfg['execute']>>;
 export const roles = createCaller<RolesInputType, RolesOutputType>('roles');
 
-type _SitesCfg = typeof _SitesEp;
-export type SitesInputType = NonNullable<_SitesCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_SitesCfg['execute']>[0]['input'];
-export type SitesOutputType = Awaited<ReturnType<_SitesCfg['execute']>>;
-export const sites = createCaller<SitesInputType, SitesOutputType>('sites');
-
 type _StaffToolsCfg = typeof _StaffToolsEp;
 export type StaffToolsInputType = NonNullable<_StaffToolsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_StaffToolsCfg['execute']>[0]['input'];
 export type StaffToolsOutputType = Awaited<ReturnType<_StaffToolsCfg['execute']>>;
@@ -227,11 +220,6 @@ type _VideoRoomsCfg = typeof _VideoRoomsEp;
 export type VideoRoomsInputType = NonNullable<_VideoRoomsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_VideoRoomsCfg['execute']>[0]['input'];
 export type VideoRoomsOutputType = Awaited<ReturnType<_VideoRoomsCfg['execute']>>;
 export const videoRooms = createCaller<VideoRoomsInputType, VideoRoomsOutputType>('videoRooms');
-
-type _VipSettingsCfg = typeof _VipSettingsEp;
-export type VipSettingsInputType = NonNullable<_VipSettingsCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_VipSettingsCfg['execute']>[0]['input'];
-export type VipSettingsOutputType = Awaited<ReturnType<_VipSettingsCfg['execute']>>;
-export const vipSettings = createCaller<VipSettingsInputType, VipSettingsOutputType>('vipSettings');
 
 type _WatchPartyCfg = typeof _WatchPartyEp;
 export type WatchPartyInputType = NonNullable<_WatchPartyCfg['inputSchema']> extends { _input: infer I } ? I : Parameters<_WatchPartyCfg['execute']>[0]['input'];
@@ -275,14 +263,12 @@ export const api = {
   reports,
   researchSummary,
   roles,
-  sites,
   staffTools,
   tournaments,
   trades,
   translate,
   typing,
   videoRooms,
-  vipSettings,
   watchParty,
   webSearch,
 };

@@ -23,7 +23,7 @@ const PERKS = [
   ['⌨️', '3× typing gems', '15 gems per chat message instead of 5'],
   ['🎁', 'Daily VIP bonus', 'Claim 500 free gems every day'],
   ['🖱️', 'Free custom cursor', 'Design your own cursor at no cost'],
-  ['🏷️', '25% off the shop', 'Titles, cosmetics, cursors and event items are cheaper'],
+  ['🏷️', '20% off cursors', 'Every cursor in the shop is cheaper'],
   ['💖', 'VIP-only cursor', 'The exclusive VIP Heart cursor'],
   ['🛡️', 'Prank Shield', 'Turn pranks off so nobody can prank you'],
   ['😈', 'Extra mean pranks', '5 mean pranks instead of 2'],

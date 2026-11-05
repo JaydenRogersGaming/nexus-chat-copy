@@ -29,7 +29,7 @@ export default createEndpoint({
     if (BLOCK.test(prompt)) return report('Blocked by the word filter');
 
     if (engine === 'openai') {
-      const { accessToken } = await integrations.get('openai-2');
+      const { accessToken } = await integrations.get('openai');
       const client = new OpenAI({ apiKey: accessToken });
       const mod = await client.moderations.create({ model: 'omni-moderation-latest', input: prompt });
       if (mod.results[0]?.flagged) return report('Flagged by moderation');

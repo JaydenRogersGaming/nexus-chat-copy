@@ -31,11 +31,11 @@ const COMMON_EN = new Set('i you he she it we they the a an and or but is are wa
 /** Cheap guess so we only call the translator for messages that aren't already English. */
 export function looksForeign(text: string): boolean {
   const t = text.replace(/https?:\/\/\S+|@\w+|\[gif\]\S*/g, '');
-  const letters: string[] = t.match(/\p{L}/gu) ?? [];
+  const letters = t.match(/\p{L}/gu) || [];
   if (!letters.length) return false;
   const nonLatin = letters.filter(c => !/[a-zA-Z]/.test(c)).length;
   if (nonLatin / letters.length > 0.15) return true;
-  const words: string[] = t.toLowerCase().match(/[a-z']+/g) ?? [];
+  const words = t.toLowerCase().match(/[a-z']+/g) || [];
   if (words.length < 3) return false;
   return !words.some(w => COMMON_EN.has(w.replace(/'/g, '')));
 }

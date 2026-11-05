@@ -10,7 +10,7 @@ export default createEndpoint({
     name: z.string(), colors: z.array(z.string()), style: z.enum(['linear', 'radial', 'glow']), angle: z.number(), cost: z.number(),
   }),
   execute: async ({ input }) => {
-    const { accessToken } = await integrations.get('openai-2');
+    const { accessToken } = await integrations.get('openai');
     const client = new OpenAI({ apiKey: accessToken });
     const res = await client.chat.completions.create({
       model: 'gpt-4.1-mini',

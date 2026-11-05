@@ -15,7 +15,7 @@ export default createEndpoint({
   }),
   outputSchema: z.object({ text: z.string() }),
   execute: async ({ input, stream }) => {
-    const { accessToken } = await integrations.get('openai-2');
+    const { accessToken } = await integrations.get('openai');
     const client = new OpenAI({ apiKey: accessToken });
 
     const msgs = input.messages.map(m =>
