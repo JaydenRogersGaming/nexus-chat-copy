@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import WhatsNew from './WhatsNew';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Bot, Globe, CalendarDays, Flame, BadgeCheck, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown, LogOut } from 'lucide-react';
-import { logout } from 'zitejs/auth';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Bot, Globe, CalendarDays, Flame, BadgeCheck, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -76,9 +75,6 @@ export default function Sidebar({ onProfileClick }: Props) {
           </NavLink>
         )}
       </nav>
-      <button onClick={() => logout()} className="mx-2 mb-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2">
-        <LogOut className="w-3.5 h-3.5" /> Sign out
-      </button>
       {profile && (
         <button onClick={onProfileClick} className="p-3 border-t border-border hover:bg-secondary transition-colors flex items-center gap-2.5 w-full text-left group">
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden flex-shrink-0">
