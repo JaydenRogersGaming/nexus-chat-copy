@@ -17,9 +17,10 @@ import type { Connected, NeedsConnect } from 'zitejs/runtime';
 
 export type { Connected, NeedsConnect };
 
-export type IntegrationName = 'openai' | 'openai-2';
+export type IntegrationName = 'gemini' | 'openai' | 'openai-2';
 
 export type IntegrationByName = {
+  'gemini': Connected;
   'openai': Connected;
   'openai-2': Connected;
 };
