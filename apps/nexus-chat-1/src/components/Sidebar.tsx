@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import WhatsNew from './WhatsNew';
-import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Bot, Globe, CalendarDays, Flame, BadgeCheck, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
+import { logout } from 'zitejs/auth';
+import { MessageSquare, Trophy, Star, Shield, ChevronRight, Dices, Circle, Bot, Globe, CalendarDays, Flame, BadgeCheck, LogOut, Store, Brush, Smile, ShieldCheck, Video, Clapperboard, Crown } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import TitleBadge from './TitleBadge';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
@@ -96,6 +97,10 @@ export default function Sidebar({ onProfileClick }: Props) {
         </button>
       )}
       <WhatsNew />
+      <button onClick={() => logout()}
+        className="mx-3 mb-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+        <LogOut className="w-3.5 h-3.5" /> Sign out
+      </button>
       <p className="px-4 pb-3 text-[10px] text-muted-foreground text-center">© 2026–2050 Nexus Hub. All rights reserved.</p>
     </aside>
   );
