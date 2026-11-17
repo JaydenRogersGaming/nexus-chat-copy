@@ -1,0 +1,102 @@
+import { formatGems } from '../lib/formatGems';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@project/components/ui/dialog';
+import { Button } from '@project/components/ui/button';
+import { Gem } from 'lucide-react';
+import TitleBadge from './TitleBadge';
+import { SHOP_TITLES } from '../lib/gameData';
+import { useApp } from '../contexts/AppContext';
+import * as DB from '../lib/storage';
+import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@project/components/ui/tabs';
+import CosmeticShop from './CosmeticShop';
+import LimitedCollection from './LimitedCollection';
+import CursorShop from './CursorShop';
+import PrankShop from './PrankShop';
+import { shopPrice, isVip } from '../lib/vip';
+
+type Props = { open: boolean; onClose: () => void };
+
+export default function ShopModal({ open, onClose }: Props) {
+  const { profile, addGems, checkAchievements, updateProfile } = useApp();
+  const [buying, setBuying] = useState<string | null>(null);
+
+  if (!profile) return null;
+  const owned = DB.getUserTitles(profile.email);
+  const customShopTitles = DB.getCustomTitles().filter(t => t.availableInShop);
+
+  const allShopItems = [
+    ...SHOP_TITLES.map(t => ({ name: t.name, effect: t.effect, cost: t.cost, color: t.color, description: t.description })),
+    ...customShopTitles.map(t => ({ name: t.name, effect: t.effect as string, cost: t.cost, color: t.color, description: 'Custom title' })),
+  ];
+
+  function buy(item: (typeof allShopItems)[0]) {
+    if (!profile) return;
+    const title = { ...item, cost: shopPrice(item.cost, profile.email) };
+    if (profile.gems < title.cost) { toast.error(`Need ${title.cost - profile.gems} more gems!`); return; }
+    if (owned.includes(title.name)) { toast.info('Already owned!'); return; }
+    setBuying(title.name);
+    addGems(-title.cost);
+    DB.addUserTitle(profile.email, title.name);
+    toast.success(`🎉 You got "${title.name}"!`);
+    setTimeout(() => { checkAchievements(); setBuying(null); }, 500);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="bg-card border-border max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Gem className="w-5 h-5 text-purple-400" /> Shop
+            <span className="ml-auto text-sm font-normal text-purple-300 flex items-center gap-1">
+              <Gem className="w-3.5 h-3.5" />{formatGems(profile.gems)} gems
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+        <Tabs defaultValue="titles" className="mt-2">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full h-auto">
+            <TabsTrigger value="titles">Titles</TabsTrigger>
+            <TabsTrigger value="bg">Backgrounds</TabsTrigger>
+            <TabsTrigger value="typing">Typing</TabsTrigger>
+            <TabsTrigger value="cursors">🖱️ Cursors</TabsTrigger>
+            <TabsTrigger value="pranks">🃏 Pranks</TabsTrigger>
+            <TabsTrigger value="limited">✨ Limited</TabsTrigger>
+          </TabsList>
+          <TabsContent value="cursors"><CursorShop /></TabsContent>
+          <TabsContent value="pranks"><PrankShop /></TabsContent>
+          <TabsContent value="limited"><LimitedCollection /></TabsContent>
+          <TabsContent value="bg"><CosmeticShop kind="bg" /></TabsContent>
+          <TabsContent value="typing"><CosmeticShop kind="typing" /></TabsContent>
+          <TabsContent value="titles">
+        <div className="space-y-3 mt-2">
+          {allShopItems.map(item => {
+            const isOwned = owned.includes(item.name);
+            const cost = shopPrice(item.cost, profile.email);
+            const canAfford = profile.gems >= cost;
+            return (
+              <div key={item.name} className="flex items-center justify-between p-3 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                <div className="flex flex-col gap-1">
+                  <TitleBadge title={item.name} effect={item.effect} color={item.color} size="md" />
+                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-sm font-bold flex items-center gap-1">
+                    <Gem className="w-3.5 h-3.5 text-purple-400" />{cost.toLocaleString()}{isVip(profile.email) && <span className="ml-1 text-[10px] text-amber-400">👑 −25%</span>}
+                  </span>
+                  {isOwned
+                    ? (profile.activeTitle === item.name
+                      ? <Button size="sm" variant="secondary" className="text-xs" onClick={() => updateProfile({ activeTitle: '' })}>Unequip</Button>
+                      : <Button size="sm" variant="outline" className="text-xs" onClick={() => updateProfile({ activeTitle: item.name, activeTitleEffect: item.effect, activeTitleColor: item.color })}>Equip</Button>)
+                    : <Button size="sm" disabled={!canAfford || buying === item.name} onClick={() => buy(item)} className="text-xs">{buying === item.name ? '…' : 'Buy'}</Button>
+                  }
+                </div>
+              </div>
+            );
+          })}
+        </div>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
